@@ -40,6 +40,17 @@
           <p ref="socialsTitle" data-menu-fade class="p-small">Socials</p>
           <div class="socials-row">
             <a 
+              v-if="facebookUrl" 
+              ref="facebookLink"
+              data-menu-fade 
+              :href="facebookUrl" 
+              target="_blank" 
+              rel="noopener"
+              class="p-large text-link"
+            >
+              Facebook
+            </a>
+            <a 
               v-if="linkedinUrl" 
               ref="linkedinLink"
               data-menu-fade 
@@ -85,15 +96,21 @@ const props = defineProps({
 const emit = defineEmits(['close-menu'])
 
 const { mainMenu } = useMenu()
-const { linkedinUrl, instagramUrl } = useSiteSettings()
+const { facebookUrl, linkedinUrl, instagramUrl } = useSiteSettings()
 const { getProcessedUrl } = useUrlProcessing()
 
-const menuItems = computed(() => mainMenu?.value?.items || [])
+const menuItems = computed(() => {
+  if (!mainMenu.value) return []
+  const items = mainMenu.value.items
+  if (!items || !Array.isArray(items)) return []
+  return items.filter(item => item && item.text) // Filter out any invalid items
+})
 
 const hasAnySocials = computed(() => {
+  const hasFacebook = Boolean(facebookUrl && String(facebookUrl).trim().length > 0)
   const hasLinkedIn = Boolean(linkedinUrl && String(linkedinUrl).trim().length > 0)
   const hasInstagram = Boolean(instagramUrl && String(instagramUrl).trim().length > 0)
-  return hasLinkedIn || hasInstagram
+  return hasFacebook || hasLinkedIn || hasInstagram
 })
 
 const closeMenu = () => {
@@ -111,6 +128,7 @@ const bgPanel1 = ref(null)
 const bgPanel2 = ref(null)
 const bgPanel3 = ref(null)
 const socialsTitle = ref(null)
+const facebookLink = ref(null)
 const linkedinLink = ref(null)
 const instagramLink = ref(null)
 
@@ -179,6 +197,7 @@ const openNav = () => {
   // Collect fade targets
   const fadeTargets = []
   if (socialsTitle.value) fadeTargets.push(socialsTitle.value)
+  if (facebookLink.value) fadeTargets.push(facebookLink.value)
   if (linkedinLink.value) fadeTargets.push(linkedinLink.value)
   if (instagramLink.value) fadeTargets.push(instagramLink.value)
   

@@ -104,7 +104,7 @@ const bgPanel3 = ref(null)
 
 // Computed properties
 const preloaderImages = computed(() => siteSettings.value?.preloaderImages || [])
-const websiteTitle = computed(() => siteSettings.value?.title || 'Registix')
+const websiteTitle = computed(() => siteSettings.value?.title || 'Coughton Court')
 const logotypeImageUrl = computed(() => {
   const logotype = siteSettings.value?.logotype
   if (!logotype?.asset?.url) return null
@@ -435,16 +435,6 @@ onUnmounted(() => {
  top:84%;
 }
 
-.logotype-image,
-.logotype-svg {
-  width:clamp(20vh, 30vw, 30vw);
-  display: block;
-}
-.has-images .logotype-image,
-.has-images .logotype-svg {
-  width: 25vw;
-  max-width: 20vh;
-}
 
 svg > * {
   fill:currentColor;

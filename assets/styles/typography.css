@@ -1,13 +1,19 @@
 @font-face {
-  font-family: 'Roslinda';
-  src: url('/fonts/RoslindaleDeckNarrowMedium.woff2') format('woff2');
+  font-family: 'TT Commons';
+  src: url('/fonts/ttcommons-regular.woff2') format('woff2');
   font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'TT Commons';
+  src: url('/fonts/ttcommons-medium.woff2') format('woff2');
+  font-weight: 500;
   font-style: normal;
 }
 
 @font-face {
-  font-family: 'Typewriter Regular PRO';
-  src: url('/fonts/Typewriter_Regular_PRO.woff2') format('woff2');
+  font-family: 'Baskerville';
+  src: url('/fonts/baskerville.woff2') format('woff2');
   font-weight: 400;
   font-style: normal;
 }
@@ -15,50 +21,24 @@
 
 
 :root {
-  --white: #fff;
-  --black: #000;
-  --dark-grey: #5b5653;
-  --mid-grey: #dfd3cd;
-  --light-grey: #f7efeb;
-  --beige: #dfd3cd;
-  --yellow: #ffdd15;
-  --color-bg: var(--white);
-  --color-text: var(--dark-grey);
-  --color-link: var(--black);
   --mono-spacing: 0.1em;
   --arrow-size: 30px;
-  --letterspacing: 0.05em;
+  --letterspacing: 0.0em;
   --letterspacing-small: 0.25em;
   --letterspacing-medium: 0.5em;
   --letterspacing-large: 1em;
-  --heading: 'Roslinda', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-  --body-font: 'Typewriter Regular PRO', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  --heading: 'TT Commons', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  --body-font: 'Baskerville', 'Georgia', serif;
 }
 
-.dark-mode, .dark {
-  --color-bg: var(--dark-grey);
-  --color-text: var(--white);
-  --color-link: var(--yellow);
-  --section-bg: var(--dark-grey);
-  --section-text: var(--white);
-}
-
-.grey-bg {
-  --color-bg: var(--grey);
-  background: var(--grey);
-}
-.black-text {
-  color: var(--black);
-  --color-text: var(--black);
-}
 
 body {
   font-family: var(--body-font);
   line-height: 1.2;
 }
-h1, h2, h3, h4, h5, h6, body {
-  font-family: var(--body-font);
-  font-weight: 400;
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--heading);
+  font-weight: 500;
   margin-bottom: 0em;
 }
 
@@ -75,8 +55,7 @@ h1, h2, h3, h4, h5, h6, body {
   position: relative;
   display: inline-block;
   border-radius: 50px;
-  padding: calc(var(--body) * .5) calc(var(--body) * 1.25) calc(var(--body) * .3);
-  font-size: var(--body);
+  font-size: var(--heading);
 }
 .button:hover {
   background: var(--color-text);
@@ -88,6 +67,10 @@ h1, h2, h3, h4, h5, h6, body {
   letter-spacing: 0px;
   font-family: var(--heading);
 }
+footer, header {
+  font-family: var(--heading);
+}
+
 
 
 
@@ -154,14 +137,11 @@ body    { line-height: 1.2; }
 .h5, .rte h5 { font-size: var(--h5); }
 .h6, .rte h6 { font-size: var(--h6); }
 .h7, .rte h7 { font-size: var(--h7); }
-body { font-size: clamp(14px, var(--body), 27px); 
-letter-spacing: var(--letterspacing);
-}
+body         { font-size: var(--body); }
 
 :root {
   --unit: 10px;
   --unit-reference: 1600;
-  --min-body: 15px;
   --min-h6: 12px;
   --h0: 4.7vw;
   --h1: calc((48 / (var(--unit-reference) / 100)) * var(--unit));
@@ -171,7 +151,7 @@ letter-spacing: var(--letterspacing);
   --h5: clamp(14px, calc((21 / (var(--unit-reference) / 100)) * var(--unit)), 80px);
   --h6: clamp(var(--min-h6), calc((16 / (var(--unit-reference) / 100)) * var(--unit)), 80px);
   --h7: clamp(11px, calc((12 / (var(--unit-reference) / 100)) * var(--unit)), 80px);
-  --body: clamp(var(--min-body), calc((19 / (var(--unit-reference) / 100)) * var(--unit)), 80px);
+  --body: 14px;
 }
 
 h1, h2, h3, h4, h5, h6, h7 {
@@ -193,7 +173,6 @@ h1, h2, h3, h4, h5, h6, h7 {
 @media all and (min-width:1024px) {
     :root {
         --unit: 1vw;
-        --min-body: 12px;
         --min-h6: 10px;
     }
 }

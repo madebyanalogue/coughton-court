@@ -1,5 +1,19 @@
 <template>
+  <div
+    v-if="logotypeImageUrl && isSvg"
+    ref="svgContainer"
+    class="logotype-image logotype-svg"
+    :aria-label="logotypeAlt || websiteTitle"
+    role="img"
+  />
+  <img
+    v-else-if="logotypeImageUrl && !isSvg"
+    :src="logotypeImageUrl"
+    :alt="logotypeAlt || websiteTitle"
+    class="logotype-image"
+  />
   <svg
+    v-else
     data-name="SVG"
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 3950 300"
@@ -24,13 +38,90 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref, watch, onMounted } from 'vue'
 import { useSiteSettings } from '~/composables/useSiteSettings'
+import { useSanityImage } from '~/composables/useSanityImage'
 
-const { title } = useSiteSettings()
-const websiteTitle = computed(() => title.value || 'Registix')
+const { title, logotype } = useSiteSettings()
+const { getImageUrl } = useSanityImage()
+const websiteTitle = computed(() => title.value || 'Coughton Court')
+const logotypeImageUrl = computed(() => {
+  if (!logotype.value) return null
+  return getImageUrl(logotype.value)
+})
+const logotypeAlt = computed(() => logotype.value?.alt || websiteTitle.value)
+
+// Check if the logo is an SVG
+const isSvg = computed(() => {
+  if (!logotype.value?.asset) return false
+  
+  // Check MIME type from asset
+  const mimeType = logotype.value.asset.mimeType || logotype.value.asset._type
+  if (mimeType && mimeType.includes('svg')) {
+    return true
+  }
+  
+  // Check URL extension
+  const url = logotypeImageUrl.value
+  if (!url) return false
+  const urlLower = url.toLowerCase()
+  return urlLower.endsWith('.svg') || urlLower.includes('.svg?') || urlLower.includes('image/svg+xml')
+})
+
+// Template ref for SVG container
+const svgContainer = ref(null)
+
+// Fetch and render SVG content via proxy to avoid CORS
+const loadSvg = async (url) => {
+  if (!svgContainer.value) return
+  
+  try {
+    // Use the proxy endpoint to avoid CORS issues
+    const proxyUrl = `/api/proxy-svg?url=${encodeURIComponent(url)}`
+    const response = await fetch(proxyUrl)
+    if (!response.ok) throw new Error(`HTTP ${response.status}`)
+    
+    const svg = await response.text()
+    svgContainer.value.innerHTML = svg
+  } catch (error) {
+    if (svgContainer.value) {
+      svgContainer.value.innerHTML = ''
+    }
+  }
+}
+
+watch([logotypeImageUrl, isSvg], async ([url, isSvgFile]) => {
+  if (url && isSvgFile && svgContainer.value) {
+    await loadSvg(url)
+  } else if (svgContainer.value) {
+    svgContainer.value.innerHTML = ''
+  }
+}, { immediate: true })
+
+onMounted(() => {
+  if (logotypeImageUrl.value && isSvg.value && svgContainer.value) {
+    loadSvg(logotypeImageUrl.value)
+  }
+})
 </script>
 
 <style scoped>
+.logotype-image {
+  width: 149px;
+  height: 70px;
+  display: block;
+  object-fit: contain;
+}
 
+.logotype-svg {
+  width: 149px;
+  height: 70px;
+  display: block;
+}
+
+.logotype-svg :deep(svg) {
+  width: 149px;
+  height: 70px;
+  display: block;
+}
 </style>

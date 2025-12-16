@@ -2,15 +2,15 @@
 
 :root {
   --logo-height: 14px;
+  --footer-logo-height: 21px;
   --header-height: 55px;
-  --initial-bg-light: var(--white);
-  --initial-bg-dark: var(--black);
-  --initial-bg: var(--initial-bg-light);
+
+
+
   /* Global animation timings */
   --fade-duration: 600ms;
   --fade-stagger: 200ms;
   --fade-initial-delay: 100ms;
-
 
   --gap: 25px;
   --gap-md: 50px;
@@ -24,29 +24,29 @@
 
 @media (min-width: 800px) {
   :root {
-    --logo-height: 21px;
-    --header-height: 65px;
+    --logo-height: 70px;
+    --footer-logo-height: 70px;
+    --header-height: 100px;
   }
 }
 /* Removed empty :root ruleset at 1024px */
 
-
-.logotype-svg svg > * {
-  fill:currentColor;
+.logo-image svg {
+  width: auto;
+  height: var(--logo-height);
+  display: block;
 }
 
-#logo svg {
+
+.logo {
+  height: var(--logo-height);
   width: auto;
   display:block;
-  height: var(--logo-height);
 }
-
-
-footer {
-  --color: var(--dark-grey);
-  --background-color: var(--white);
-  background-color: var(--background-color);
-  color: var(--color);
+.footer-logo .logo {
+  height: var(--footer-logo-height);
+  width: auto;
+  display:block;
 }
 
 /* Page transition fade */
@@ -61,52 +61,11 @@ footer {
   opacity: 1;
 }
 
-/* Let the global page transition fade everything together (main + footer) */
-:root.dark-mode {
-  --initial-bg: var(--initial-bg-dark);
-}
-
-
-html {
-  background-color: var(--initial-bg-light);
-}
-
-html.dark-mode {
-  background-color: var(--initial-bg-dark);
-  color: var(--white);
-}
 
 .page-container {
   min-height: 100svh;
   display: flex;
   flex-direction: column;
-}
-
-body {
-  background-color: var(--initial-bg-light);
-}
-.dark-mode body {
-  background-color: var(--initial-bg-dark);
-}
-
-section, footer, header {
-  --color-bg: var(--white);
-  --color-text: var(--dark-grey);
-  background-color: var(--color-bg);
-  color: var(--color-text);
-}
-body {
-  --section-bg: var(--white);
-  --section-text: var(--dark-grey);
-}
-section {
-  background-color: var(--section-bg);
-  color: var(--section-text);
-  transition: background-color 1s ease;
-}
-.dark-mode {
-  --section-bg: var(--dark-grey);
-  --section-text: var(--white);
 }
 
 header {
@@ -129,17 +88,6 @@ header a, header button {
   display: grid;
   grid-template-columns: 1fr;
   gap: 0px;
-}
-
-.logo {
-  max-width: var(--logo-width);
-}
-.logo svg {
- width: 100%;
- display: inline-block;
-}
-.logo svg > * {
-  fill: currentColor;
 }
 
 
@@ -263,11 +211,6 @@ body.preloader-complete {
 .section-trigger.visible {
   opacity: 0 !important;
 } */
-
-/* Dark mode body background */
-:root.dark-mode body {
-  background-color: var(--initial-bg-dark);
-}
 
 
 /* Directional Button Hover Effects */
@@ -739,4 +682,21 @@ main > div, .page-container main {
 }
 .underline-links.reverse a:hover:after, .underline-link.reverse:hover:after {
   width: 0%;
+}
+
+
+
+
+
+
+.image-wrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 6 / 5;
+  overflow: hidden;
+}
+.image-wrapper * {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }

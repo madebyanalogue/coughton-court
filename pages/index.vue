@@ -15,31 +15,20 @@
         </div>
       </div>
     </template>
-    <template v-else-if="pageData?.sections?.length">
+    
+    <template v-if="pageData?.sections?.length">
       <PageBuilder :sections="pageData.sections" :page-data="pageData" />
-    </template>
-    <template v-else-if="pageData">
-      <div class="wrapper py6">
-        <h1>{{ pageData.title || 'Home' }}</h1>
-        <p>This page is being prepared. Please check back soon!</p>
-        <p v-if="isDev">Debug: No sections found</p>
-      </div>
     </template>
   </div>
 </template>
 
 <script setup>
-import { useNuxtApp } from '#app'
-import { watch } from 'vue'
-import { useRuntimeConfig } from '#app'
-import { computed } from 'vue'
-import { useRoute } from 'vue-router'
+import { watch, computed } from 'vue'
+import { useRuntimeConfig, useHead } from '#app'
 import { usePageSettings } from '~/composables/usePageSettings'
 import { useSiteSettings } from '~/composables/useSiteSettings'
 
-const { $sanity } = useNuxtApp()
 const config = useRuntimeConfig()
-const route = useRoute()
 
 // Use the usePageSettings composable instead of duplicating the data fetching
 const { page: pageData, error, pending } = usePageSettings()

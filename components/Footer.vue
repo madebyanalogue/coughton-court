@@ -2,7 +2,7 @@
   <div>
     <SectionMarquee />
     
-    <footer>
+    <footer class="scheme dark">
     <div id="footer" class="py2 py-sm-3 py-md-2 grid grid-1 gap-2">
 
 
@@ -10,13 +10,13 @@
         <div class="grid gap-1 py-md-1 ptop">
 
           <!--ICON-->
-          <div class="col-span-12 col-span-6-sm col-span-2-md grid grid-6 grid-md-2 py1 pbottom">
+          <div class="">
             
-            <div class="col-span-2 col-start-1 col-span-1-md col-start-2-sm col-start-2-md">
               <NuxtLink to="/">
-                <Logo />
+                <div class="footer-logo">
+                  <Logo />
+                </div>
               </NuxtLink>
-            </div>
           </div>
 
           <!--COLUMN 1-->
@@ -46,7 +46,7 @@
 
                 <!--SOCIAL ICONS-->
                 <div class="flex flex-row flex-bottom gap-1">
-                  <SocialIcons :linkedinUrl="linkedinUrl" :instagramUrl="instagramUrl" />
+                  <SocialIcons :facebookUrl="facebookUrl" :linkedinUrl="linkedinUrl" :instagramUrl="instagramUrl" />
                 </div>
 
 
@@ -144,12 +144,13 @@ const props = defineProps({
 });
 
 // Sanity image URL builder
-const builder = imageUrlBuilder({ projectId: 'uuzbe0e0', dataset: 'production' })
+const builder = imageUrlBuilder({ projectId: '4dgj84d5', dataset: 'production' })
 const $urlFor = (source) => builder.image(source)
 
 const route = useRoute();
 const { 
   contactInfo, 
+  facebookUrl,
   linkedinUrl,
   instagramUrl,
   openingTimes,
@@ -158,7 +159,7 @@ const {
 } = useSiteSettings();
 
 // Website title from Sanity
-const websiteTitle = computed(() => title.value || 'Registix');
+const websiteTitle = computed(() => title.value || 'Coughton Court');
 
 const { 
   mainMenu, 

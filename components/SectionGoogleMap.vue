@@ -84,7 +84,7 @@ const mapContainer = ref(null)
 let map = null
 let marker = null
 
-// Google Maps Style ID for Registix (fallback)
+// Google Maps Style ID for Coughton Court (fallback)
 const mapStyleId = '3d2d84b1d8ab6d551417b829'
 
 // Default dark mode greyscale style

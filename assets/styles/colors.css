@@ -1,0 +1,55 @@
+:root {
+    --white: #fff;
+    --light-green: 204, 200, 168;
+    --mid-green: 97, 121, 84;
+    --dark-green: 41, 51, 43;
+}
+
+.scheme, html {
+   background: var(--background-color);
+   color: var(--text-color);
+}
+.secondary {
+    background: var(--secondary-background-color);
+    color: var(--secondary-text-color);
+}
+.tertiary {
+    background: var(--tertiary-background-color);
+    color: var(--tertiary-text-color);
+}
+svg > * {
+    fill:var(--text-color);
+}
+.button {
+    background-color: var(--button-background-color);
+    color: var(--button-text-color);
+}
+.button:hover {
+    background-color: var(--button-hover-background-color);
+    color: var(--button-hover-text-color);
+}
+
+.light, html {
+    --background-color: rgba(var(--light-green), 1);
+    --text-color: rgba(var(--dark-green), 1);
+    --secondary-background-color: rgba(var(--mid-green), .3);
+    --secondary-text-color: rgba(var(--dark-green), 1);
+    --tertiary-background-color: rgba(var(--light-green), 1);
+    --tertiary-text-color: rgba(var(--dark-green), 1);
+    --button-background-color: rgb(var(--dark-green));
+    --button-text-color: rgba(var(--light-green), 1);
+    --button-hover-background-color: rgba(var(--dark-green), 1);
+    --button-hover-text-color: rgba(var(--light-green), 1);
+}
+.dark {
+    --background-color: rgba(var(--mid-green), 1);
+    --text-color: rgba(var(--dark-green), 1);
+    --secondary-background-color: rgba(var(--mid-green), 1);
+    --secondary-text-color: rgba(var(--light-green), 1);
+    --tertiary-background-color: rgba(var(--dark-green), 1);
+    --tertiary-text-color: rgba(var(--light-green), 1);
+    --button-background-color: rgba(var(--light-green), 1);
+    --button-text-color: rgba(var(--dark-green), 1);
+    --button-hover-background-color: rgba(var(--light-green), 1);
+    --button-hover-text-color: rgba(var(--dark-green), 1);
+}

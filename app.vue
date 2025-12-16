@@ -84,6 +84,7 @@ const mainPaddingVar = computed(() => 'var(--header-height)');
 // Update favicon based on dark mode
 useFavicon(isDark);
 
+
 // Add script to head to prevent flash of incorrect mode
 useHead({
   link: [
@@ -95,9 +96,6 @@ useHead({
     {
       children: `
         (function() {
-          // Default to light mode - let Sanity CMS control dark mode per page
-          document.documentElement.style.backgroundColor = 'var(--white)';
-          
           //console.log('🔴 [App] CDN scripts loaded - plugins should auto-register');
         })();
       `,

@@ -1,16 +1,37 @@
+import { useSiteSettings } from '~/composables/useSiteSettings'
+import { watch } from 'vue'
+
 export const useMenu = () => {
-  // Fetch main menu from Sanity
-  const { data: mainMenu, pending: mainMenuPending, error: mainMenuError } = useAsyncData('mainMenu', async () => {
-    try {
-      const result = await $fetch('/api/sanity', {
-        query: { type: 'menu', menuTitle: 'Main Menu' }
-      })
-      return result
-    } catch (error) {
-      mainMenuError.value = error
-      console.error('Error fetching main menu:', error)
-      throw error
+  const { mainNavigationMenu, settings, pending: settingsPending } = useSiteSettings()
+  
+  // Fetch main menu from site settings or fallback to fetching by title
+  const { data: mainMenu, pending: mainMenuPending, error: mainMenuError, refresh: refreshMainMenu } = useAsyncData('mainMenu', async () => {
+    // First check if a menu is selected in site settings
+    const menuFromSettings = settings.value?.mainNavigationMenu || mainNavigationMenu.value
+    
+    if (menuFromSettings && menuFromSettings._id) {
+      // Normalize items to array
+      if (!Array.isArray(menuFromSettings.items)) {
+        menuFromSettings.items = menuFromSettings.items ? [menuFromSettings.items] : []
+      }
+      return menuFromSettings
     }
+    
+    // Fallback to fetching by title if no menu is selected
+    const result = await $fetch('/api/sanity', {
+      query: { type: 'menu', menuTitle: 'Main Menu' }
+    })
+    
+    // Normalize items to array
+    if (result) {
+      if (!Array.isArray(result.items)) {
+        result.items = result.items ? [result.items] : []
+      }
+    }
+    
+    return result || null
+  }, {
+    watch: [() => settings.value?.mainNavigationMenu, mainNavigationMenu]
   })
 
   // Fetch footer menu from Sanity
@@ -27,21 +48,21 @@ export const useMenu = () => {
     }
   })
 
-  const updateMenuStates = () => {
-    mainMenuPending.value = mainMenuLoading.value
-    footerMenuPending.value = footerMenuLoading.value
-    mainMenuError.value = mainMenuErrorData.value
-    footerMenuError.value = footerMenuErrorData.value
-  }
-
   const fetchMainMenu = async () => {
     try {
+      // First check if a menu is selected in site settings
+      if (mainNavigationMenu.value) {
+        mainMenu.value = mainNavigationMenu.value
+        return
+      }
+      
+      // Fallback to fetching by title if no menu is selected
       const result = await $fetch('/api/sanity', {
         query: { type: 'menu', menuTitle: 'Main Menu' }
       })
       mainMenu.value = result
     } catch (error) {
-      mainMenuErrorData.value = error
+      mainMenuError.value = error
       console.error('Error fetching main menu:', error)
     }
   }
@@ -53,10 +74,15 @@ export const useMenu = () => {
       })
       footerMenu.value = result
     } catch (error) {
-      footerMenuErrorData.value = error
+      footerMenuError.value = error
       console.error('Error fetching footer menu:', error)
     }
   }
+
+  // Watch for changes in site settings menu and refresh
+  watch([() => settings.value?.mainNavigationMenu, mainNavigationMenu], () => {
+    refreshMainMenu()
+  })
 
   return {
     mainMenu,
@@ -64,6 +90,7 @@ export const useMenu = () => {
     mainMenuPending,
     footerMenuPending,
     mainMenuError,
-    footerMenuError
+    footerMenuError,
+    refreshMainMenu
   }
 } 

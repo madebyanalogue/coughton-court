@@ -7,7 +7,7 @@ interface SanityError extends Error {
 }
 
 const client = createClient({
-  projectId: 'uuzbe0e0',
+  projectId: '4dgj84d5',
   dataset: 'production',
   apiVersion: '2024-03-19',
   useCdn: false
@@ -93,7 +93,33 @@ export default defineEventHandler(async (event) => {
             // Logotype image for preloader
             logotype {
               ...,
-              asset->
+              asset-> {
+                _id,
+                url,
+                mimeType,
+                metadata {
+                  dimensions
+                }
+              },
+              alt
+            },
+            // Main navigation menu reference
+            mainNavigationMenu-> {
+              _id,
+              title,
+              items[] {
+                ...,
+                to {
+                  ...,
+                  page-> {
+                    _id,
+                    slug {
+                      current
+                    },
+                    title
+                  }
+                }
+              }
             },
             // Feature flags / toggles
             disablePreloader,
@@ -106,6 +132,10 @@ export default defineEventHandler(async (event) => {
         `)
         if (!result) {
           return { footerLogos: [], contactInfo: [] }
+        }
+        // Normalize menu items to array if null
+        if (result.mainNavigationMenu && (result.mainNavigationMenu.items === null || result.mainNavigationMenu.items === undefined)) {
+          result.mainNavigationMenu.items = []
         }
         return result
       } catch (fetchError: any) {
@@ -121,9 +151,30 @@ export default defineEventHandler(async (event) => {
     
     if (query.menuTitle) {
       const result = await client.fetch(
-        '*[_type == "menu" && title == $menuTitle][0]{..., items[]{..., to{..., page-> { _id, slug, title }}}}',
+        `*[_type == "menu" && title == $menuTitle][0]{
+          ...,
+          items[]{
+            ...,
+            _key,
+            text,
+            to{
+              ...,
+              page-> {
+                _id,
+                slug {
+                  current
+                },
+                title
+              }
+            }
+          }
+        }`,
         { menuTitle: query.menuTitle }
       )
+      // Ensure items is always an array, not null
+      if (result && result.items === null) {
+        result.items = []
+      }
       return result
     }
     
@@ -135,11 +186,17 @@ export default defineEventHandler(async (event) => {
           _id,
           title,
           slug,
-          darkMode,
-          removeTopPadding,
-          hideFooter,
-          hideHeaderLogo,
-          greyBackground,
+          featuredImage {
+            asset-> {
+              _id,
+              url,
+              metadata {
+                dimensions
+              }
+            },
+            alt
+          },
+          shortDescription,
           sections[]-> {
             _id,
             _type,
@@ -550,6 +607,27 @@ export default defineEventHandler(async (event) => {
                     metadata { dimensions }
                   }
                 }
+              }
+            },
+            selectedPagesContent {
+              title,
+              pages[]-> {
+                _id,
+                title,
+                slug {
+                  current
+                },
+                featuredImage {
+                  asset-> {
+                    _id,
+                    url,
+                    metadata {
+                      dimensions
+                    }
+                  },
+                  alt
+                },
+                shortDescription
               }
             }
           }

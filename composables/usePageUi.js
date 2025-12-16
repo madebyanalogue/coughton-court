@@ -9,10 +9,8 @@ watch(isDark, (val) => {
   if (typeof window !== 'undefined') {
     if (val) {
       document.documentElement.classList.add('dark-mode')
-      document.documentElement.style.backgroundColor = 'var(--black)'
     } else {
       document.documentElement.classList.remove('dark-mode')
-      document.documentElement.style.backgroundColor = 'var(--white)'
     }
   }
 }, { immediate: true })

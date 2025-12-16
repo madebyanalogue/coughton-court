@@ -2,8 +2,6 @@
 
 
   <header ref="headerRef">
-
-    <SectionMarquee />
   
     <div class="header-bar flex flex-row flex-center flex-middle px1 px-md-2">
       <div class="header-left">
@@ -17,7 +15,7 @@
         class="logo-center"
       >
         <div id="logo">
-          <Logotype />
+          <Logo />
         </div>
       </NuxtLink>
       <div v-else class="logo-center">
@@ -35,6 +33,22 @@
       </div>
 
     </div>
+
+    <nav v-if="mainMenuItems.length > 0" class="header-nav">
+      <ul class="header-nav-list">
+        <li v-for="item in mainMenuItems" :key="item._key || item.text" class="header-nav-item">
+          <NuxtLink 
+            v-if="getMenuItemUrl(item)" 
+            :to="getMenuItemUrl(item)" 
+            class="header-nav-link"
+          >
+            {{ item.text }}
+          </NuxtLink>
+          <span v-else class="header-nav-link">{{ item.text }}</span>
+        </li>
+      </ul>
+    </nav>
+
   </header>
 </template>
 
@@ -44,6 +58,7 @@ import { gsap } from 'gsap';
 import { useRoute } from '#app';
 import { useHeaderScroll } from '~/composables/useHeaderScroll';
 import { useSiteSettings } from '~/composables/useSiteSettings';
+import { useMenu } from '~/composables/useMenu';
 import Logo from '~/components/Logo.vue';
 import MenuButton from '~/components/MenuButton.vue';
 import MobileMenu from '~/components/MobileMenu.vue';
@@ -63,9 +78,29 @@ const route = useRoute();
 const headerRef = ref(null);
 const { isHeaderVisible } = useHeaderScroll()
 const { settings: siteSettings } = useSiteSettings()
+const { mainMenu } = useMenu()
+
+// Get menu items from the menu
+const mainMenuItems = computed(() => {
+  if (!mainMenu.value) return []
+  const items = mainMenu.value.items
+  if (!items || !Array.isArray(items)) return []
+  return items.filter(item => item && item.text) // Filter out any invalid items
+})
+
+// Helper function to get the URL for a menu item
+const getMenuItemUrl = (item) => {
+  if (item.to?.page?.slug?.current) {
+    return `/${item.to.page.slug.current}`
+  }
+  if (item.to?.url) {
+    return item.to.url
+  }
+  return null
+}
 
 // Website title from Sanity
-const websiteTitle = computed(() => siteSettings.value?.title || 'Registix')
+const websiteTitle = computed(() => siteSettings.value?.title || 'Coughton Court')
 
 // Deprecated local menu control (kept for layout logic only)
 const menuOpen = ref(false)
@@ -256,9 +291,6 @@ const closeMenu = () => {
   color: var(--color-text, #fff);
   background: transparent;
 }
-.header-bar.header-hidden {
-  /* This will be handled by GSAP for smooth transitions */
-}
 .header-left, .header-right {
   min-width: 0;
   flex: 1;
@@ -349,6 +381,44 @@ const closeMenu = () => {
 .page-title {
   display: flex;
   align-items: center;
+}
+
+.header-nav {
+  border-top: 1px solid var(--color-text);
+  border-bottom: 1px solid var(--color-text);
+  display: block;
+  width: 100%;
+}
+
+.header-nav-list {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0.5em 1em;
+  gap: 1.5em;
+  flex-wrap: wrap;
+}
+
+.header-nav-item {
+  margin: 0;
+}
+
+.header-nav-link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  padding: 0.5em 0;
+  transition: opacity 0.3s ease;
+}
+
+.header-nav-link:hover {
+  opacity: 0.7;
+}
+
+
+nav {
+  border-top: 1px solid var(--color-text);
+  border-bottom: 1px solid var(--color-text);
 }
 
 

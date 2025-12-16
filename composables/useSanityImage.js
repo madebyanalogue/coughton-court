@@ -5,7 +5,7 @@ export const useSanityImage = () => {
   const { $sanity } = useNuxtApp()
   
   const builder = imageUrlBuilder({
-    projectId: 'uuzbe0e0',
+    projectId: '4dgj84d5',
     dataset: 'production'
   })
 
@@ -18,7 +18,7 @@ export const useSanityImage = () => {
     }
     if (source.asset._ref) {
       const [_file, id, extension] = source.asset._ref.split('-')
-      const url = `https://cdn.sanity.io/images/uuzbe0e0/production/${id}.${extension}`
+      const url = `https://cdn.sanity.io/images/4dgj84d5/production/${id}.${extension}`
       return url
     }
     return null

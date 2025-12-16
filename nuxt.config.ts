@@ -6,7 +6,7 @@ export default defineNuxtConfig({
     '@nuxt/image'
   ],
   sanity: {
-    projectId: 'uuzbe0e0',
+    projectId: '4dgj84d5',
     dataset: 'production',
     useCdn: true
   },
@@ -23,6 +23,7 @@ export default defineNuxtConfig({
   },
   css: [
     '~/assets/styles/reset.css',
+    '~/assets/styles/colors.css',
     '~/assets/styles/utilities.css',
     '~/assets/styles/typography.css',
     '~/assets/styles/main.css',
@@ -36,6 +37,11 @@ export default defineNuxtConfig({
 
   build: {
     transpile: ['gsap']
+  },
+  vite: {
+    ssr: {
+      noExternal: []
+    }
   },
   
   app: {
