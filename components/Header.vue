@@ -1,7 +1,14 @@
 <template>
 
 
-  <header ref="headerRef">
+  <header 
+    ref="headerRef" 
+    class="scheme"
+    :class="{
+      'overlay': shouldUseOverlay,
+      'light': !shouldUseOverlay
+    }"
+  >
   
     <div class="header-bar flex flex-row flex-center flex-middle px1 px-md-2">
       <div class="header-left">
@@ -80,6 +87,55 @@ const { isHeaderVisible } = useHeaderScroll()
 const { settings: siteSettings } = useSiteSettings()
 const { mainMenu } = useMenu()
 
+// Hero scroll detection
+const hasScrolledPastHero = ref(false)
+
+// Determine if we should use overlay scheme
+const shouldUseOverlay = computed(() => {
+  if (!props.pageData?.enableHeroImage) {
+    return false
+  }
+  // If we've scrolled past the hero, use light scheme
+  return !hasScrolledPastHero.value
+})
+
+// Check if we've scrolled past the hero section
+const checkHeroScroll = () => {
+  if (!props.pageData?.enableHeroImage) {
+    hasScrolledPastHero.value = false
+    return
+  }
+
+  // Find the hero section element
+  const heroElement = document.querySelector('.page-hero')
+  if (!heroElement) {
+    hasScrolledPastHero.value = false
+    return
+  }
+
+  const heroRect = heroElement.getBoundingClientRect()
+  
+  // If hero bottom is above the viewport (negative), we've scrolled past it
+  hasScrolledPastHero.value = heroRect.bottom < 50
+}
+
+// Watch for pageData changes to detect hero
+watch(() => props.pageData?.enableHeroImage, (hasHero) => {
+  if (hasHero) {
+    nextTick(() => {
+      checkHeroScroll()
+      if (typeof window !== 'undefined') {
+        window.addEventListener('scroll', checkHeroScroll, { passive: true })
+      }
+    })
+  } else {
+    hasScrolledPastHero.value = false
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('scroll', checkHeroScroll)
+    }
+  }
+}, { immediate: true })
+
 // Get menu items from the menu
 const mainMenuItems = computed(() => {
   if (!mainMenu.value) return []
@@ -91,7 +147,13 @@ const mainMenuItems = computed(() => {
 // Helper function to get the URL for a menu item
 const getMenuItemUrl = (item) => {
   if (item.to?.page?.slug?.current) {
-    return `/${item.to.page.slug.current}`
+    let url = `/${item.to.page.slug.current}`
+    // Append anchor if provided
+    if (item.to?.anchor) {
+      const anchor = item.to.anchor.startsWith('#') ? item.to.anchor : `#${item.to.anchor}`
+      url += anchor
+    }
+    return url
   }
   if (item.to?.url) {
     return item.to.url
@@ -384,10 +446,10 @@ const closeMenu = () => {
 }
 
 .header-nav {
-  border-top: 1px solid var(--color-text);
-  border-bottom: 1px solid var(--color-text);
   display: block;
   width: 100%;
+  border-bottom: 1px solid currentColor;
+  border-top: 1px solid currentColor;
 }
 
 .header-nav-list {
@@ -395,8 +457,10 @@ const closeMenu = () => {
   list-style: none;
   margin: 0;
   padding: 0.5em 1em;
-  gap: 1.5em;
+  gap: 10px;
   flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
 }
 
 .header-nav-item {
@@ -407,8 +471,8 @@ const closeMenu = () => {
   display: block;
   text-decoration: none;
   color: inherit;
-  padding: 0.5em 0;
   transition: opacity 0.3s ease;
+  line-height: 1;
 }
 
 .header-nav-link:hover {

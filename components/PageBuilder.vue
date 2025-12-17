@@ -81,6 +81,12 @@
         :section="section"
       />
 
+      <!-- Selected Pages Section -->
+      <SectionSelectedPages
+        v-else-if="section._type === 'section' && section.sectionType === 'selectedPages'"
+        :section="section"
+      />
+
       <!-- Quote Section -->
       <SectionQuote
         v-else-if="section._type === 'section' && section.sectionType === 'quote'"
@@ -174,12 +180,6 @@
         :section="section"
       />
 
-      <!-- Selected Pages Section -->
-      <SectionSelectedPages
-        v-else-if="section._type === 'section' && section.sectionType === 'selectedPages'"
-        :section="section"
-      />
-
       <!-- Fallback for empty or misconfigured Home Scroll Section -->
       <div
         v-else-if="section._type === 'section' && section.sectionType === 'homeScroll'"
@@ -221,6 +221,7 @@ import SectionNews from '~/components/SectionNews.vue'
 import SectionServices from '~/components/SectionServices.vue'
 import SectionService from '~/components/SectionService.vue'
 import SectionSelectedNews from '~/components/SectionSelectedNews.vue'
+import SectionSelectedPages from '~/components/SectionSelectedPages.vue'
 import SectionUsps from '~/components/SectionUsps.vue'
 import SectionQuote from '~/components/SectionQuote.vue'
 import SectionGoogleMap from '~/components/SectionGoogleMap.vue'
@@ -234,7 +235,6 @@ import SectionServiceLinks from '~/components/SectionServiceLinks.vue'
 import SectionImages from '~/components/SectionImages.vue'
 import SectionTipsFromTheTable from '~/components/SectionTipsFromTheTable.vue'
 import SectionReviews from '~/components/SectionReviews.vue'
-import SectionSelectedPages from '~/components/SectionSelectedPages.vue'
 import SectionInstagram from '~/components/SectionInstagram.vue'
 import SectionGalleries from '~/components/SectionGalleries.vue'
 import SectionHorizontalCarousel from '~/components/SectionHorizontalCarousel.vue'

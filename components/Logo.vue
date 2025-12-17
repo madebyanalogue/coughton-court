@@ -100,22 +100,5 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.logo-image {
-  width: 127px;
-  height: 70px;
-  display: block;
-  object-fit: contain;
-}
 
-.logo-svg {
-  width: 127px;
-  height: 70px;
-  display: block;
-}
-
-.logo-svg :deep(svg) {
-  width: 127px;
-  height: 70px;
-  display: block;
-}
 </style>

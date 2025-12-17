@@ -84,7 +84,6 @@ const mainPaddingVar = computed(() => 'var(--header-height)');
 // Update favicon based on dark mode
 useFavicon(isDark);
 
-
 // Add script to head to prevent flash of incorrect mode
 useHead({
   link: [
@@ -96,7 +95,7 @@ useHead({
     {
       children: `
         (function() {
-          //console.log('🔴 [App] CDN scripts loaded - plugins should auto-register');
+          // CDN scripts loaded
         })();
       `,
       type: 'text/javascript'

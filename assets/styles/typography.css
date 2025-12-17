@@ -19,7 +19,6 @@
 }
 
 
-
 :root {
   --mono-spacing: 0.1em;
   --arrow-size: 30px;
@@ -35,6 +34,7 @@
 body {
   font-family: var(--body-font);
   line-height: 1.2;
+  letter-spacing: 0.01em;
 }
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--heading);
@@ -134,13 +134,12 @@ body    { line-height: 1.2; }
 .h2, .rte h2 { font-size: var(--h2); }
 .h3, .rte h3 { font-size: var(--h3); }
 .h4, .rte h4 { font-size: var(--h4); }
-.h5, .rte h5 { font-size: var(--h5); }
-.h6, .rte h6 { font-size: var(--h6); }
-.h7, .rte h7 { font-size: var(--h7); }
+.h5, .rte h5 { font-size: var(--h5); text-transform: uppercase; font-weight: 500; }
+.h6, .rte h6 { font-size: var(--h6); text-transform: none; font-weight: 400;      }
+.h7, .rte h7 { font-size: var(--h7); text-transform: uppercase; }
 body         { font-size: var(--body); }
 
 :root {
-  --unit: 10px;
   --unit-reference: 1600;
   --min-h6: 12px;
   --h0: 4.7vw;
@@ -148,9 +147,9 @@ body         { font-size: var(--body); }
   --h2: calc((35 / (var(--unit-reference) / 100)) * var(--unit));
   --h3: calc((32 / (var(--unit-reference) / 100)) * var(--unit));
   --h4: clamp(14px, calc((25 / (var(--unit-reference) / 100)) * var(--unit)), 80px);
-  --h5: clamp(14px, calc((21 / (var(--unit-reference) / 100)) * var(--unit)), 80px);
-  --h6: clamp(var(--min-h6), calc((16 / (var(--unit-reference) / 100)) * var(--unit)), 80px);
-  --h7: clamp(11px, calc((12 / (var(--unit-reference) / 100)) * var(--unit)), 80px);
+  --h5: 12px;
+  --h6: 12px;
+  --h7: 12px;
   --body: 14px;
 }
 
@@ -158,30 +157,6 @@ h1, h2, h3, h4, h5, h6, h7 {
   font-weight: 400;
 }
 
-@media all and (min-width:600px) {
-  :root {
-      --unit: 2vw;
-    }
-}
-
-@media all and (min-width:800px) {
-  :root {
-      --unit: 15px;
-    }
-}
-
-@media all and (min-width:1024px) {
-    :root {
-        --unit: 1vw;
-        --min-h6: 10px;
-    }
-}
-
-@media all and (min-width:2000px) {
-  :root {
-    --unit: 20px;
-  }
-}
 
 .medium {
   font-weight: 500;

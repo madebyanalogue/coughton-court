@@ -1,129 +1,101 @@
 <template>
   <div>
-    <SectionMarquee />
-    
-    <footer class="scheme dark">
-    <div id="footer" class="py2 py-sm-3 py-md-2 grid grid-1 gap-2">
+    <footer class="scheme dark h6">
+      <div id="footer" class="py2 py-sm-3 py-md-2 grid grid-1 gap-2">
 
 
-      <div class="wrapper">
-        <div class="grid gap-1 py-md-1 ptop">
 
-          <!--ICON-->
-          <div class="">
-            
-              <NuxtLink to="/">
-                <div class="footer-logo">
-                  <Logo />
+        <div class="wrapper">
+
+          <div class="flex flex-between">
+
+            <!-- FOOTER MENUS LEFT -->
+            <div v-if="footerMenusLeft?.length > 0" class="footer-menus-left grid grid-3 gap-2">
+              <div v-for="menu in footerMenusLeft" :key="menu._id" class="footer-menu h6">
+                <div class="grid grid-1 gap-1">
+                  <h5 v-if="menu.title" class="footer-menu-title h5">{{ menu.title }}</h5>
+                  <ul v-if="menu.items && menu.items.length > 0" class="footer-menu-list">
+                    <li v-for="item in menu.items" :key="item._key || item.text" class="footer-menu-item">
+                      <NuxtLink 
+                        v-if="getMenuItemUrl(item) && !isExternalUrl(item.to?.url)" 
+                        :to="getMenuItemUrl(item)" 
+                        class="footer-menu-link"
+                      >
+                        {{ item.text }}
+                      </NuxtLink>
+                      <a 
+                        v-else-if="getMenuItemUrl(item) && isExternalUrl(item.to?.url)"
+                        :href="getMenuItemUrl(item)" 
+                        target="_blank"
+                        rel="noopener"
+                        class="footer-menu-link"
+                      >
+                        {{ item.text }}
+                      </a>
+                      <span v-else class="footer-menu-link">{{ item.text }}</span>
+                    </li>
+                  </ul>
                 </div>
-              </NuxtLink>
-          </div>
-
-          <!--COLUMN 1-->
-          <div class="col-span-12 col-span-6-sm col-span-4-md grid grid-1 gap-1">
-
-            <!--CONTACT INFO-->
-            <div class="col-span-3-md">
-              <div class="grid grid-1-auto gap-1">
-
-                <div class="grid grid-1 gap-1 underline-links reverse">
-
-                  <!--CONTACT BLOCKS-->
-                  <div class="rte">
-                    <div v-for="item in firstHalfContactInfo" :key="item._key">
-                      <SanityBlocks :blocks="item.value" />
-                    </div>
-                  </div>
-
-                  <!--CONTACT BLOCKS-->
-                  <div class="rte">
-                    <div v-for="item in secondHalfContactInfo" :key="item._key">
-                      <SanityBlocks :blocks="item.value" />
-                    </div>
-                  </div>
-
-                </div>
-
-                <!--SOCIAL ICONS-->
-                <div class="flex flex-row flex-bottom gap-1">
-                  <SocialIcons :facebookUrl="facebookUrl" :linkedinUrl="linkedinUrl" :instagramUrl="instagramUrl" />
-                </div>
-
-
               </div>
             </div>
 
-          </div>
-
-          <!--COLUMN 2-->
-          <div class="col-span-12 col-span-6-sm col-span-3-md grid grid-1 gap-1 col-start-7-sm">
-
-            <div class="grid grid-1-auto gap-2">
-
-              <div class="hide-md"></div>
-
-              <!--OPENING TIMES-->
-              <div v-if="openingTimes && openingTimes.length > 0" class="opening-times">
-                <table class="opening-times-table">
-                  <tbody>
-                    <tr v-for="time in openingTimes" :key="time.day">
-                      <td class="day">{{ formatDay(time.day) }}</td>
-                      <td class="time">{{ time.time }}</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-
-              <!-- FOOTER LINKS -->
-              <template v-if="footerMenuItems.length > 0">
-                <div class="flex flex-row gap-2">
-                  <template v-for="item in footerMenuItems" :key="item.text">
-                    <NuxtLink 
-                      v-if="item.to?.page?.slug?.current" 
-                      :to="`/${item.to.page.slug.current}`"
-                      class="button"
-                    >
-                      {{ item.text }}
-                    </NuxtLink>
-                    <a 
-                      v-else-if="item.to?.url" 
-                      class="button"
-                      :href="getProcessedUrl(item.to.url)" 
-                      target="_blank" 
-                      rel="noopener"
-                    >
-                      {{ item.text }}
-                    </a>
-                  </template>
+            <!-- COPYRIGHT -->
+            <div class="">
+              <div class="flex flex-col flex-center gap-1">
+                <div class="flex flex-center">
+                  <NuxtLink to="/">
+                    <div class="footer-logo">
+                      <Logo />
+                    </div>
+                  </NuxtLink>
                 </div>
-              </template>
-
+                <div class="h7">© <span>{{ websiteTitle }}</span> {{ new Date().getFullYear() }}. All Rights Reserved.</div>
+              </div>
             </div>
 
-          </div>
+            <!--FOOTER RIGHT-->
+            <div class="footer-right grid grid-1 gap-2">
 
+                <!-- FOOTER MENUS RIGHT -->
+                <div v-if="footerMenusRight?.length > 0" class="footer-menus-right grid grid-3 gap-2">
+
+                  <div v-for="menu in footerMenusRight" :key="menu._id" class="footer-menu">
+                    <div class="grid grid-1 gap-1">
+                      <h3 v-if="menu.title" class="footer-menu-title">{{ menu.title }}</h3>
+                      <ul v-if="menu.items && menu.items.length > 0" class="footer-menu-list">
+                        <li v-for="item in menu.items" :key="item._key || item.text" class="footer-menu-item">
+                          <NuxtLink 
+                            v-if="getMenuItemUrl(item) && !isExternalUrl(item.to?.url)" 
+                            :to="getMenuItemUrl(item)" 
+                            class="footer-menu-link"
+                          >
+                            {{ item.text }}
+                          </NuxtLink>
+                          <a 
+                            v-else-if="getMenuItemUrl(item) && isExternalUrl(item.to?.url)"
+                            :href="getMenuItemUrl(item)" 
+                            target="_blank"
+                            rel="noopener"
+                            class="footer-menu-link"
+                          >
+                            {{ item.text }}
+                          </a>
+                          <span v-else class="footer-menu-link">{{ item.text }}</span>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+                <NewsletterSignup />
+
+
+            </div>
+                
+          </div>
         </div>
       </div>
-
-      <div class="wrapper">
-
-        <div class="grid h7">
-
-          <div class="col-span-12 col-span-2-md">
-          </div>
-
-          <!-- COPYRIGHT -->
-          <div class="col-span-12 col-span-6-sm col-start-7-sm col-start-1-md col-span-10-md">
-            <div class="">© <span>{{ websiteTitle }}</span> {{ new Date().getFullYear() }}. All Rights Reserved.</div>
-          </div>
-              
-        </div>
-
-      </div>
-
-    </div>
-
-  </footer>
+    </footer>
   </div>
 </template>
 
@@ -155,7 +127,9 @@ const {
   instagramUrl,
   openingTimes,
   title,
-  disablePreloader
+  disablePreloader,
+  footerMenusLeft,
+  footerMenusRight
 } = useSiteSettings();
 
 // Website title from Sanity
@@ -173,6 +147,29 @@ const {
 // Computed properties for menu items
 const mainMenuItems = computed(() => mainMenu?.value?.items || []);
 const footerMenuItems = computed(() => footerMenu?.value?.items || []);
+
+// Helper function to check if URL is external
+const isExternalUrl = (url) => {
+  if (!url) return false
+  return url.startsWith('http://') || url.startsWith('https://') || url.startsWith('//')
+}
+
+// Helper function to get menu item URL
+const getMenuItemUrl = (item) => {
+  if (item.to?.page?.slug?.current) {
+    let url = `/${item.to.page.slug.current}`
+    // Append anchor if provided
+    if (item.to?.anchor) {
+      const anchor = item.to.anchor.startsWith('#') ? item.to.anchor : `#${item.to.anchor}`
+      url += anchor
+    }
+    return url
+  }
+  if (item.to?.url) {
+    return getProcessedUrl(item.to.url)
+  }
+  return null
+}
 
 // Function to process external URLs consistently
 const getProcessedUrl = (url) => {

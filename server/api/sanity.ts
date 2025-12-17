@@ -100,25 +100,6 @@ export default defineEventHandler(async (event) => {
                 metadata {
                   dimensions
                 }
-              },
-              alt
-            },
-            // Main navigation menu reference
-            mainNavigationMenu-> {
-              _id,
-              title,
-              items[] {
-                ...,
-                to {
-                  ...,
-                  page-> {
-                    _id,
-                    slug {
-                      current
-                    },
-                    title
-                  }
-                }
               }
             },
             // Feature flags / toggles
@@ -127,15 +108,97 @@ export default defineEventHandler(async (event) => {
             contactInfo[] {
               label,
               value
-            }
+            },
+            // Main navigation menu
+            mainNavigationMenu-> {
+              _id,
+              title,
+              items[] {
+                ...,
+                _key,
+                text,
+                to {
+                  ...,
+                  page-> {
+                    _id,
+                    _type,
+                    slug {
+                      current
+                    },
+                    title
+                  },
+                  anchor
+                }
+              }
+            },
+            // Footer menus
+            footerMenusLeft[]-> {
+              _id,
+              title,
+              items[] {
+                ...,
+                _key,
+                text,
+                to {
+                  ...,
+                  page-> {
+                    _id,
+                    _type,
+                    slug {
+                      current
+                    },
+                    title
+                  },
+                  anchor
+                }
+              }
+            },
+            footerMenusRight[]-> {
+              _id,
+              title,
+              items[] {
+                ...,
+                _key,
+                text,
+                to {
+                  ...,
+                  page-> {
+                    _id,
+                    _type,
+                    slug {
+                      current
+                    },
+                    title
+                  },
+                  anchor
+                }
+              }
+            },
+            // Social & newsletter
+            facebookUrl,
+            newsletterActionUrl
           }
         `)
+        // Normalize menu items to always be arrays
+        if (result) {
+          if (result.mainNavigationMenu && result.mainNavigationMenu.items === null) {
+            result.mainNavigationMenu.items = []
+          }
+          if (result.footerMenusLeft) {
+            result.footerMenusLeft = result.footerMenusLeft.map((menu: any) => ({
+              ...menu,
+              items: menu.items === null ? [] : menu.items
+            }))
+          }
+          if (result.footerMenusRight) {
+            result.footerMenusRight = result.footerMenusRight.map((menu: any) => ({
+              ...menu,
+              items: menu.items === null ? [] : menu.items
+            }))
+          }
+        }
         if (!result) {
           return { footerLogos: [], contactInfo: [] }
-        }
-        // Normalize menu items to array if null
-        if (result.mainNavigationMenu && (result.mainNavigationMenu.items === null || result.mainNavigationMenu.items === undefined)) {
-          result.mainNavigationMenu.items = []
         }
         return result
       } catch (fetchError: any) {
@@ -151,30 +214,9 @@ export default defineEventHandler(async (event) => {
     
     if (query.menuTitle) {
       const result = await client.fetch(
-        `*[_type == "menu" && title == $menuTitle][0]{
-          ...,
-          items[]{
-            ...,
-            _key,
-            text,
-            to{
-              ...,
-              page-> {
-                _id,
-                slug {
-                  current
-                },
-                title
-              }
-            }
-          }
-        }`,
+        '*[_type == "menu" && title == $menuTitle][0]{..., items[]{..., to{..., page-> { _id, slug, title }}}}',
         { menuTitle: query.menuTitle }
       )
-      // Ensure items is always an array, not null
-      if (result && result.items === null) {
-        result.items = []
-      }
       return result
     }
     
@@ -186,6 +228,11 @@ export default defineEventHandler(async (event) => {
           _id,
           title,
           slug,
+          darkMode,
+          removeTopPadding,
+          hideFooter,
+          hideHeaderLogo,
+          greyBackground,
           featuredImage {
             asset-> {
               _id,
@@ -193,10 +240,14 @@ export default defineEventHandler(async (event) => {
               metadata {
                 dimensions
               }
-            },
-            alt
+            }
           },
           shortDescription,
+          enableHeroImage,
+          showTitleOverHero,
+          enableIntroduction,
+          introductionTitle,
+          introduction,
           sections[]-> {
             _id,
             _type,
@@ -607,27 +658,6 @@ export default defineEventHandler(async (event) => {
                     metadata { dimensions }
                   }
                 }
-              }
-            },
-            selectedPagesContent {
-              title,
-              pages[]-> {
-                _id,
-                title,
-                slug {
-                  current
-                },
-                featuredImage {
-                  asset-> {
-                    _id,
-                    url,
-                    metadata {
-                      dimensions
-                    }
-                  },
-                  alt
-                },
-                shortDescription
               }
             }
           }

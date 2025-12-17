@@ -27,7 +27,6 @@ export const useSiteSettings = () => {
     instagramUrl: computed(() => settings.value?.instagramUrl || ''),
     preloaderImages: computed(() => settings.value?.preloaderImages || []),
     logotype: computed(() => settings.value?.logotype || null),
-    mainNavigationMenu: computed(() => settings.value?.mainNavigationMenu || null),
     bookingTitle: computed(() => settings.value?.bookingTitle || 'Book Your Appointment Now'),
     bookingLink: computed(() => settings.value?.bookingLink || ''),
     favicon: computed(() => settings.value?.favicon || {}),
@@ -36,6 +35,10 @@ export const useSiteSettings = () => {
     faviconDarkPngUrl: computed(() => settings.value?.favicon?.faviconDarkPng?.asset?.url || ''),
     appleTouchIconUrl: computed(() => settings.value?.favicon?.appleTouchIcon?.asset?.url || ''),
     androidIconUrl: computed(() => settings.value?.favicon?.androidIcon?.asset?.url || ''),
-    disablePreloader: computed(() => settings.value?.disablePreloader === true)
+    disablePreloader: computed(() => settings.value?.disablePreloader === true),
+    mainNavigationMenu: computed(() => settings.value?.mainNavigationMenu || null),
+    footerMenusLeft: computed(() => settings.value?.footerMenusLeft || []),
+    footerMenusRight: computed(() => settings.value?.footerMenusRight || []),
+    newsletterActionUrl: computed(() => settings.value?.newsletterActionUrl || '')
   }
 } 

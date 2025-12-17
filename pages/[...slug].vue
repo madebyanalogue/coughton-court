@@ -15,15 +15,27 @@
         </div>
       </div>
     </template>
-    <template v-else-if="pageData?.sections?.length">
-      <PageBuilder :sections="pageData.sections" :page-data="pageData" />
-    </template>
     <template v-else-if="pageData">
-      <div class="wrapper py6">
-        <h1>{{ pageData.title || 'Page' }}</h1>
-        <p>This page is being prepared. Please check back soon!</p>
-        <p v-if="isDev">Debug: No sections found</p>
-      </div>
+      <!-- Page Hero Image -->
+      <PageHero 
+        v-if="pageData?.enableHeroImage && pageData?.featuredImage"
+        :featured-image="pageData.featuredImage"
+        :enabled="!!pageData.enableHeroImage"
+        :show-title="!!pageData.showTitleOverHero"
+        :title="pageData.title"
+      />
+      
+      <!-- Page Introduction -->
+      <PageIntroduction 
+        v-if="pageData?.enableIntroduction"
+        :enabled="!!pageData.enableIntroduction"
+        :title="pageData.introductionTitle"
+        :content="pageData.introduction"
+      />
+      
+      <template v-if="pageData?.sections?.length">
+        <PageBuilder :sections="pageData.sections" :page-data="pageData" />
+      </template>
     </template>
   </div>
 </template> 
@@ -35,6 +47,8 @@ import { useRuntimeConfig } from '#app'
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useSiteSettings } from '~/composables/useSiteSettings'
+import PageHero from '~/components/PageHero.vue'
+import PageIntroduction from '~/components/PageIntroduction.vue'
 
 const route = useRoute()
 const config = useRuntimeConfig()
@@ -94,4 +108,4 @@ const isDev = computed(() => config.public.dev)
     transform: rotate(360deg);
   }
 }
-</style> 
+</style>

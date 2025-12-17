@@ -107,21 +107,14 @@ onMounted(() => {
 
 <style scoped>
 .logotype-image {
-  width: 149px;
-  height: 70px;
-  display: block;
-  object-fit: contain;
-}
-
-.logotype-svg {
-  width: 149px;
-  height: 70px;
+  width: auto;
+  height: 100%;
   display: block;
 }
 
 .logotype-svg :deep(svg) {
-  width: 149px;
-  height: 70px;
+  width: auto;
+  height: 100%;
   display: block;
 }
 </style>
