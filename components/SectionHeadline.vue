@@ -1,5 +1,5 @@
 <template>
-  <section v-if="section?.headlineContent" :id="sectionId" ref="sectionRef">
+  <section v-if="section?.headlineContent" :id="sectionId" ref="sectionRef" :class="{ 'section-border-top': section.borderTop }">
     <div class="wrapper">
       <div :class="`py${section.headlineContent.paddingBottom || '0'} pbottom`">
         <div

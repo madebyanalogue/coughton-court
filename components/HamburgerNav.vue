@@ -21,7 +21,7 @@
             </a>
             <!-- Use NuxtLink for internal page navigation -->
             <NuxtLink 
-              v-else 
+              v-else-if="item.to && item.to !== '#'" 
               :to="item.to" 
               class="hamburger-nav__a" 
               @click="closeMenu"
@@ -29,6 +29,11 @@
               <p class="hamburger-nav__p">{{ item.text }}</p>
               <div class="hamburger-nav__dot"></div>
             </NuxtLink>
+            <!-- Fallback for items without valid links -->
+            <span v-else class="hamburger-nav__a">
+              <p class="hamburger-nav__p">{{ item.text }}</p>
+              <div class="hamburger-nav__dot"></div>
+            </span>
           </div>
         </ul>
       </div>

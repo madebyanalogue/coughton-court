@@ -87,6 +87,48 @@
         :section="section"
       />
 
+      <!-- Gardens Section -->
+      <SectionGardens
+        v-else-if="section._type === 'section' && section.sectionType === 'gardens'"
+        :section="section"
+      />
+
+      <!-- Events Section -->
+      <SectionEvents
+        v-else-if="section._type === 'section' && section.sectionType === 'events'"
+        :section="section"
+      />
+
+      <!-- Carousel Section -->
+      <SectionCarousel
+        v-else-if="section._type === 'section' && section.sectionType === 'carousel'"
+        :section="section"
+      />
+
+      <!-- FAQs Section -->
+      <SectionFAQs
+        v-else-if="section._type === 'section' && section.sectionType === 'faqs'"
+        :section="section"
+      />
+
+      <!-- Contact Form Section -->
+      <SectionContactForm
+        v-else-if="section._type === 'section' && section.sectionType === 'contactForm'"
+        :section="section"
+      />
+
+      <!-- Directions Section -->
+      <SectionDirections
+        v-else-if="section._type === 'section' && section.sectionType === 'directions'"
+        :section="section"
+      />
+
+      <!-- Opening Times and Prices Section -->
+      <SectionOpeningTimesAndPrices
+        v-else-if="section._type === 'section' && section.sectionType === 'openingTimesAndPrices'"
+        :section="section"
+      />
+
       <!-- Quote Section -->
       <SectionQuote
         v-else-if="section._type === 'section' && section.sectionType === 'quote'"

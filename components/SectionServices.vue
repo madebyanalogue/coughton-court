@@ -1,5 +1,5 @@
 <template>
-  <section ref="sectionRef">
+  <section ref="sectionRef" :class="{ 'section-border-top': section.borderTop }">
     <div class="wrapper">
 
       <div class="grid grid-1 py2 ptop">

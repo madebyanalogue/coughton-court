@@ -36,9 +36,15 @@ export const useSiteSettings = () => {
     appleTouchIconUrl: computed(() => settings.value?.favicon?.appleTouchIcon?.asset?.url || ''),
     androidIconUrl: computed(() => settings.value?.favicon?.androidIcon?.asset?.url || ''),
     disablePreloader: computed(() => settings.value?.disablePreloader === true),
+    disablePageTransition: computed(() => settings.value?.disablePageTransition === true),
     mainNavigationMenu: computed(() => settings.value?.mainNavigationMenu || null),
     footerMenusLeft: computed(() => settings.value?.footerMenusLeft || []),
     footerMenusRight: computed(() => settings.value?.footerMenusRight || []),
-    newsletterActionUrl: computed(() => settings.value?.newsletterActionUrl || '')
+    newsletterActionUrl: computed(() => settings.value?.newsletterActionUrl || ''),
+    newsletterTitleFooter: computed(() => settings.value?.newsletterTitleFooter || ''),
+    newsletterTitleHero: computed(() => settings.value?.newsletterTitleHero || ''),
+    newsletterPlaceholder: computed(() => settings.value?.newsletterPlaceholder || 'Enter your email'),
+    cookiesMessage: computed(() => settings.value?.cookiesMessage || []),
+    googleAnalyticsId: computed(() => settings.value?.googleAnalyticsId || '')
   }
 } 

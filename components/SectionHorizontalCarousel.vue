@@ -1,5 +1,5 @@
 <template>
-  <section class="section-horizontal-carousel">
+  <section :class="['section-horizontal-carousel', { 'section-border-top': section.borderTop }]">
     <div class="">
       
       <!-- GSAP Slider -->

@@ -1,5 +1,5 @@
 <template>
-  <section class="section-dual-carousel">
+  <section :class="['section-dual-carousel', { 'section-border-top': section.borderTop }]">
     <!-- Desktop Dual Carousel -->
     <div class="dual-carousel-container desktop-carousel">
       <!-- Left Carousel -->

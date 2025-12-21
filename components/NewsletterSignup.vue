@@ -58,7 +58,7 @@ const props = defineProps({
   },
   action: {
     type: String,
-    required: true,
+    default: '',
     description: 'Mailchimp form action URL (e.g., https://yourdomain.us1.list-manage.com/subscribe/post-json?u=xxx&id=xxx)'
   },
   onSubmit: {

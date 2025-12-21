@@ -49,14 +49,21 @@ export default defineNuxtConfig({
       link: [
         {
           rel: 'preload',
-          href: '/fonts/RoslindaleDeckNarrowMedium.woff2',
+          href: '/fonts/ttcommons-regular.woff2',
           as: 'font',
           type: 'font/woff2',
           crossorigin: 'anonymous'
         },
         {
           rel: 'preload',
-          href: '/fonts/Typewriter_Regular_PRO.woff2',
+          href: '/fonts/ttcommons-medium.woff2',
+          as: 'font',
+          type: 'font/woff2',
+          crossorigin: 'anonymous'
+        },
+        {
+          rel: 'preload',
+          href: '/fonts/baskerville.woff2',
           as: 'font',
           type: 'font/woff2',
           crossorigin: 'anonymous'

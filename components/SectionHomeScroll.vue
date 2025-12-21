@@ -1,5 +1,5 @@
 <template>
-  <section class="home-scroll-section">
+  <section :class="['home-scroll-section', { 'section-border-top': section.borderTop }]">
     <div class="home--container">
       <div class="logo home--logo"><Logo /></div>
       <div class="container" v-if="hasItems">

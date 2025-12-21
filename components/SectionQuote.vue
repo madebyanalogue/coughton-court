@@ -1,5 +1,5 @@
 <template>
-  <section>
+  <section :class="{ 'section-border-top': section.borderTop }">
     <div class="wrapper" data-fade-in>
       <div  :class="[
               'grid',

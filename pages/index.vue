@@ -16,40 +16,37 @@
       </div>
     </template>
     
-    <!-- Spline Testing Section - PageBuilder is dormant -->
-    <!-- Show Spline even if pending/error for testing - SSR compatible -->
-    <div class="spline-test-container">
-      <!-- Add your Spline models here -->
-      <div class="spline-section" v-for="(model, index) in splineModels" :key="index">
-        <SplineModel 
-          :scene="model.scene" 
-          :container-class="model.containerClass"
-          :container-style="model.containerStyle"
+    <template v-else-if="pageData">
+      <!-- Page Hero Image -->
+      <PageHero 
+        v-if="pageData?.enableHeroImage && pageData?.featuredImage"
+        :featured-image="pageData.featuredImage"
+        :enabled="!!pageData.enableHeroImage"
+        :show-title="!!pageData.showTitleOverHero"
+        :title="pageData.title"
+        :enable-custom-title-and-button="!!pageData.enableCustomTitleAndButton"
+        :custom-title="pageData.customTitle"
+        :custom-button-title="pageData.customButtonTitle"
+        :custom-button-link="pageData.customButtonLink"
+        :enable-newsletter-signup="!!pageData.enableNewsletterSignup"
+        :enable-cookies-banner="!!pageData.enableCookiesBanner"
         />
-      </div>
-    </div>
-    
-    <!-- PageBuilder is commented out - uncomment when ready to use -->
-    <!--
+      
     <template v-if="pageData?.sections?.length">
       <PageBuilder :sections="pageData.sections" :page-data="pageData" />
+      </template>
     </template>
-    -->
   </div>
 </template>
 
 <script setup>
-import { useNuxtApp } from '#app'
 import { watch } from 'vue'
 import { useRuntimeConfig } from '#app'
-import { computed, ref } from 'vue'
-import { useRoute } from 'vue-router'
+import { computed } from 'vue'
 import { usePageSettings } from '~/composables/usePageSettings'
 import { useSiteSettings } from '~/composables/useSiteSettings'
 
-const { $sanity } = useNuxtApp()
 const config = useRuntimeConfig()
-const route = useRoute()
 
 // Use the usePageSettings composable instead of duplicating the data fetching
 const { page: pageData, error, pending } = usePageSettings()
@@ -57,36 +54,6 @@ const { page: pageData, error, pending } = usePageSettings()
 // Get site settings once
 const { title: websiteTitle } = useSiteSettings()
 
-// Spline models configuration
-// Add your Spline scene URLs or local file paths here
-const splineModels = ref([
-  // {
-  //   // Robot 4 legs toon model
-  //   scene: 'https://prod.spline.design/MQIiUj66nAWKsqDa/scene.splinecode',
-  //   containerClass: 'spline-model-container',
-  //   containerStyle: {
-  //     width: '100%',
-  //     height: '100vh' // Full viewport height
-  //   }
-  // }
-  {
-    scene: 'https://prod.spline.design/9g0Ad4sqfF-lHa2G/scene.splinecode',
-    containerClass: 'spline-model-container',
-    containerStyle: {
-      width: '100%',
-      height: '100vh' // Full viewport height
-    }
-  }
-  // Add more models as needed:
-  // {
-  //   scene: 'https://prod.spline.design/your-scene-url.splinecode',
-  //   containerClass: 'spline-model-container',
-  //   containerStyle: {
-  //     width: '100%',
-  //     height: '600px'
-  //   }
-  // }
-])
 
 // Watch for changes in pageData to update title
 watch(() => pageData.value, (newData) => {
@@ -136,20 +103,4 @@ const isDev = computed(() => config.public.dev)
   }
 }
 
-.spline-test-container {
-  width: 100%;
-  min-height: 100vh;
-}
-
-.spline-section {
-  width: 100%;
-  margin-bottom: 2rem;
-}
-
-.spline-model-container {
-  width: 100%;
-  border-radius: 8px;
-  overflow: hidden;
-  background: transparent;
-}
 </style> 

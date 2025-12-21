@@ -23,6 +23,12 @@
         :enabled="!!pageData.enableHeroImage"
         :show-title="!!pageData.showTitleOverHero"
         :title="pageData.title"
+        :enable-custom-title-and-button="!!pageData.enableCustomTitleAndButton"
+        :custom-title="pageData.customTitle"
+        :custom-button-title="pageData.customButtonTitle"
+        :custom-button-link="pageData.customButtonLink"
+        :enable-newsletter-signup="!!pageData.enableNewsletterSignup"
+        :enable-cookies-banner="!!pageData.enableCookiesBanner"
       />
       
       <!-- Page Introduction -->
@@ -42,7 +48,6 @@
 
 <script setup>
 import { usePageSettings } from '~/composables/usePageSettings'
-import { watch } from 'vue'
 import { useRuntimeConfig } from '#app'
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
@@ -59,21 +64,11 @@ const slug = computed(() => route.params.slug?.join('/') || '')
 // Use the usePageSettings composable for consistency
 const { page: pageData, error, pending } = usePageSettings()
 
-// Watch for changes in pageData to update title
-watch(() => pageData.value, (newData) => {
-  if (newData) {
+// Call useSiteSettings once at setup level
     const { title: websiteTitle } = useSiteSettings()
-    const pageTitle = newData.title || route.path.split('/').pop()
-    const fullTitle = `${websiteTitle.value} | ${pageTitle}`
-    useHead({
-      title: fullTitle
-    })
-  }
-}, { immediate: true })
 
-// Page meta
+// Page meta - use the already-fetched websiteTitle
 useHead(() => {
-  const { title: websiteTitle } = useSiteSettings()
   const title = pageData.value?.title || 'Page Not Found';
   return { 
     title: `${websiteTitle.value} | ${title}`

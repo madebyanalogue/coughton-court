@@ -1,5 +1,5 @@
 <template>
-  <section ref="sectionRef" class="section-service">
+  <section ref="sectionRef" :class="['section-service', { 'section-border-top': section.borderTop }]">
     <div class="wrapper">
       <div class="service-content-container grid grid-1 py15 py-sm-3">
         

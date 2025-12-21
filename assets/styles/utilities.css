@@ -1,9 +1,8 @@
 /* Utility CSS */
 :root {
   --unit: 10px;
-  --unit-reference: 1600;
-  --max-width: 2000px;
-  --max-width-medium: 2000px;
+  --max-width-reference: 1800;
+  --max-width: 1836px;
   --pad-1: calc(var(--unit) * 1);
   --pad-2: calc(var(--unit) * 2);
   --pad-3: calc(var(--unit) * 3);

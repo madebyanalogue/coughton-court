@@ -2,7 +2,8 @@
   <section class="section-single-carousel" 
     :class="{
         'py2': enablePaddingTopBottom,
-        'px1 px-sm-2': enablePaddingLeftRight
+        'px1 px-sm-2': enablePaddingLeftRight,
+        'section-border-top': section.borderTop
       }">
     <!-- Top Background Section -->
     <div 

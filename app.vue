@@ -7,7 +7,7 @@
   </ClientOnly>
   <VisibleGrid v-if="preloaderReady" />
   <Header v-if="preloaderReady" :page-data="page" />
-  <Transition name="page" mode="out-in" appear @before-enter="onPageBeforeEnter" @after-enter="onPageEnter">
+  <Transition :name="disablePageTransition ? '' : 'page'" mode="out-in" appear @before-enter="onPageBeforeEnter" @after-enter="onPageEnter">
     <div v-if="preloaderReady" class="page-container" :key="route.fullPath">
       <Suspense>
         <main :style="{ paddingTop: mainPaddingVar }">
@@ -47,7 +47,7 @@ import { useSiteSettings } from '~/composables/useSiteSettings'
 const { isDark, page } = usePageSettings();
 const route = useRoute();
 const router = useRouter();
-const { disablePreloader } = useSiteSettings()
+const { disablePreloader, disablePageTransition } = useSiteSettings()
 
 // Initialize scroll trigger system
 const { enableScrollAnimations } = useScrollTrigger();
@@ -74,8 +74,13 @@ router.afterEach(() => {
 
 
 
-// Always use header height padding for main element
-const mainPaddingVar = computed(() => 'var(--header-height)');
+// Use header height padding unless hero is enabled
+const mainPaddingVar = computed(() => {
+  if (page.value?.enableHeroImage) {
+    return '0'
+  }
+  return 'var(--header-height)'
+});
 
 
 

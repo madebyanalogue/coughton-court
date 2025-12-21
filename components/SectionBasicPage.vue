@@ -1,5 +1,5 @@
 <template>
-  <section class="dark section-basic-page">
+  <section :class="['dark section-basic-page', { 'section-border-top': section.borderTop }]">
     <div class="wrapper medium">
       <div class="py2 py-sm-3 grid grid-1 gap-3">
 

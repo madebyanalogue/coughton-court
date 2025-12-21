@@ -176,7 +176,10 @@ export default defineEventHandler(async (event) => {
             },
             // Social & newsletter
             facebookUrl,
-            newsletterActionUrl
+            newsletterActionUrl,
+            // Cookies & Analytics
+            cookiesMessage,
+            googleAnalyticsId
           }
         `)
         // Normalize menu items to always be arrays
@@ -229,6 +232,7 @@ export default defineEventHandler(async (event) => {
           title,
           slug,
           darkMode,
+          borderTop,
           removeTopPadding,
           hideFooter,
           hideHeaderLogo,
@@ -245,6 +249,19 @@ export default defineEventHandler(async (event) => {
           shortDescription,
           enableHeroImage,
           showTitleOverHero,
+          enableCustomTitleAndButton,
+          customTitle,
+          customButtonTitle,
+          customButtonLink {
+            page-> {
+              slug {
+                current
+              }
+            },
+            url
+          },
+          enableNewsletterSignup,
+          enableCookiesBanner,
           enableIntroduction,
           introductionTitle,
           introduction,
@@ -252,6 +269,7 @@ export default defineEventHandler(async (event) => {
             _id,
             _type,
             title,
+            borderTop,
             sectionType,
             heroContent {
               image {
@@ -659,6 +677,96 @@ export default defineEventHandler(async (event) => {
                   }
                 }
               }
+            },
+            selectedPagesContent {
+              title,
+              pages[]-> {
+                _id,
+                title,
+                slug,
+                shortDescription,
+                featuredImage {
+                  asset-> {
+                    _id,
+                    url,
+                    metadata { dimensions }
+                  }
+                }
+              }
+            },
+            gardensContent {
+              title
+            },
+            eventsContent {
+              title
+            },
+            carouselContent {
+              title,
+              description,
+              images[] {
+                asset-> {
+                  _id,
+                  url,
+                  metadata { dimensions }
+                },
+                alt,
+                caption
+              }
+            },
+            faqsContent {
+              subtitle,
+              image {
+                asset-> {
+                  _id,
+                  url,
+                  metadata { dimensions }
+                }
+              },
+              faqs[] {
+                question,
+                answer
+              }
+            },
+            contactFormContent {
+              title,
+              description,
+              image {
+                asset-> {
+                  _id,
+                  url,
+                  metadata { dimensions }
+                }
+              }
+            },
+            directionsContent {
+              title,
+              tabs[] {
+                tabTitle,
+                content
+              },
+              mapEmbedCode
+            },
+            openingTimesAndPricesContent {
+              title,
+              openingTimes[] {
+                title,
+                time
+              },
+              prices[] {
+                category,
+                price
+              },
+              informationBlocks[] {
+                title,
+                description
+              },
+              image {
+                asset-> {
+                  _id,
+                  url,
+                  metadata { dimensions }
+                }
+              }
             }
           }
         }`
@@ -870,6 +978,116 @@ export default defineEventHandler(async (event) => {
         }
       `)
       return result
+    }
+
+    if (query.type === 'event') {
+      if (query.all) {
+        return await client.fetch(`
+          *[_type == "event"] | order(startDate asc) {
+            _id,
+            title,
+            slug,
+            shortDescription,
+            startDate,
+            endDate,
+            featuredImage {
+              asset-> {
+                _id,
+                url,
+                metadata { dimensions }
+              }
+            }
+          }
+        `)
+      }
+      
+      // Single event by slug
+      if (query.slug) {
+        return await client.fetch(`
+          *[_type == "event" && slug.current == $slug][0] {
+            _id,
+            title,
+            slug,
+            shortDescription,
+            startDate,
+            endDate,
+            cost,
+            category,
+            featuredImage {
+              asset-> {
+                _id,
+                url,
+                metadata { dimensions }
+              }
+            },
+            introductionTitle,
+            introduction,
+            gallery[] {
+              asset-> {
+                _id,
+                url,
+                metadata { dimensions }
+              },
+              alt,
+              caption
+            },
+            tab1Title,
+            tab1Content,
+            tab2Title,
+            tab2Content,
+            bookingUrl
+          }
+        `, { slug: query.slug })
+      }
+    }
+
+    if (query.type === 'garden') {
+      if (query.all) {
+        return await client.fetch(`
+          *[_type == "garden"] | order(_createdAt asc) {
+            _id,
+            title,
+            slug,
+            shortDescription,
+            featuredImage {
+              asset-> {
+                _id,
+                url,
+                metadata { dimensions }
+              }
+            }
+          }
+        `)
+      }
+      
+      // Single garden by slug
+      if (query.slug) {
+        return await client.fetch(`
+          *[_type == "garden" && slug.current == $slug][0] {
+            _id,
+            title,
+            slug,
+            shortDescription,
+            mainDescription,
+            featuredImage {
+              asset-> {
+                _id,
+                url,
+                metadata { dimensions }
+              }
+            },
+            gallery[] {
+              asset-> {
+                _id,
+                url,
+                metadata { dimensions }
+              },
+              alt,
+              caption
+            }
+          }
+        `, { slug: query.slug })
+      }
     }
 
     if (query.type === 'galleries') {

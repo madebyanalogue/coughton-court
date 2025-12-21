@@ -87,7 +87,11 @@
                   </div>
                 </div>
 
-                <NewsletterSignup />
+                <NewsletterSignup 
+                  :title="newsletterTitleFooter" 
+                  :action="newsletterActionUrl"
+                  :placeholder="newsletterPlaceholder"
+                />
 
 
             </div>
@@ -129,7 +133,10 @@ const {
   title,
   disablePreloader,
   footerMenusLeft,
-  footerMenusRight
+  footerMenusRight,
+  newsletterActionUrl,
+  newsletterTitleFooter,
+  newsletterPlaceholder
 } = useSiteSettings();
 
 // Website title from Sanity

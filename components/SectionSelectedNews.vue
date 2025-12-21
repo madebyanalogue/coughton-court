@@ -1,5 +1,5 @@
 <template>
-  <section ref="sectionRef">
+  <section ref="sectionRef" :class="{ 'section-border-top': section.borderTop }">
     <div class="wrapper">
       <div class="grid grid-1">
 
@@ -41,7 +41,7 @@
         </div>
 
         <div v-if="button && button.text && (button.page || button.url)" class="text-center py2">
-          <NuxtLink v-if="button.page" :to="`/${button.page.slug?.current}`" class="btn" data-btn-hover>
+          <NuxtLink v-if="button.page?.slug?.current" :to="`/${button.page.slug.current}`" class="btn" data-btn-hover>
             <span class="btn__text">{{ button.text }}</span>
             <div class="btn__circle"></div>
           </NuxtLink>

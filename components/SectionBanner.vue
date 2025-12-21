@@ -1,5 +1,5 @@
 <template>
-  <section>
+  <section :class="{ 'section-border-top': section.borderTop }">
     <div class="wrapper">
       <div class="relative py9">
         <div v-if="section.bannerContent?.image" class="cover object-fit-child show-md">

@@ -1,7 +1,7 @@
 <template>
   <section 
     ref="sectionRef"
-    class="section-galleries"
+    :class="['section-galleries', { 'section-border-top': section.borderTop }]"
   >
     <div class="">
       <div data-gallery="" class="gallery-group py-md-2">

@@ -1,5 +1,5 @@
 <template>
-  <section class="section-service-links">
+  <section :class="['section-service-links', { 'section-border-top': section.borderTop }]">
     <div :class="['service-links-container', {'py1 py-sm-2': enablePaddingTopBottom, 'px1 px-sm-2': enablePaddingLeftRight }]">
       <div class="service-links-grid">
         <div 

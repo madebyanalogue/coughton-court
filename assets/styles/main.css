@@ -3,7 +3,9 @@
 :root {
   --logo-height: 14px;
   --footer-logo-height: 21px;
-  --header-height: 55px;
+  --header-height: calc(var(--header-bar-height) + var(--header-nav-height));
+  --header-bar-height: 90px;
+  --header-nav-height: 50px;
 
 
 
@@ -26,7 +28,6 @@
   :root {
     --logo-height: 70px;
     --footer-logo-height: 70px;
-    --header-height: 100px;
   }
 }
 /* Removed empty :root ruleset at 1024px */

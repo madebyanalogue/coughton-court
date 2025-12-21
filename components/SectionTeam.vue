@@ -1,5 +1,5 @@
 <template>
-  <section class="section-team">
+  <section :class="['section-team', { 'section-border-top': section.borderTop }]">
     <div class="show-md"> 
       <div class="team--viewer" ref="effectSection">
         <p class="scroll">Scroll</p>

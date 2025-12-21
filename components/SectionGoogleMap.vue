@@ -1,5 +1,5 @@
 <template>
-  <section>
+  <section :class="{ 'section-border-top': section.borderTop }">
     <div class="wrapper">
       <div class="grid">
         <div class="col-span-12 col-span-8-md">

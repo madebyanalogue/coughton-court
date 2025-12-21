@@ -20,14 +20,13 @@
     "@sanity/client": "^6.29.1",
     "@sanity/image-url": "^1.1.0",
     "@sanity/vision": "^3.89.0",
-    "@splinetool/loader": "^1.11.4",
-    "@splinetool/runtime": "^1.11.4",
     "@unhead/vue": "^2.0.8",
     "better-sqlite3": "^12.2.0",
     "canvas": "^3.2.0",
     "colorthief": "^2.6.0",
     "gsap": "^3.13.0",
     "nuxt": "^3.17.2",
+    "resend": "^6.6.0",
     "vue": "^3.5.13",
     "vue-router": "^4.5.1"
   }

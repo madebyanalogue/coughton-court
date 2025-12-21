@@ -32,6 +32,15 @@
       </div>
       
       <div class="header-right flex flex-row flex-center">
+        <a 
+          v-if="bookingLink"
+          :href="bookingLink"
+          target="_blank"
+          rel="noopener"
+          class="header-booking-btn"
+        >
+          {{ bookingTitle }}
+        </a>
         <MobileMenu 
           :is-open="menuOpen" 
           @close-menu="closeMenu" 
@@ -84,14 +93,28 @@ const headerAnimated = ref(false)
 const route = useRoute();
 const headerRef = ref(null);
 const { isHeaderVisible } = useHeaderScroll()
-const { settings: siteSettings } = useSiteSettings()
+const { settings: siteSettings, bookingLink, bookingTitle } = useSiteSettings()
 const { mainMenu } = useMenu()
 
 // Hero scroll detection
 const hasScrolledPastHero = ref(false)
 
+// Check if we're on an event page
+const isEventPage = computed(() => {
+  return route.path.startsWith('/events/')
+})
+
+// Check if we're on a garden page
+const isGardenPage = computed(() => {
+  return route.path.startsWith('/gardens/')
+})
+
 // Determine if we should use overlay scheme
 const shouldUseOverlay = computed(() => {
+  // Events and gardens always have a hero
+  if (isEventPage.value || isGardenPage.value) {
+    return !hasScrolledPastHero.value
+  }
   if (!props.pageData?.enableHeroImage) {
     return false
   }
@@ -101,6 +124,30 @@ const shouldUseOverlay = computed(() => {
 
 // Check if we've scrolled past the hero section
 const checkHeroScroll = () => {
+  // For event pages, always check for hero
+  if (isEventPage.value) {
+    const heroElement = document.querySelector('.event-hero')
+    if (heroElement) {
+      const heroRect = heroElement.getBoundingClientRect()
+      hasScrolledPastHero.value = heroRect.bottom < 50
+      return
+    }
+    hasScrolledPastHero.value = false
+    return
+  }
+
+  // For garden pages, always check for hero
+  if (isGardenPage.value) {
+    const heroElement = document.querySelector('.garden-hero')
+    if (heroElement) {
+      const heroRect = heroElement.getBoundingClientRect()
+      hasScrolledPastHero.value = heroRect.bottom < 50
+      return
+    }
+    hasScrolledPastHero.value = false
+    return
+  }
+
   if (!props.pageData?.enableHeroImage) {
     hasScrolledPastHero.value = false
     return
@@ -119,9 +166,9 @@ const checkHeroScroll = () => {
   hasScrolledPastHero.value = heroRect.bottom < 50
 }
 
-// Watch for pageData changes to detect hero
-watch(() => props.pageData?.enableHeroImage, (hasHero) => {
-  if (hasHero) {
+// Watch for route changes and pageData to detect hero
+watch([() => route.path, () => props.pageData?.enableHeroImage], () => {
+  if (isEventPage.value || isGardenPage.value || props.pageData?.enableHeroImage) {
     nextTick(() => {
       checkHeroScroll()
       if (typeof window !== 'undefined') {
@@ -336,7 +383,7 @@ const closeMenu = () => {
   grid-template-areas:
         "left center right";
   gap: 10px;
-  height: var(--header-height);
+  height: var(--header-bar-height);
   grid-template-rows: auto;
   /* Initial state will be handled entirely by GSAP */
 }
@@ -395,6 +442,33 @@ const closeMenu = () => {
   justify-content: flex-end;
   grid-area: right;
   align-self: stretch;
+  gap: 1rem;
+  align-items: center;
+}
+
+.header-booking-btn {
+  padding: 0.5rem 1rem;
+  background: var(--black, #000);
+  color: var(--white, #fff);
+  text-decoration: none;
+  font-size: 0.875rem;
+  white-space: nowrap;
+  transition: all 0.2s;
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+.header-booking-btn:hover {
+  background: var(--gray-700, #333);
+}
+
+header.overlay .header-booking-btn {
+  background: var(--white, #fff);
+  color: var(--black, #000);
+}
+
+header.overlay .header-booking-btn:hover {
+  background: var(--gray-100, #f5f5f5);
 }
 
 .hamburger {
@@ -450,6 +524,10 @@ const closeMenu = () => {
   width: 100%;
   border-bottom: 1px solid currentColor;
   border-top: 1px solid currentColor;
+  height: var(--header-nav-height);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .header-nav-list {

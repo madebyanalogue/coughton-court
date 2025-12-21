@@ -7,32 +7,32 @@
           <div class="h4 mono">{{ title }}</div>
         </div>
 
-        <div class="grid grid-1 grid-md-4 gap-2">
-          <div v-for="page in pages" :key="page._id" class="page-card">
+        <div class="grid grid-1 grid-sm-2 grid-md-3 gap-2">
+          <div v-for="garden in gardens" :key="garden._id" class="garden-card">
             <NuxtLink 
-              v-if="page.slug?.current" 
-              :to="`/${page.slug.current}`" 
-              class="page-link"
+              v-if="garden.slug?.current" 
+              :to="`/gardens/${garden.slug.current}`" 
+              class="garden-link"
             >
               <div class="grid grid-1 gap-1">
-                <div class="h2">{{ page.title }}</div>
+                <div class="h2">{{ garden.title }}</div>
                 <div class="image-wrapper">
                   <NuxtImg 
-                    v-if="page.featuredImage"
-                    :src="getImageUrl(page.featuredImage)" 
-                    :alt="page.title"
-                    class="page-image"
+                    v-if="garden.featuredImage"
+                    :src="getImageUrl(garden.featuredImage)" 
+                    :alt="garden.title"
+                    class="garden-image"
                     data-image-overlay
                     loading="lazy"
                   />
                   <div 
                     v-else
-                    class="page-image-fallback secondary"
+                    class="garden-image-fallback secondary"
                   ></div>
                 </div>
                 <div class="flex gap-1">
                     <div class="col-xs">
-                    <p v-if="page.shortDescription" class="p-small">{{ page.shortDescription }}</p>
+                    <p v-if="garden.shortDescription" class="p-small">{{ garden.shortDescription }}</p>
                     </div>
                     <div class="">
                       <div class="">→</div>
@@ -40,26 +40,26 @@
                 </div>
               </div>
             </NuxtLink>
-            <div v-else class="page-link">
+            <div v-else class="garden-link">
               <div class="grid grid-1 gap-1">
-                <div class="h2">{{ page.title }}</div>
+                <div class="h2">{{ garden.title }}</div>
                 <div class="image-wrapper">
                   <NuxtImg 
-                    v-if="page.featuredImage"
-                    :src="getImageUrl(page.featuredImage)" 
-                    :alt="page.title"
-                    class="page-image"
+                    v-if="garden.featuredImage"
+                    :src="getImageUrl(garden.featuredImage)" 
+                    :alt="garden.title"
+                    class="garden-image"
                     data-image-overlay
                     loading="lazy"
                   />
                   <div 
                     v-else
-                    class="page-image-fallback secondary"
+                    class="garden-image-fallback secondary"
                   ></div>
                 </div>
                 <div class="flex gap-1">
                     <div class="col-xs">
-                    <p v-if="page.shortDescription" class="p-small">{{ page.shortDescription }}</p>
+                    <p v-if="garden.shortDescription" class="p-small">{{ garden.shortDescription }}</p>
                     </div>
                 </div>
               </div>
@@ -88,18 +88,30 @@ const { registerSection, unregisterSection } = useScrollTrigger()
 const { getImageUrl } = useSanityImage()
 const sectionRef = ref(null)
 
-const title = computed(() => props.section?.selectedPagesContent?.title || '')
-const pages = computed(() => props.section?.selectedPagesContent?.pages || [])
+const title = computed(() => props.section?.gardensContent?.title || '')
+
+// Fetch gardens from Sanity
+const { data: gardensData } = await useAsyncData(
+  `gardens-${props.section._key}`,
+  () => $fetch('/api/sanity', { 
+    params: { 
+      type: 'garden',
+      all: true
+    } 
+  })
+)
+
+const gardens = computed(() => gardensData.value || [])
 
 onMounted(async () => {
   // Dispatch event for image overlay plugin to re-initialize
   nextTick(() => {
-    window.dispatchEvent(new CustomEvent('pages-loaded'))
+    window.dispatchEvent(new CustomEvent('gardens-loaded'))
   })
   
   // Register section for scroll animations
   if (sectionRef.value) {
-    registerSection(`selected-pages-${props.section._id}`, {
+    registerSection(`gardens-${props.section._id}`, {
       trigger: sectionRef.value,
       start: 'top 80%',
       onEnter: () => {
@@ -119,7 +131,7 @@ onMounted(async () => {
 
 // Clean up scroll trigger when component unmounts
 onUnmounted(() => {
-  unregisterSection(`selected-pages-${props.section._id}`)
+  unregisterSection(`gardens-${props.section._id}`)
 })
 </script>
 
@@ -129,20 +141,20 @@ section {
   opacity: 0;
 }
 
-.page-link {
+.garden-link {
   display: block;
   text-decoration: none;
   color: inherit;
   cursor: pointer;
 }
 
-.page-image {
+.garden-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.page-image-fallback {
+.garden-image-fallback {
   width: 100%;
   height: 100%;
 }

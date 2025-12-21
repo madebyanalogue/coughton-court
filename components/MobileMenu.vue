@@ -5,7 +5,7 @@
       <div class="menu-bg">
         <div ref="bgPanel1" class="bg-panel first"></div>
         <div ref="bgPanel2" class="bg-panel second"></div>
-        <div ref="bgPanel3" class="bg-panel"></div>
+        <div ref="bgPanel3" class="bg-panel scheme dark"></div>
       </div>
       <div class="menu-inner">
         <ul class="menu-list">
@@ -240,7 +240,6 @@ const closeNav = () => {
 
 .bg-panel {
   z-index: 0;
-  background-color: var(--white);
   /* border-top-left-radius: 1.25em;
   border-bottom-left-radius: 1.25em; */
   position: absolute;
@@ -248,11 +247,11 @@ const closeNav = () => {
 }
 
 .bg-panel.first {
-  background-color: var(--yellow);
+  background-color: transparent;
 }
 
 .bg-panel.second {
-  background-color: var(--light-grey);
+  background-color: transparent;
 }
 
 .menu-inner {
@@ -296,7 +295,7 @@ const closeNav = () => {
   transition: color 0.3s ease;
 }
 .menu-link:hover {
-  color: var(--yellow);
+  color: var(--white);
 }
 
 .menu-link-heading {
@@ -311,7 +310,7 @@ const closeNav = () => {
 
 .eyebrow {
   z-index: 1;
-  color: var(--yellow);
+  color: var(--white);
   text-transform: uppercase;
   font-weight: 400;
   position: relative;
@@ -352,13 +351,13 @@ const closeNav = () => {
 
 
 .p-large.text-link {
-  color: var(--dark-grey);
+  color: var(--white);
   text-decoration: none;
   transition: color 0.3s ease;
 }
 
 .p-large.text-link:hover {
-  color: var(--yellow);
+  color: var(--white);
 }
 
 .overlay {
