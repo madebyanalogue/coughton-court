@@ -25,13 +25,13 @@
           :disabled="isSubmitting"
           aria-label="Subscribe to newsletter"
         >
-          <div class="arrow" :class="{ 'arrow--loading': isSubmitting }"></div>
+          <div class="arrow" :class="{ 'arrow--loading': isSubmitting }">→</div>
         </button>
       </div>
       <div 
         v-if="message" 
         :id="`${formId}-error`"
-        class="newsletter-message h8" 
+        class="newsletter-message h7" 
         :class="{ 
           'newsletter-message--error': isError,
           'newsletter-message--success': !isError
@@ -255,13 +255,15 @@ const handleSubmit = async () => {
 .newsletter-input {
   flex: 1;
   width: 100%;
-  padding: 0.75em 1em;
+  padding: 12px 20px 9px;
   background: transparent;
   border: none;
   outline: none;
   color: inherit;
-  font-family: inherit;
+  font-family: var(--heading);
   font-size: inherit;
+  border-radius: 100px;
+  color: rgba(var(--darkest-green), 1);
   transition: color 0s ease 999999s, background-color 0s ease 999999s;
 }
 
@@ -273,18 +275,19 @@ const handleSubmit = async () => {
 
 .newsletter-submit {
   position: absolute;
-  right: 0.5em;
-  top: 50%;
-  transform: translateY(-50%);
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0.25em;
+  right: 4px;
+top: 50%;
+transform: translateY(-50%);
+background: none;
+border: none;
+cursor: pointer;
+padding: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: inherit;
   transition: opacity 0.3s ease;
+  border-radius: 100px;
 }
 
 .newsletter-submit:hover {
@@ -326,6 +329,9 @@ const handleSubmit = async () => {
 
 .newsletter-message {
   animation: fadeIn 0.3s ease;
+  margin-top:15px;
+  font-family: var(--heading);
+  letter-spacing: 0.01em;
 }
 
 .newsletter-message--error {

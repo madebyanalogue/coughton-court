@@ -1,24 +1,14 @@
 <template>
   <section :class="['dark section-basic-page', { 'section-border-top': section.borderTop, 'section-border-bottom': section.borderBottom }]">
     <div class="wrapper medium">
-      <div class="py2 py-sm-3 grid grid-1 gap-3">
+      <div class="py2 px-3-sm px-md-0 grid grid-1 grid-md-4 gap-3">
 
-        <div class="grid show-md" style="color: var(--yellow);">
-          <div class="col-span-2-md grid grid-2">
-            <div></div>
-            <div class="grid grid-1 ">
-                <Logo />
-                <div style="width: 270%;">
-                  <Logotype />
-                </div>
-            </div>
-          </div>
+        <div class="">
+          <h2 class="h4">{{ section.basicContent.title }}</h2>
         </div>
 
-        <div class="grid py1 pbottom">
-          <div></div>
-          <div class="col-span-12 col-span-7-md">
-            <h2>{{ section.basicContent.title }}</h2>
+        <div class="grid py1 pbottom col-span-12 col-span-3-md">
+          <div class="col-span-12 col-span-9-md">
             <div v-if="section?.basicContent?.content" class="content-wrapper">
               <SanityBlocks :blocks="section.basicContent.content" />
             </div>

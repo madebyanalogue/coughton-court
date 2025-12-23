@@ -22,70 +22,38 @@ const processMenuItems = (items) => {
 }
 
 export const useMenu = () => {
-  // Fetch main menu from Sanity
-  const { data: mainMenu, pending: mainMenuPending, error: mainMenuError } = useAsyncData('mainMenu', async () => {
+  // Global, shared state so menus are fetched once and reused across routes
+  const mainMenu = useState('mainMenu', () => null)
+  const footerMenu = useState('footerMenu', () => null)
+  const mainMenuPending = useState('mainMenuPending', () => false)
+  const footerMenuPending = useState('footerMenuPending', () => false)
+  const mainMenuError = useState('mainMenuError', () => null)
+  const footerMenuError = useState('footerMenuError', () => null)
+
+  const fetchMenu = async (key, menuTitle, targetState, pendingState, errorState) => {
+    // If we already have data or are currently loading, don't refetch
+    if (targetState.value || pendingState.value) return
+
     try {
+      pendingState.value = true
       const result = await $fetch('/api/sanity', {
-        query: { type: 'menu', menuTitle: 'Main Menu' }
+        query: { type: 'menu', menuTitle }
       })
       if (result && result.items) {
         result.items = processMenuItems(result.items)
       }
-      return result
+      targetState.value = result || { items: [] }
     } catch (error) {
-      mainMenuError.value = error
-      console.error('Error fetching main menu:', error)
-      throw error
-    }
-  })
-
-  // Fetch footer menu from Sanity
-  const { data: footerMenu, pending: footerMenuPending, error: footerMenuError } = useAsyncData('footerMenu', async () => {
-    try {
-      const result = await $fetch('/api/sanity', {
-        query: { type: 'menu', menuTitle: 'Footer' }
-      })
-      if (result && result.items) {
-        result.items = processMenuItems(result.items)
-      }
-      return result
-    } catch (error) {
-      footerMenuError.value = error
-      console.error('Error fetching footer menu:', error)
-      throw error
-    }
-  })
-
-  const updateMenuStates = () => {
-    mainMenuPending.value = mainMenuLoading.value
-    footerMenuPending.value = footerMenuLoading.value
-    mainMenuError.value = mainMenuErrorData.value
-    footerMenuError.value = footerMenuErrorData.value
-  }
-
-  const fetchMainMenu = async () => {
-    try {
-      const result = await $fetch('/api/sanity', {
-        query: { type: 'menu', menuTitle: 'Main Menu' }
-      })
-      mainMenu.value = result
-    } catch (error) {
-      mainMenuErrorData.value = error
-      console.error('Error fetching main menu:', error)
+      console.error(`Error fetching ${key}:`, error)
+      errorState.value = error
+    } finally {
+      pendingState.value = false
     }
   }
 
-  const fetchFooterMenu = async () => {
-    try {
-      const result = await $fetch('/api/sanity', {
-        query: { type: 'menu', menuTitle: 'Footer' }
-      })
-      footerMenu.value = result
-    } catch (error) {
-      footerMenuErrorData.value = error
-      console.error('Error fetching footer menu:', error)
-    }
-  }
+  // Kick off fetches on first use; subsequent calls reuse the same state
+  fetchMenu('mainMenu', 'Main Menu', mainMenu, mainMenuPending, mainMenuError)
+  fetchMenu('footerMenu', 'Footer', footerMenu, footerMenuPending, footerMenuError)
 
   return {
     mainMenu,

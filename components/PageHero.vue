@@ -21,21 +21,21 @@
     <div class="page-hero-overlay"></div>
     
     <!-- Custom Title and Button -->
-    <div v-if="enableCustomTitleAndButton" class="page-hero-custom-content">
+    <div v-if="enableCustomTitleAndButton" class="page-hero-custom-content flex column gap-2">
       <div v-if="customTitle?.length" class="page-hero-custom-title h1">
         <SanityBlocks :blocks="customTitle" />
       </div>
       <NuxtLink 
         v-if="customButtonTitle && customButtonLink?.page?.slug?.current" 
         :to="`/${customButtonLink.page.slug.current}`"
-        class="page-hero-custom-button"
+        class="page-hero-custom-button button"
       >
         {{ customButtonTitle }}
       </NuxtLink>
       <a 
         v-else-if="customButtonTitle && customButtonLink?.url" 
         :href="getProcessedUrl(customButtonLink.url)"
-        class="page-hero-custom-button"
+        class="page-hero-custom-button button"
         :target="isExternalUrl(customButtonLink.url) ? '_blank' : '_self'"
         :rel="isExternalUrl(customButtonLink.url) ? 'noopener noreferrer' : ''"
       >
@@ -317,15 +317,20 @@ onUnmounted(() => {
     position: relative;
     z-index: 2;
     width: 100%;
-    max-width: 300px;
-    padding: var(--pad-2);
+    padding: 28px;
+    max-width: calc(100% - var(--pad-4));
     position: absolute;
     right: var(--wrapper-padding);
     top: unset;
-    bottom: var(--pad-6);
+    bottom: var(--pad-5);
+}
+@media (min-width: 700px) {
+    .page-hero-newsletter {
+    max-width: 370px;
+    }
 }
 .cookies-accepted .page-hero-newsletter {
-    bottom: calc(var(--wrapper-padding) * 1);
+    bottom: var(--pad-2);
 }
 .page-hero-newsletter-inner {
     position: relative;

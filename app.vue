@@ -112,9 +112,15 @@ router.beforeEach(() => {
   }
 })
 
-router.afterEach(() => {
+router.afterEach((to) => {
   // Keep footer hidden until page transition is complete
   // The footer will be shown again in onPageEnter after fade-in completes
+
+  // For garden detail pages, always reset scroll to top after navigation
+  // so we don't land at the footer when moving between /gardens/* routes.
+  if (typeof window !== 'undefined' && to.path.startsWith('/gardens/')) {
+    window.scrollTo({ top: 0, behavior: 'instant' })
+  }
 })
 
 
@@ -217,15 +223,9 @@ const onPageEnter = () => {
   document.dispatchEvent(new CustomEvent('route-changed'))
 }
 
-// Called right before the new page starts to enter (fade in)
-// We scroll to top instantly here so the old page can fade out at current scroll position
-// and the new page fades in at the top
 const onPageBeforeEnter = () => {
-  // For full fade mode we still want to snap to top.
-  // For cross-fade "instant" mode we leave scroll position alone to avoid visible jiggle.
-  if (typeof window !== 'undefined' && !disablePageTransition.value) {
-    window.scrollTo({ top: 0, behavior: 'instant' })
-  }
+  // Intentionally left empty: we no longer force scroll position on route changes
+  // so the footer doesn't appear to "jump" to the top on short pages.
 }
 </script>
 

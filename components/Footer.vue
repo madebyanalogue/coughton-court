@@ -371,4 +371,8 @@ onUnmounted(() => {
 .footer-menu-list {
   line-height: 1.6;
 }
+
+.footer-menu-link:hover {
+  opacity: 0.7;
+}
 </style> 

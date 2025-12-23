@@ -21,7 +21,7 @@
 
 :root {
   --mono-spacing: 0.1em;
-  --arrow-size: 30px;
+  --arrow-size: 20px;
   --letterspacing: 0.0em;
   --letterspacing-small: 0.25em;
   --letterspacing-medium: 0.5em;
@@ -80,9 +80,11 @@ footer, header {
   height: var(--arrow-size);
   transform-origin: center;
   position:relative;
+  line-height: 24px;
+  font-family: var(--heading);
   transition: transform 0.6s ease;
 }
-*:hover > .arrow {
+/* *:hover > .arrow {
   transform: scaleX(.75);
 }
 .arrow:before, 
@@ -111,7 +113,7 @@ footer, header {
 }
 .arrow.arrow-right {
   transform: rotate(90deg) scaleX(.75);
-}
+} */
 
 
 /* ---------------------------------

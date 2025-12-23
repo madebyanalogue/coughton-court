@@ -244,7 +244,9 @@ onUnmounted(() => {
 .contact-form-image__img {
   width: 100%;
   height: auto;
+  aspect-ratio: 5/4;
   object-fit: cover;
+  object-position: center;
 }
 </style>
 
