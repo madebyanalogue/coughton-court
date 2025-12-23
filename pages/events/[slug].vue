@@ -14,20 +14,22 @@
       </div>
     </template>
     <template v-else-if="event">
-      <!-- Hero with featured image and title -->
-      <section class="event-hero">
-        <div class="event-hero__image" :class="{ 'event-hero__image--no-image': !event.featuredImage }">
-          <NuxtImg 
-            v-if="event.featuredImage"
-            :src="getImageUrl(event.featuredImage)" 
-            :alt="event.title"
-            class="event-hero__img"
-            loading="eager"
-            preload
-          />
+      <!-- Hero with featured image and title (with parallax similar to PageHero) -->
+      <section class="event-hero scheme overlay" ref="eventHeroRef">
+        <div class="event-hero__image-wrapper">
+          <div class="event-hero__image" :class="{ 'event-hero__image--no-image': !event.featuredImage }">
+            <NuxtImg 
+              v-if="event.featuredImage"
+              :src="getImageUrl(event.featuredImage)" 
+              :alt="event.title"
+              class="event-hero__img"
+              loading="eager"
+              preload
+            />
+          </div>
         </div>
         <div class="event-hero__overlay">
-          <h1 class="event-hero__title">{{ event.title }}</h1>
+          <h1 class="event-hero__title h1 px4">{{ event.title }}</h1>
         </div>
       </section>
       
@@ -40,42 +42,41 @@
       />
 
       <!-- Two Column Layout: Event Details + Gallery Carousel -->
-      <section class="event-details-section">
+      <section class="event-details-section section-border-top section-padding">
         <div class="wrapper">
           <div class="grid grid-1 grid-md-2 gap-3">
             <!-- Left: Event Details -->
-            <div class="event-details">
-              <h2 class="h2">{{ event.title }}</h2>
+            <div class="event-details flex column gap-3 px-md-3">
               
-              <dl class="event-meta">
+              <dl class="event-meta grid grid-2">
                 <div v-if="event.startDate" class="event-meta-item">
-                  <dt>{{ isSameDate ? 'Date' : 'Start Date' }}</dt>
+                  <dt class="h5">{{ isSameDate ? 'Date' : 'Start Date' }}</dt>
                   <dd>{{ formatDate(event.startDate) }}</dd>
                 </div>
                 <div v-if="event.startDate && !isSameDate" class="event-meta-item">
-                  <dt>End Date</dt>
+                  <dt class="h5">End Date</dt>
                   <dd>{{ formatDate(event.endDate) }}</dd>
                 </div>
                 <div v-if="event.cost" class="event-meta-item">
-                  <dt>Cost</dt>
+                  <dt class="h5">Cost</dt>
                   <dd>{{ event.cost }}</dd>
                 </div>
                 <div v-if="event.category" class="event-meta-item">
-                  <dt>Category</dt>
+                  <dt class="h5">Category</dt>
                   <dd>{{ event.category }}</dd>
                 </div>
               </dl>
 
               <!-- Tabs Section -->
               <div v-if="hasTabContent" class="event-tabs-section">
-                <div class="event-tabs">
+                <div class="event-tabs grid grid-1 gap-2">
                   <!-- Tab Headers (only show if both tabs have content) -->
                   <div v-if="showTabHeaders" class="event-tabs__headers">
                     <button 
                       v-for="tab in tabs" 
                       :key="tab.id"
                       @click="activeTab = tab.id"
-                      class="event-tabs__header"
+                      class="event-tabs__header h5 "
                       :class="{ 'event-tabs__header--active': activeTab === tab.id }"
                     >
                       {{ tab.title }}
@@ -94,11 +95,12 @@
 
                   <!-- Booking Button -->
                   <div v-if="event.bookingUrl" class="event-booking">
-                    <a :href="event.bookingUrl" target="_blank" rel="noopener" class="button" data-btn-hover>
+                    <a :href="event.bookingUrl" target="_blank" rel="noopener" class="button min-180">
                       <span class="btn__text">{{ bookingTitle || 'Book Now' }}</span>
                       <div class="btn__circle"></div>
                     </a>
                   </div>
+                  
                 </div>
               </div>
 
@@ -134,22 +136,22 @@
                         loading="lazy"
                       />
                     </div>
-                    <p v-if="image.caption" class="event-carousel__caption">{{ image.caption }}</p>
+                    <p v-if="image.caption" class="carousel__caption">{{ image.caption }}</p>
                   </div>
                 </div>
-                <button @click="prevSlide" class="event-carousel__btn event-carousel__btn--prev" aria-label="Previous">
+                <button @click="prevSlide" class="carousel__btn carousel__btn--prev" aria-label="Previous">
                   ←
                 </button>
-                <button @click="nextSlide" class="event-carousel__btn event-carousel__btn--next" aria-label="Next">
+                <button @click="nextSlide" class="carousel__btn carousel__btn--next" aria-label="Next">
                   →
                 </button>
-                <div class="event-carousel__dots">
+                <div class="carousel__dots">
                   <button
                     v-for="(image, index) in event.gallery"
                     :key="index"
                     @click="goToSlide(index)"
-                    class="event-carousel__dot"
-                    :class="{ 'event-carousel__dot--active': currentSlide === index }"
+                    class="carousel__dot"
+                    :class="{ 'carousel__dot--active': currentSlide === index }"
                     :aria-label="`Go to slide ${index + 1}`"
                   ></button>
                 </div>
@@ -165,7 +167,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useSanityImage } from '~/composables/useSanityImage.js'
 import { useSiteSettings } from '~/composables/useSiteSettings'
@@ -206,6 +208,34 @@ const isSameDate = computed(() => {
   const start = new Date(event.value.startDate)
   const end = new Date(event.value.endDate)
   return start.toDateString() === end.toDateString()
+})
+
+// Event hero parallax (match PageHero behavior)
+const eventHeroRef = ref(null)
+let eventHeroScrollHandler = null
+
+const handleEventHeroScroll = () => {
+  if (!eventHeroRef.value) return
+  const wrapper = eventHeroRef.value.querySelector('.event-hero__image-wrapper')
+  if (!wrapper) return
+
+  const scrollY = window.scrollY || window.pageYOffset
+  const parallaxOffset = scrollY * 0.3
+  wrapper.style.transform = `translateY(${parallaxOffset}px)`
+}
+
+onMounted(() => {
+  if (typeof window !== 'undefined' && event.value?.featuredImage) {
+    eventHeroScrollHandler = handleEventHeroScroll
+    window.addEventListener('scroll', eventHeroScrollHandler, { passive: true })
+    handleEventHeroScroll()
+  }
+})
+
+onUnmounted(() => {
+  if (eventHeroScrollHandler && typeof window !== 'undefined') {
+    window.removeEventListener('scroll', eventHeroScrollHandler)
+  }
 })
 
 // Gallery carousel
@@ -301,10 +331,19 @@ onMounted(() => {
 
 .event-hero {
   position: relative;
-  height: 60vh;
+  height: 31vw;
   min-height: 400px;
   overflow: hidden;
   padding-top: var(--header-height, 80px);
+}
+
+.event-hero__image-wrapper {
+  position: absolute;
+  top: -20%;
+  left: 0;
+  width: 100%;
+  height: 140%;
+  will-change: transform;
 }
 
 .event-hero__image {
@@ -328,45 +367,27 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
+  padding-top: var(--header-bar-height, 80px);
   background: rgba(0, 0, 0, 0.3);
 }
 
 .event-hero__title {
-  color: white;
   text-align: center;
-  font-size: clamp(2rem, 5vw, 4rem);
 }
 
-.event-details-section {
-  padding: 4rem 0;
-}
-
-.event-details h2 {
-  margin-bottom: 2rem;
-}
 
 .event-meta {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+  gap: calc(var(--pad-1) * 1.5);
 }
 
 .event-meta-item {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.1rem;
 }
 
-.event-meta-item dt {
-  font-weight: 600;
-  font-size: 0.875rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--gray-600, #666);
-}
 
 .event-meta-item dd {
-  font-size: 1rem;
   margin: 0;
 }
 
@@ -377,7 +398,7 @@ onMounted(() => {
 .event-carousel {
   position: relative;
   overflow: hidden;
-  aspect-ratio: 5 / 4;
+  aspect-ratio: 8 / 7;
 }
 
 .event-carousel__track {
@@ -416,112 +437,43 @@ onMounted(() => {
   -webkit-user-drag: none;
 }
 
-.event-carousel__caption {
+.carousel__caption {
   text-align: center;
   margin-top: 0.5rem;
   font-size: 0.875rem;
   color: var(--gray-600, #666);
   padding: 0 1rem;
-}
-
-.event-carousel__btn {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 48px;
-  height: 48px;
-  border: 1px solid var(--gray-300, #ccc);
-  background: white;
-  cursor: pointer;
-  font-size: 1.25rem;
-  transition: all 0.2s;
-  z-index: 10;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.event-carousel__btn:hover {
-  background: var(--black, #000);
-  color: white;
-  border-color: var(--black, #000);
-}
-
-.event-carousel__btn--prev {
-  left: 1rem;
-}
-
-.event-carousel__btn--next {
-  right: 1rem;
-}
-
-.event-carousel__dots {
-  position: absolute;
-  bottom: 1rem;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 0.5rem;
-  z-index: 10;
-}
-
-.event-carousel__dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  border: 2px solid white;
-  background: transparent;
-  cursor: pointer;
-  transition: all 0.2s;
-  padding: 0;
-}
-
-.event-carousel__dot:hover {
-  background: rgba(255, 255, 255, 0.5);
-}
-
-.event-carousel__dot--active {
-  background: white;
-}
-
-.event-tabs-section {
-  padding: 4rem 0;
+  display: none;
 }
 
 .event-tabs__headers {
   display: flex;
-  gap: 1rem;
-  border-bottom: 1px solid var(--gray-300, #ccc);
-  margin-bottom: 2rem;
 }
 
 .event-tabs__header {
-  padding: 1rem 2rem;
+  padding: var(--h5) calc(calc(var(--h5) * 1.5)) calc(calc(var(--h5) * .8));
   background: none;
   border: none;
-  border-bottom: 2px solid transparent;
+  background: rgba(var(--mid-green), 0.3);
+  color: var(--dark-green);
   cursor: pointer;
-  font-size: 1rem;
-  transition: all 0.2s;
+  transition: background 0.3s ease, color 0.3s ease;
 }
 
-.event-tabs__header:hover {
-  color: var(--black, #000);
+.event-tabs__header:not(.event-tabs__header--active):hover {
+  background: rgba(var(--mid-green), 0.6);
 }
-
 .event-tabs__header--active {
-  border-bottom-color: var(--black, #000);
-  font-weight: 600;
+  background: rgba(var(--mid-green), 1);
+  color: rgba(var(--light-green), 1);
+}
+.event-tabs__header--active:hover {
+  color: var(--white);
 }
 
 .event-tab-panel {
   max-width: 800px;
   margin: 0 auto;
-}
-
-.event-booking {
-  margin-top: 3rem;
-  text-align: center;
 }
 
 .loading-placeholder {
@@ -538,6 +490,13 @@ onMounted(() => {
   border-top-color: var(--black, #000);
   border-radius: 50%;
   animation: spin 1s linear infinite;
+}
+
+@media (max-width: 799px) {
+  .event-tabs__headers {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 @keyframes spin {

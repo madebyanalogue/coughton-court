@@ -1,5 +1,5 @@
 <template>
-  <section :class="['section-text py2 py-sm-4', { 'section-border-top': section.borderTop }]">
+  <section :id="sectionId" :class="['section-text py2 py-sm-4', { 'section-border-top': section.borderTop, 'section-border-bottom': section.borderBottom }]">
     <div class="wrapper">
       <div class="grid grid-center-items">
         
@@ -37,6 +37,7 @@ import { computed } from 'vue'
 import SanityBlocks from '~/components/SanityBlocks.vue'
 import Logoicon from '~/components/Logoicon.vue'
 import { useSanityImage } from '~/composables/useSanityImage'
+import { useSectionId } from '~/composables/useSectionId'
 
 const props = defineProps({
   section: {
@@ -49,6 +50,9 @@ const props = defineProps({
     }
   }
 })
+
+const { generateSectionId } = useSectionId()
+const sectionId = computed(() => generateSectionId(props.section?.title))
 
 // Extract text content
 const content = computed(() => {

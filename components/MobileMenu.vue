@@ -37,19 +37,8 @@
           </li>
         </ul>
         <div class="menu-details" v-if="hasAnySocials">
-          <p ref="socialsTitle" data-menu-fade class="p-small">Socials</p>
+          <p ref="socialsTitle" data-menu-fade class="h7">Socials</p>
           <div class="socials-row">
-            <a 
-              v-if="linkedinUrl" 
-              ref="linkedinLink"
-              data-menu-fade 
-              :href="linkedinUrl" 
-              target="_blank" 
-              rel="noopener"
-              class="p-large text-link"
-            >
-              LinkedIn
-            </a>
             <a 
               v-if="instagramUrl" 
               ref="instagramLink"
@@ -60,6 +49,28 @@
               class="p-large text-link"
             >
               Instagram
+            </a>
+            <a 
+              v-if="facebookUrl" 
+              ref="facebookLink"
+              data-menu-fade 
+              :href="facebookUrl" 
+              target="_blank" 
+              rel="noopener"
+              class="p-large text-link"
+            >
+              Facebook
+            </a>
+            <a 
+              v-if="linkedinUrl" 
+              ref="linkedinLink"
+              data-menu-fade 
+              :href="linkedinUrl" 
+              target="_blank" 
+              rel="noopener"
+              class="p-large text-link"
+            >
+              LinkedIn
             </a>
           </div>
         </div>
@@ -85,7 +96,7 @@ const props = defineProps({
 const emit = defineEmits(['close-menu'])
 
 const { mainMenu } = useMenu()
-const { linkedinUrl, instagramUrl } = useSiteSettings()
+const { linkedinUrl, instagramUrl, facebookUrl } = useSiteSettings()
 const { getProcessedUrl } = useUrlProcessing()
 
 const menuItems = computed(() => mainMenu?.value?.items || [])
@@ -93,7 +104,8 @@ const menuItems = computed(() => mainMenu?.value?.items || [])
 const hasAnySocials = computed(() => {
   const hasLinkedIn = Boolean(linkedinUrl && String(linkedinUrl).trim().length > 0)
   const hasInstagram = Boolean(instagramUrl && String(instagramUrl).trim().length > 0)
-  return hasLinkedIn || hasInstagram
+  const hasFacebook = Boolean(facebookUrl && String(facebookUrl).trim().length > 0)
+  return hasLinkedIn || hasInstagram || hasFacebook
 })
 
 const closeMenu = () => {
@@ -113,6 +125,7 @@ const bgPanel3 = ref(null)
 const socialsTitle = ref(null)
 const linkedinLink = ref(null)
 const instagramLink = ref(null)
+const facebookLink = ref(null)
 
 onMounted(() => {
   // Register custom ease
@@ -176,19 +189,16 @@ const openNav = () => {
   // Get menu links dynamically
   const menuLinks = navWrap.value.querySelectorAll(".menu-link")
   
-  // Collect fade targets
-  const fadeTargets = []
-  if (socialsTitle.value) fadeTargets.push(socialsTitle.value)
-  if (linkedinLink.value) fadeTargets.push(linkedinLink.value)
-  if (instagramLink.value) fadeTargets.push(instagramLink.value)
+  // Collect fade targets in DOM order for proper stagger
+  const fadeTargets = navWrap.value.querySelectorAll('[data-menu-fade]')
   
   tl.clear()
     .set(navWrap.value, { display: "block" })
     .set(menu.value, { xPercent: 0 }, "<")
     .fromTo(overlay.value, { autoAlpha: 0 }, { autoAlpha: 1 }, "<")
     .fromTo([bgPanel1.value, bgPanel2.value, bgPanel3.value], { xPercent: 101 }, { xPercent: 0, stagger: 0.12, duration: 0.575 }, "<")
-    .fromTo(menuLinks, { yPercent: 200, rotate: 10 }, { yPercent: 0, rotate: 0, stagger: 0.05 }, "<+=0.35")
-    .fromTo(fadeTargets, { autoAlpha: 0, yPercent: 50 }, { autoAlpha: 1, yPercent: 0, stagger: 0.04 }, "<+=0.2")
+    .fromTo(menuLinks, { yPercent: 200, rotate: 10 }, { yPercent: 0, rotate: 0, stagger: 0.06 }, "<+=0.35")
+    .fromTo(fadeTargets, { autoAlpha: 0, yPercent: 50 }, { autoAlpha: 1, yPercent: 0, stagger: 0.12 }, "<+=0.2")
 }
 
 const closeNav = () => {
@@ -314,6 +324,7 @@ const closeNav = () => {
   text-transform: uppercase;
   font-weight: 400;
   position: relative;
+  display: none;
 }
 
 .menu-details {

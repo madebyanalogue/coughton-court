@@ -1,5 +1,5 @@
 <template>
-  <section :class="{ 'section-border-top': section.borderTop }">
+  <section :class="{ 'section-border-top': section.borderTop, 'section-border-bottom': section.borderBottom }">
     <div class="wrapper">
       <div class="relative py6">
         <div class="cover object-fit-child show-md">

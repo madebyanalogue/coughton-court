@@ -2,7 +2,7 @@
   <div 
     v-if="shouldShow" 
     ref="heroRef"
-    class="page-hero scheme overlay"
+    :class="['page-hero', 'scheme', 'overlay', { 'page-hero--custom-content': enableCustomTitleAndButton }]"
   >
     <div v-if="imageUrl" class="page-hero-image-wrapper">
       <NuxtImg
@@ -22,7 +22,7 @@
     
     <!-- Custom Title and Button -->
     <div v-if="enableCustomTitleAndButton" class="page-hero-custom-content">
-      <div v-if="customTitle?.length" class="page-hero-custom-title">
+      <div v-if="customTitle?.length" class="page-hero-custom-title h1">
         <SanityBlocks :blocks="customTitle" />
       </div>
       <NuxtLink 
@@ -41,18 +41,35 @@
       >
         {{ customButtonTitle }}
       </a>
+      <button
+        v-else-if="customButtonTitle"
+        class="page-hero-custom-button button"
+        type="button"
+      >
+        {{ customButtonTitle }}
+      </button>
     </div>
     
     <!-- Default Title -->
     <h1 v-else-if="showTitle && title" class="page-hero-title h1">{{ title }}</h1>
     
     <!-- Newsletter Signup -->
-    <div v-if="enableNewsletterSignup" class="page-hero-newsletter">
-      <NewsletterSignup 
-        :title="newsletterTitleHero" 
-        :action="newsletterActionUrl"
-        :placeholder="newsletterPlaceholder"
-      />
+    <div v-if="enableNewsletterSignup && showHeroNewsletter" class="page-hero-newsletter scheme dark">
+        <div class="page-hero-newsletter-inner">
+            <button 
+                type="button" 
+                class="page-hero-newsletter-close"
+                @click="showHeroNewsletter = false"
+                aria-label="Close newsletter signup"
+            >
+                ×
+            </button>
+            <NewsletterSignup 
+                :title="newsletterTitleHero" 
+                :action="newsletterActionUrl"
+                :placeholder="newsletterPlaceholder"
+            />
+        </div>
     </div>
     
     <!-- Cookies Banner -->
@@ -114,6 +131,21 @@ const { newsletterActionUrl, newsletterTitleHero, newsletterPlaceholder } = useS
 
 const { getImageUrl } = useSanityImage()
 const heroRef = ref(null)
+const showHeroNewsletter = ref(true)
+
+// Debug logging for button visibility
+if (process.env.NODE_ENV === 'development') {
+  watch(() => [props.enableCustomTitleAndButton, props.customButtonTitle, props.customButtonLink], ([enabled, title, link]) => {
+    console.log('[PageHero] Button Debug:', {
+      enabled,
+      title,
+      link,
+      hasPageLink: !!link?.page?.slug?.current,
+      hasUrl: !!link?.url,
+      shouldShow: enabled && title && (link?.page?.slug?.current || link?.url || title)
+    })
+  }, { immediate: true })
+}
 
 // Helper function to check if URL is external
 const isExternalUrl = (url) => {
@@ -209,7 +241,7 @@ onUnmounted(() => {
 .page-hero {
   position: relative;
   width: 100%;
-  height: 60vh;
+  height: 37vh;
   min-height: 400px;
   max-height: 800px;
   overflow: hidden;
@@ -220,6 +252,10 @@ onUnmounted(() => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+}
+
+.page-hero--custom-content {
+  height: 60vh;
 }
 
 .page-hero-image-wrapper {
@@ -236,6 +272,7 @@ onUnmounted(() => {
   height: 100%;
   object-fit: cover;
   display: block;
+  pointer-events: none;
 }
 
 .page-hero-overlay {
@@ -260,10 +297,10 @@ onUnmounted(() => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 1.5rem;
   text-align: center;
-  max-width: 800px;
-  padding: 0 2rem;
+  padding: 0 var(--wrapper-padding);
+  gap: var(--pad-2);
+  padding-bottom: var(--wrapper-padding);
 }
 
 .page-hero-custom-title {
@@ -271,43 +308,58 @@ onUnmounted(() => {
 }
 
 .page-hero-custom-button {
-  display: inline-block;
-  padding: 0.75rem 2rem;
-  text-decoration: none;
-  border: 1px solid currentColor;
-  transition: all 0.3s ease;
-  z-index: 2;
+  position: relative;
+  visibility: visible;
+  opacity: 1;
 }
 
 .page-hero-newsletter {
-  position: relative;
-  z-index: 2;
-  width: 100%;
-  max-width: 500px;
-  padding: 0 2rem;
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 300px;
+    padding: var(--pad-2);
+    position: absolute;
+    right: var(--wrapper-padding);
+    top: unset;
+    bottom: var(--pad-6);
+}
+.cookies-accepted .page-hero-newsletter {
+    bottom: calc(var(--wrapper-padding) * 1);
+}
+.page-hero-newsletter-inner {
+    position: relative;
+}
+.page-hero-newsletter-close {
+position: absolute;
+top: 0px;
+right: 0px;
+background: transparent;
+border: none;
+cursor: pointer;
+font-size: var(--h8);
+line-height: 1;
+transition: color 0.3s ease;
+}
+.page-hero-newsletter-close:hover {
+    color: var(--white);
 }
 
 .page-hero-cookies {
   position: relative;
   z-index: 2;
   width: 100%;
-  max-width: 800px;
-  padding: 0 2rem;
+  padding: 0 var(--wrapper-padding);
+
+  position: absolute;
+bottom: 0;
+width: 100%;
 }
 
 @media (max-width: 768px) {
   .page-hero {
     height: 50vh;
     min-height: 300px;
-  }
-  
-  .page-hero-custom-content {
-    padding: 0 1rem;
-  }
-  
-  .page-hero-newsletter,
-  .page-hero-cookies {
-    padding: 0 1rem;
   }
 }
 </style>

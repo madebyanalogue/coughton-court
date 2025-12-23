@@ -1,5 +1,5 @@
 <template>
-  <section :class="['section-reviews', { 'section-border-top': section.borderTop }]" :style="{ '--section-bg': `var(--${backgroundColor})`, '--section-text': `var(--${textColor})` }">
+  <section :class="['section-reviews', { 'section-border-top': section.borderTop, 'section-border-bottom': section.borderBottom }]" :style="{ '--section-bg': `var(--${backgroundColor})`, '--section-text': `var(--${textColor})` }">
     <div class="wrapper">
       <div class="reviews-container py2 py-sm-4">
         <div class="grid grid-4">

@@ -1,5 +1,5 @@
 <template>
-  <section :class="['section-usps', { 'section-border-top': section.borderTop }]" ref="sectionRef">
+  <section :class="['section-usps', { 'section-border-top': section.borderTop, 'section-border-bottom': section.borderBottom }]" ref="sectionRef">
     <div class="wrapper">
       <div class="grid grid-1 py7 px-md-5">
         <div>

@@ -40,18 +40,22 @@ svg > * {
     --button-text-color: rgba(var(--light-green), 1);
     --button-hover-background-color: rgba(var(--dark-green), 1);
     --button-hover-text-color: rgba(var(--light-green), 1);
+    --button-border-color: rgba(var(--dark-green), 1);
+    --button-hover-border-color: rgba(var(--dark-green), 1);
 }
 .dark, html {
     --background-color: rgba(var(--mid-green), 1);
     --text-color: rgba(var(--dark-green), 1);
-    --secondary-background-color: rgba(var(--mid-green), 1);
-    --secondary-text-color: rgba(var(--light-green), 1);
+    --secondary-background-color: rgba(var(--dark-green), .3);
+    --secondary-text-color: rgba(var(--mid-green), 1);
     --tertiary-background-color: rgba(var(--dark-green), 1);
     --tertiary-text-color: rgba(var(--light-green), 1);
     --button-background-color: rgba(var(--light-green), 1);
     --button-text-color: rgba(var(--dark-green), 1);
     --button-hover-background-color: rgba(var(--light-green), 1);
     --button-hover-text-color: rgba(var(--dark-green), 1);
+    --button-border-color: rgba(var(--dark-green), 1);
+    --button-hover-border-color: rgba(var(--dark-green), 1);
 }
 .scheme.overlay {
     --background-color: transparent;
@@ -60,8 +64,10 @@ svg > * {
     --secondary-text-color: #ffffff;
     --tertiary-background-color: transparent;
     --tertiary-text-color: #ffffff;
-    --button-background-color: transparent;
-    --button-text-color: #ffffff;
-    --button-hover-background-color: #ffffff;
-    --button-hover-text-color: #ffffff;
+    --button-background-color: white;
+    --button-text-color: rgba(var(--dark-green), 1);
+    --button-hover-background-color: rgba(var(--dark-green), 1);
+    --button-hover-text-color: rgba(var(--light-green), 1);
+    --button-border-color: white;
+    --button-hover-border-color: rgba(var(--light-green), 1);
 }

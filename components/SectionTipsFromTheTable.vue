@@ -1,5 +1,5 @@
 <template>
-  <section :class="['section-tips-from-the-table grid grid-1 gap-2 gap-3-sm py2 py-sm-3', { 'section-border-top': section.borderTop }]">
+  <section :class="['section-tips-from-the-table grid grid-1 gap-2 gap-3-sm py2 py-sm-3', { 'section-border-top': section.borderTop, 'section-border-bottom': section.borderBottom }]">
       <div v-if="title" class="wrapper">
         <div class="">
           <h2 class="h0 heading uppercase flex flex-between">

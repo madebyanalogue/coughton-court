@@ -1,13 +1,13 @@
 @import './dev-backgrounds.css';
 
 :root {
-  --logo-height: 14px;
+  --logo-height: 39px;
   --footer-logo-height: 21px;
-  --header-height: calc(var(--header-bar-height) + var(--header-nav-height));
-  --header-bar-height: 90px;
-  --header-nav-height: 50px;
+  --header-height:var(--header-bar-height);
+  --header-bar-height: 60px;
+  --header-nav-height: 43px;
 
-
+  --centered-text-max-width: 740px;
 
   /* Global animation timings */
   --fade-duration: 600ms;
@@ -26,8 +26,10 @@
 
 @media (min-width: 800px) {
   :root {
-    --logo-height: 70px;
-    --footer-logo-height: 70px;
+    --logo-height: 60px;
+    --header-bar-height: 97px;
+    --footer-logo-height: 115px;
+    --header-height: calc(var(--header-bar-height) + var(--header-nav-height));
   }
 }
 /* Removed empty :root ruleset at 1024px */
@@ -44,23 +46,99 @@
   width: auto;
   display:block;
 }
-.footer-logo .logo {
+.footer-logo .logo-image svg {
   height: var(--footer-logo-height);
   width: auto;
   display:block;
 }
 
-/* Page transition fade */
-.page-enter-active { transition: opacity 2000ms ease; }
-.page-leave-active { transition: opacity 1000ms ease; }
-.page-enter-from,
-.page-leave-to {
-  opacity: 0;
+/* App shell that wraps header + page content for transitions */
+.app-shell {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
 }
-.page-enter-to,
+
+/* Page transition fade (enabled mode, Transition name=\"page\") */
+.page-enter-active {
+  transition: opacity 0s ease-out;
+}
+.page-leave-active {
+  transition: opacity 0.25s ease-in;
+}
+.page-enter-from {
+  opacity: 0.5;  /* start slightly visible to avoid a hard 'pop' */
+}
+.page-enter-to {
+  opacity: 1;
+}
 .page-leave-from {
   opacity: 1;
 }
+.page-leave-to {
+  opacity: 1;  /* fade out only halfway so background never shows through fully */
+}
+
+
+
+.centered-text-max-width {
+  max-width: var(--centered-text-max-width);
+  margin: 0 auto;
+}
+
+.page-builder section, .page-introduction, .section-padding {
+  padding: var(--section-padding) 0px;
+}
+
+section {
+  position: relative;
+}
+
+.section-border-bottom:after,
+.section-border-top:before {
+  content: '';
+  position: absolute;
+  left: 30px;
+  width: calc(100% - 60px);
+  height: 1px;
+  background-color: currentColor;
+}
+.section-border-top:before {
+  top: 0%;
+}
+.section-border-bottom:after {
+  bottom: 0%;
+}
+
+
+
+.button {
+  padding: 0.5rem 1rem;
+  background: var(--button-background-color);
+  color: var(--button-text-color);
+  text-decoration: none;
+  font-size: var(--h7);
+  white-space: nowrap;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+  border-radius: 100px;
+  cursor: pointer;
+  padding: calc(var(--h4) * .6) calc(var(--h4) * 1.5) calc(var(--h4) * .4);
+  border: 1px solid var(--button-border-color);
+  line-height: 1;
+  font-family: var(--heading);
+  font-size: var(--h6);
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.button:hover {
+  background: var(--button-hover-background-color);
+  color: var(--button-hover-text-color);
+  border-color: var(--button-border-color);
+}
+
+
+
 
 
 .page-container {
@@ -69,12 +147,33 @@
   flex-direction: column;
 }
 
+/* Ensure page-container maintains height during transitions */
+.page-enter-active .page-container,
+.page-leave-active .page-container {
+  min-height: 100svh;
+}
+
+/* Footer fade transition */
+footer {
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+.page-transitioning footer {
+  opacity: 0;
+}
+
+/* Hide footer until preloader is ready to avoid flash at top on first load/refresh */
+body:not(.preloader-ready) footer {
+  opacity: 0;
+}
+
 header {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  z-index: 9000;
+  z-index: 2;
   width: 100%;
   pointer-events: none;
 }
@@ -83,6 +182,13 @@ header.menu-active {
 }
 header a, header button {
   pointer-events: auto;
+}
+
+/* When page transitions are disabled, freeze visual recalibration effects */
+body.no-page-transition,
+body.no-page-transition * {
+  transition: none !important;
+  animation: none !important;
 }
 
 .page-builder {
@@ -127,6 +233,7 @@ header a, header button {
 
 main {
   flex: 1 0 auto;
+  min-height: 100svh;
   /* Optional: add padding or margin as needed */
   padding-top: calc(var(--header-height));
 }
@@ -699,4 +806,71 @@ main > div, .page-container main {
     width: 100%;
     height: 100%;
     object-fit: cover;
+}
+
+
+
+
+
+
+
+
+.carousel__btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 48px;
+  height: 48px;
+  border: 1px solid var(--gray-300, #ccc);
+  background: white;
+  cursor: pointer;
+  font-size: 1.25rem;
+  transition: all 0.2s;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.carousel__btn:hover {
+  background: var(--black, #000);
+  color: white;
+  border-color: var(--black, #000);
+}
+
+.carousel__btn--prev {
+  left: 1rem;
+}
+
+.carousel__btn--next {
+  right: 1rem;
+}
+
+.carousel__dots {
+  position: absolute;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 0.5rem;
+  z-index: 10;
+}
+
+.carousel__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid white;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+  padding: 0;
+}
+
+.carousel__dot:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.carousel__dot--active {
+  background: white;
 }

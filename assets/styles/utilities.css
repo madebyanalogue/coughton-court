@@ -1,6 +1,6 @@
 /* Utility CSS */
 :root {
-  --unit: 10px;
+  --unit: 14px;
   --max-width-reference: 1800;
   --max-width: 1836px;
   --pad-1: calc(var(--unit) * 1);
@@ -14,25 +14,16 @@
   --pad-9: calc(var(--unit) * 9); 
   --pad-10: calc(var(--unit) * 10); 
   --wrapper-padding: var(--pad-2);
+  --section-padding: var(--pad-3);
   --grid-gap: var(--pad-1);
   --columns: 12;
 }
 
-/* @media (min-width: 1024px) {
+@media (min-width: 1024px) {
   :root {
-    --unit: 1vw;
-    --pad-1: calc((25 / (var(--unit-reference) / 100)) * var(--unit));
-    --pad-2: calc((50 / (var(--unit-reference) / 100)) * var(--unit));
-    --pad-3: calc((75 / (var(--unit-reference) / 100)) * var(--unit));
-    --pad-4: calc((100 / (var(--unit-reference) / 100)) * var(--unit));
-    --pad-5: calc((125 / (var(--unit-reference) / 100)) * var(--unit));
-    --pad-6: calc((150 / (var(--unit-reference) / 100)) * var(--unit));
-    --pad-7: calc((175 / (var(--unit-reference) / 100)) * var(--unit));
-    --pad-8: calc((200 / (var(--unit-reference) / 100)) * var(--unit));
-    --pad-9: calc((225 / (var(--unit-reference) / 100)) * var(--unit));
-    --pad-10: calc((250 / (var(--unit-reference) / 100)) * var(--unit));
+    --wrapper-padding: var(--pad-4);
   }
-} */
+}
 
 .wrapper {
   max-width: var(--max-width);
@@ -45,12 +36,6 @@
 }
 .wrapper.medium {
   max-width: var(--max-width-medium);
-}
-
-@media (max-width: 600px) {
-  :root {
-    --wrapper-padding: calc(var(--pad-1) * 1.5);
-  }
 }
 
 .grid {
@@ -67,6 +52,13 @@
   height: 100%;
 }
 
+.min-180 {
+  min-width: 180px;
+}
+
+.flex.column {
+  flex-direction: column;
+}
 
 @media (min-width: 1024px) {
   .grid {
@@ -464,7 +456,12 @@ img {
   .gap-2-md { gap: var(--pad-2); }
   .gap-3-md { gap: var(--pad-3); }
   .gap-4-md { gap: var(--pad-4); }
-  
+  .gap-5-md { gap: var(--pad-5); }
+  .gap-6-md { gap: var(--pad-6); }
+  .gap-7-md { gap: var(--pad-7); }
+  .gap-8-md { gap: var(--pad-8); }
+  .gap-9-md { gap: var(--pad-9); }
+  .gap-10-md { gap: var(--pad-10); }
 }
 
 /* Grid reverse utility - mobile only */

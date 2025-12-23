@@ -5,10 +5,47 @@
       @preloader-ready="onPreloaderReady" 
     />
   </ClientOnly>
-  <VisibleGrid v-if="preloaderReady" />
-  <Header v-if="preloaderReady" :page-data="page" />
-  <Transition :name="disablePageTransition ? '' : 'page'" mode="out-in" appear @before-enter="onPageBeforeEnter" @after-enter="onPageEnter">
-    <div v-if="preloaderReady" class="page-container" :key="route.fullPath">
+  
+  <!-- Page transitions (wrap header + page content so whole app fades) -->
+  <Transition
+    v-if="!disablePageTransition"
+    name="page"
+    mode="out-in"
+    appear
+    @before-enter="onPageBeforeEnter"
+    @after-enter="onPageEnter"
+  >
+    <div v-if="preloaderReady" class="app-shell" :key="route.fullPath">
+      <VisibleGrid />
+      <Header :page-data="page" />
+
+      <div class="page-container">
+        <Suspense>
+          <main :style="{ paddingTop: mainPaddingVar }">
+            <NuxtPage />
+          </main>
+        </Suspense>
+        <ClientOnly>
+          <template #default>
+            <Footer
+              v-if="!page?.value?.hideFooter"
+              :page-data="page"
+              :key="route.path"
+            />
+          </template>
+          <template #fallback>
+            <!-- No footer during SSR -->
+          </template>
+        </ClientOnly>
+      </div>
+    </div>
+  </Transition>
+
+  <!-- No page transitions: render instantly with no animation -->
+  <div v-else-if="preloaderReady" class="app-shell" :key="route.fullPath">
+    <VisibleGrid />
+    <Header :page-data="page" />
+    <div class="page-container">
       <Suspense>
         <main :style="{ paddingTop: mainPaddingVar }">
           <NuxtPage />
@@ -16,9 +53,9 @@
       </Suspense>
       <ClientOnly>
         <template #default>
-          <Footer 
-            v-if="!page?.value?.hideFooter" 
-            :page-data="page" 
+          <Footer
+            v-if="!page?.value?.hideFooter"
+            :page-data="page"
             :key="route.path"
           />
         </template>
@@ -27,7 +64,7 @@
         </template>
       </ClientOnly>
     </div>
-  </Transition>
+  </div>
 </template>
 
 <script setup>
@@ -60,10 +97,18 @@ const isPageTransitioning = ref(false)
 
 // Handle page transitions
 router.beforeEach(() => {
-  isPageTransitioning.value = true
-  // Add class to body to prevent footer scroll trigger during transitions
-  if (typeof document !== 'undefined') {
-    document.body.classList.add('page-transitioning')
+  if (!disablePageTransition.value) {
+    isPageTransitioning.value = true
+    // Add class to body to prevent footer scroll trigger during transitions
+    if (typeof document !== 'undefined') {
+      document.body.classList.add('page-transitioning')
+    }
+  } else {
+    // Ensure any stale state is cleared when transitions are disabled
+    isPageTransitioning.value = false
+    if (typeof document !== 'undefined') {
+      document.body.classList.remove('page-transitioning')
+    }
   }
 })
 
@@ -176,7 +221,9 @@ const onPageEnter = () => {
 // We scroll to top instantly here so the old page can fade out at current scroll position
 // and the new page fades in at the top
 const onPageBeforeEnter = () => {
-  if (typeof window !== 'undefined') {
+  // For full fade mode we still want to snap to top.
+  // For cross-fade "instant" mode we leave scroll position alone to avoid visible jiggle.
+  if (typeof window !== 'undefined' && !disablePageTransition.value) {
     window.scrollTo({ top: 0, behavior: 'instant' })
   }
 }

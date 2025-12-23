@@ -3,7 +3,8 @@
     :class="{
         'py2': enablePaddingTopBottom,
         'px1 px-sm-2': enablePaddingLeftRight,
-        'section-border-top': section.borderTop
+        'section-border-top': section.borderTop,
+        'section-border-bottom': section.borderBottom
       }">
     <!-- Top Background Section -->
     <div 

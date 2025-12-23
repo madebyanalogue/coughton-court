@@ -1,5 +1,5 @@
 <template>
-  <section ref="sectionRef" :class="{ 'section-border-top': section.borderTop }">
+  <section ref="sectionRef" :class="{ 'section-border-top': section.borderTop, 'section-border-bottom': section.borderBottom }">
     <div class="wrapper">
       <div class="grid grid-1">
 
@@ -7,7 +7,7 @@
           <div class="h4 mono">{{ title }}</div>
         </div>
 
-        <div class="grid grid-1 grid-sm-2 grid-md-3 gap-2">
+        <div class="grid grid-1 grid-sm-2 grid-md-3 gap-3">
           <div v-for="garden in gardens" :key="garden._id" class="garden-card">
             <NuxtLink 
               v-if="garden.slug?.current" 
@@ -15,7 +15,7 @@
               class="garden-link"
             >
               <div class="grid grid-1 gap-1">
-                <div class="h2">{{ garden.title }}</div>
+                <div class="h5">{{ garden.title }}</div>
                 <div class="image-wrapper">
                   <NuxtImg 
                     v-if="garden.featuredImage"
@@ -30,19 +30,19 @@
                     class="garden-image-fallback secondary"
                   ></div>
                 </div>
-                <div class="flex gap-1">
+                <div class="flex gap-1 flex-between">
                     <div class="col-xs">
-                    <p v-if="garden.shortDescription" class="p-small">{{ garden.shortDescription }}</p>
+                    <p v-if="garden.shortDescription" class="h7">{{ garden.shortDescription }}</p>
                     </div>
                     <div class="">
-                      <div class="">→</div>
+                      <div class="arrow">→</div>
                     </div>
                 </div>
               </div>
             </NuxtLink>
             <div v-else class="garden-link">
               <div class="grid grid-1 gap-1">
-                <div class="h2">{{ garden.title }}</div>
+                <div class="h5">{{ garden.title }}</div>
                 <div class="image-wrapper">
                   <NuxtImg 
                     v-if="garden.featuredImage"
@@ -57,9 +57,9 @@
                     class="garden-image-fallback secondary"
                   ></div>
                 </div>
-                <div class="flex gap-1">
+                <div class="flex gap-1 flex-between">
                     <div class="col-xs">
-                    <p v-if="garden.shortDescription" class="p-small">{{ garden.shortDescription }}</p>
+                    <p v-if="garden.shortDescription" class="h7">{{ garden.shortDescription }}</p>
                     </div>
                 </div>
               </div>
@@ -139,6 +139,10 @@ onUnmounted(() => {
 /* Initial state for scroll animations */
 section {
   opacity: 0;
+}
+
+.image-wrapper {
+  aspect-ratio: 3/2;
 }
 
 .garden-link {

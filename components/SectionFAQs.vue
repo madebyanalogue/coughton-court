@@ -1,7 +1,7 @@
 <template>
-  <section ref="sectionRef" :class="['section-faqs', { 'section-border-top': section.borderTop }]">
+  <section ref="sectionRef" :class="['section-faqs', { 'section-border-top': section.borderTop, 'section-border-bottom': section.borderBottom }]">
     <div class="wrapper">
-      <div class="grid grid-1 grid-md-2 gap-3">
+      <div class="grid grid-1 grid-md-2 gap-3 gap-4-md px-md-4">
         
         <!-- Left: Image -->
         <div v-if="image" class="faqs-image">
@@ -15,7 +15,7 @@
 
         <!-- Right: FAQs -->
         <div class="faqs-content">
-          <h3 v-if="subtitle" class="faqs-subtitle">{{ subtitle }}</h3>
+          <h3 v-if="subtitle" class="faqs-subtitle h4">{{ subtitle }}</h3>
           
           <div class="faqs-list">
             <details 
@@ -100,23 +100,14 @@ onUnmounted(() => {
   width: 100%;
 }
 
-.faqs-subtitle {
-  font-size: 0.875rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--gray-600, #666);
-  margin-bottom: 2rem;
-}
 
 .faqs-list {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
 }
 
 .faq-item {
-  border-bottom: 1px solid var(--gray-200, #e5e5e5);
-  padding-bottom: 1rem;
+  border-bottom: 1px solid currentColor;
 }
 
 .faq-item:last-child {
@@ -124,13 +115,11 @@ onUnmounted(() => {
 }
 
 .faq-question {
-  font-weight: 600;
-  font-size: 1.125rem;
   cursor: pointer;
   list-style: none;
-  padding: 0.5rem 0;
+  padding: calc(var(--pad-1) * .8) 0;
   position: relative;
-  padding-right: 2rem;
+  padding-right: calc(var(--pad-1) * 1.5);
 }
 
 .faq-question::-webkit-details-marker {
@@ -143,7 +132,7 @@ onUnmounted(() => {
   right: 0;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 1.5rem;
+  font-size:13px;
   font-weight: 300;
   transition: transform 0.2s;
 }
@@ -157,10 +146,9 @@ onUnmounted(() => {
 }
 
 .faq-answer {
-  padding-top: 1rem;
   padding-left: 0;
-  color: var(--gray-700, #555);
-  line-height: 1.6;
+  padding:  0px 0px calc(var(--pad-1) * 1);
+  letter-spacing: 0.01em;
 }
 </style>
 

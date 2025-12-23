@@ -2,7 +2,7 @@
   <div class="">
     <div class="hero-section-container py2 px2">
       <!-- Hero section -->
-      <section ref="heroSectionRef" :class="['hero-section', { 'section-border-top': section.borderTop }]" data-momentum-hover-init style="opacity: 0; visibility: hidden;">
+      <section ref="heroSectionRef" :class="['hero-section', { 'section-border-top': section.borderTop, 'section-border-bottom': section.borderBottom }]" data-momentum-hover-init style="opacity: 0; visibility: hidden;">
         <div v-if="isSvg && svgContent" class="hero-image svg-loading" data-momentum-hover-element v-html="svgContent"></div>
         <img v-else :src="imageUrl" alt="Hero Image" class="hero-image" />
       </section>

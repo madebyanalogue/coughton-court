@@ -127,6 +127,10 @@ export default defineEventHandler(async (event) => {
                     },
                     title
                   },
+                  section-> {
+                    _id,
+                    title
+                  },
                   anchor
                 }
               }
@@ -149,6 +153,10 @@ export default defineEventHandler(async (event) => {
                     },
                     title
                   },
+                  section-> {
+                    _id,
+                    title
+                  },
                   anchor
                 }
               }
@@ -168,6 +176,10 @@ export default defineEventHandler(async (event) => {
                     slug {
                       current
                     },
+                    title
+                  },
+                  section-> {
+                    _id,
                     title
                   },
                   anchor
@@ -217,7 +229,7 @@ export default defineEventHandler(async (event) => {
     
     if (query.menuTitle) {
       const result = await client.fetch(
-        '*[_type == "menu" && title == $menuTitle][0]{..., items[]{..., to{..., page-> { _id, slug, title }}}}',
+        '*[_type == "menu" && title == $menuTitle][0]{..., items[]{..., to{..., page-> { _id, slug, title }, section-> { _id, title }}}}',
         { menuTitle: query.menuTitle }
       )
       return result
@@ -270,6 +282,7 @@ export default defineEventHandler(async (event) => {
             _type,
             title,
             borderTop,
+            borderBottom,
             sectionType,
             heroContent {
               image {
@@ -835,13 +848,9 @@ export default defineEventHandler(async (event) => {
         }
       }
 
-      if (!result) {
-        throw createError({
-          statusCode: 404,
-          message: `Page not found: ${query.identifier}`
-        })
-      }
-      return result
+      // Return null instead of throwing 404 - allows usePageSettings to gracefully handle missing pages
+      // (e.g., for event/garden pages that aren't regular page documents)
+      return result || null
     }
     
     if (query.type === 'section') {
@@ -1044,7 +1053,7 @@ export default defineEventHandler(async (event) => {
     if (query.type === 'garden') {
       if (query.all) {
         return await client.fetch(`
-          *[_type == "garden"] | order(_createdAt asc) {
+          *[_type == "garden"] | order(orderRank asc) {
             _id,
             title,
             slug,

@@ -1,5 +1,5 @@
 <template>
-  <section :class="['wrapper', { 'section-border-top': section.borderTop }]">
+  <section :class="['wrapper', { 'section-border-top': section.borderTop, 'section-border-bottom': section.borderBottom }]">
     <div class="grid grid-1 grid-sm-2">
       <div class="contact-content h3 medium grid grid-1 uppercase">
         <div v-if="section.contactContent?.content" class="whitespace-pre-line" data-fade-in v-html="formatContent(section.contactContent.content)"></div>

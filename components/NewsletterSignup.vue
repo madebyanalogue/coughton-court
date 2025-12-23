@@ -1,6 +1,6 @@
 <template>
   <div class="newsletter-signup">
-    <h3 v-if="title" class="newsletter-title">{{ title }}</h3>
+    <h3 v-if="title" class="newsletter-title h8 medium">{{ title }}</h3>
     <form 
       :id="formId"
       @submit.prevent="handleSubmit" 
@@ -31,7 +31,7 @@
       <div 
         v-if="message" 
         :id="`${formId}-error`"
-        class="newsletter-message" 
+        class="newsletter-message h8" 
         :class="{ 
           'newsletter-message--error': isError,
           'newsletter-message--success': !isError
@@ -225,12 +225,12 @@ const handleSubmit = async () => {
 <style scoped>
 .newsletter-signup {
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--pad-1);
 }
 
 .newsletter-title {
-  margin-bottom: 1em;
-  font-family: var(--heading);
-  font-weight: 500;
 }
 
 .newsletter-form {
@@ -238,13 +238,14 @@ const handleSubmit = async () => {
 }
 
 .newsletter-input-wrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-  width: 100%;
-  border: 1px solid currentColor;
-  padding-right: calc(var(--arrow-size) + 0.5em);
-  transition: border-color 0.3s ease;
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    background: var(--secondary-background-color);
+    padding-right: calc(var(--arrow-size) + 0.5em);
+    transition: border-color 0.3s ease;
+    border-radius: 50px;
 }
 
 .newsletter-input-wrapper--error {
@@ -261,6 +262,7 @@ const handleSubmit = async () => {
   color: inherit;
   font-family: inherit;
   font-size: inherit;
+  transition: color 0s ease 999999s, background-color 0s ease 999999s;
 }
 
 .newsletter-input::placeholder {
@@ -268,9 +270,6 @@ const handleSubmit = async () => {
   opacity: 0.6;
 }
 
-.newsletter-input--error {
-  color: rgba(255, 0, 0, 0.8);
-}
 
 .newsletter-submit {
   position: absolute;
@@ -326,20 +325,15 @@ const handleSubmit = async () => {
 }
 
 .newsletter-message {
-  margin-top: 0.75em;
-  font-size: 0.9em;
-  opacity: 0.8;
   animation: fadeIn 0.3s ease;
 }
 
 .newsletter-message--error {
   opacity: 1;
-  color: rgba(255, 0, 0, 0.9);
 }
 
 .newsletter-message--success {
   opacity: 1;
-  color: currentColor;
 }
 
 @keyframes fadeIn {

@@ -20,25 +20,33 @@ export const usePageSettings = () => {
            const { data: pageData, pending, error } = useAsyncData(
            `page-settings-${route.fullPath}`,
            async () => {
+             // For non-"page" routes like events and gardens, skip the API call entirely
+             const slug = pageSlug.value
+             if (slug.startsWith('events/') || slug.startsWith('gardens/')) {
+               useRemoveTopPadding.value = defaultSettings.removeTopPadding
+               isDark.value = defaultSettings.darkMode
+               return null
+             }
+
              try {
                const result = await $fetch('/api/sanity', {
                  params: {
                    type: 'page',
-                   identifier: pageSlug.value,
+                   identifier: slug,
                    identifierType: 'slug'
                  }
                })
         
-        // Set initial values based on Sanity data or defaults
-        if (result && Object.keys(result).length > 0) {
-          useRemoveTopPadding.value = result.removeTopPadding !== undefined ? !!result.removeTopPadding : defaultSettings.removeTopPadding
-          isDark.value = result.darkMode !== undefined ? !!result.darkMode : defaultSettings.darkMode
-        } else {
-          useRemoveTopPadding.value = defaultSettings.removeTopPadding
-          isDark.value = defaultSettings.darkMode
-        }
+               // Set initial values based on Sanity data or defaults
+               if (result && Object.keys(result).length > 0) {
+                 useRemoveTopPadding.value = result.removeTopPadding !== undefined ? !!result.removeTopPadding : defaultSettings.removeTopPadding
+                 isDark.value = result.darkMode !== undefined ? !!result.darkMode : defaultSettings.darkMode
+               } else {
+                 useRemoveTopPadding.value = defaultSettings.removeTopPadding
+                 isDark.value = defaultSettings.darkMode
+               }
         
-                       return result
+               return result
              } catch (err) {
                // Set defaults on error and don't log 404 errors
                if (err.statusCode !== 404) {

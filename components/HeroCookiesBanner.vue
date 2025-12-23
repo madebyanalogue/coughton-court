@@ -28,6 +28,12 @@ const message = computed(() => cookiesMessage.value || [])
 const acceptCookies = () => {
   localStorage.setItem('cookies-accepted', 'true')
   showBanner.value = false
+  // Add class to body
+  if (typeof document !== 'undefined') {
+    document.body.classList.add('cookies-handled')
+    document.body.classList.add('cookies-accepted')
+    document.body.classList.remove('cookies-declined')
+  }
   // Dispatch event for GA plugin to initialize
   if (typeof window !== 'undefined') {
     window.dispatchEvent(new Event('cookies-accepted'))
@@ -39,6 +45,12 @@ const acceptCookies = () => {
 const declineCookies = () => {
   localStorage.setItem('cookies-accepted', 'false')
   showBanner.value = false
+  // Add class to body
+  if (typeof document !== 'undefined') {
+    document.body.classList.add('cookies-handled')
+    document.body.classList.add('cookies-declined')
+    document.body.classList.remove('cookies-accepted')
+  }
 }
 
 const initializeGA = () => {
@@ -57,8 +69,21 @@ onMounted(() => {
   const cookiesAccepted = localStorage.getItem('cookies-accepted')
   if (cookiesAccepted === null) {
     showBanner.value = true
-  } else if (cookiesAccepted === 'true') {
-    initializeGA()
+  } else {
+    // User has already made a choice, add class to body
+    if (typeof document !== 'undefined') {
+      document.body.classList.add('cookies-handled')
+      if (cookiesAccepted === 'true') {
+        document.body.classList.add('cookies-accepted')
+        document.body.classList.remove('cookies-declined')
+      } else {
+        document.body.classList.add('cookies-declined')
+        document.body.classList.remove('cookies-accepted')
+      }
+    }
+    if (cookiesAccepted === 'true') {
+      initializeGA()
+    }
   }
 })
 </script>
@@ -74,6 +99,8 @@ onMounted(() => {
   gap: 1rem;
   align-items: center;
   justify-content: space-between;
+  height: var(--pad-4);
+  border-top: 1px solid currentColor;
 }
 
 @media (min-width: 768px) {
@@ -93,34 +120,13 @@ onMounted(() => {
 }
 
 .hero-cookies-banner__btn {
-  padding: 0.5rem 1.5rem;
-  border: none;
-  cursor: pointer;
-  font-size: 0.875rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  transition: all 0.2s;
+    cursor: pointer;
+    font-size: var(--body);
+    /* font-weight: 600; */
+    /* text-transform: uppercase; */
+    /* letter-spacing: 0.05em; */
+    transition: all 0.2s;
 }
 
-.hero-cookies-banner__btn--accept {
-  background: var(--black, #000);
-  color: var(--white, #fff);
-}
-
-.hero-cookies-banner__btn--accept:hover {
-  background: var(--gray-700, #333);
-}
-
-.hero-cookies-banner__btn--decline {
-  background: transparent;
-  color: var(--black, #000);
-  border: 1px solid var(--black, #000);
-}
-
-.hero-cookies-banner__btn--decline:hover {
-  background: var(--black, #000);
-  color: var(--white, #fff);
-}
 </style>
 

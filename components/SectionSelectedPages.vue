@@ -1,5 +1,5 @@
 <template>
-  <section ref="sectionRef" :class="{ 'section-border-top': section.borderTop }">
+  <section ref="sectionRef" :class="{ 'section-border-top': section.borderTop, 'section-border-bottom': section.borderBottom }">
     <div class="wrapper">
       <div class="grid grid-1">
 
@@ -15,7 +15,7 @@
               class="page-link"
             >
               <div class="grid grid-1 gap-1">
-                <div class="h2">{{ page.title }}</div>
+                <div class="h5">{{ page.title }}</div>
                 <div class="image-wrapper">
                   <NuxtImg 
                     v-if="page.featuredImage"
@@ -32,17 +32,17 @@
                 </div>
                 <div class="flex gap-1">
                     <div class="col-xs">
-                    <p v-if="page.shortDescription" class="p-small">{{ page.shortDescription }}</p>
+                    <p v-if="page.shortDescription" class="h7">{{ page.shortDescription }}</p>
                     </div>
                     <div class="">
-                      <div class="">→</div>
+                      <div class="arrow">→</div>
                     </div>
                 </div>
               </div>
             </NuxtLink>
             <div v-else class="page-link">
               <div class="grid grid-1 gap-1">
-                <div class="h2">{{ page.title }}</div>
+                <div class="h5">{{ page.title }}</div>
                 <div class="image-wrapper">
                   <NuxtImg 
                     v-if="page.featuredImage"
@@ -59,7 +59,7 @@
                 </div>
                 <div class="flex gap-1">
                     <div class="col-xs">
-                    <p v-if="page.shortDescription" class="p-small">{{ page.shortDescription }}</p>
+                    <p v-if="page.shortDescription" class="h7">{{ page.shortDescription }}</p>
                     </div>
                 </div>
               </div>

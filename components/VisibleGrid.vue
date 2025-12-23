@@ -9,19 +9,9 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref } from 'vue'
 const visible = ref(false)
-function handleKey(e) {
-  if (e.key === 'g' || e.key === 'G') {
-    visible.value = !visible.value
-  }
-}
-onMounted(() => {
-  window.addEventListener('keydown', handleKey)
-})
-onUnmounted(() => {
-  window.removeEventListener('keydown', handleKey)
-})
+// Grid toggle disabled - keydown listener removed
 </script>
 
 <style scoped>

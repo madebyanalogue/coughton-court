@@ -1,6 +1,7 @@
 <template>
   <div :class="['page-builder', { 'pbottom': removeTopPadding }]">
     <template v-for="(section, index) in sections" :key="section._id || index">
+      <!-- Pass sectionId to each section component -->
       
       <SectionHero
         v-if="section._type === 'section' && section.sectionType === 'hero'"

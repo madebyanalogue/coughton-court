@@ -1,4 +1,9 @@
 export default defineNuxtPlugin(() => {
+  // Image overlay swipe-in effect disabled globally.
+  // Plugin left in place as a no-op to avoid runtime errors.
+  if (process.server) return
+  return
+
   // Available overlay colors
   const overlayColors = [
     //'#5b5653', // dark grey

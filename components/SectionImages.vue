@@ -1,5 +1,5 @@
 <template>
-  <section :class="['section-images', { 'section-border-top': section.borderTop }]">
+  <section :class="['section-images', { 'section-border-top': section.borderTop, 'section-border-bottom': section.borderBottom }]">
     <div :class="[{'py-md-3': enablePadding }]">
       <div class="images-grid p1 p2-sm">
         <div 

@@ -1,22 +1,28 @@
 <template>
-  <section ref="sectionRef" :class="['section-opening-times-prices', { 'section-border-top': section.borderTop }]">
+  <section ref="sectionRef" :class="['section-opening-times-prices', { 'section-border-top': section.borderTop, 'section-border-bottom': section.borderBottom }]">
     <div class="wrapper">
-      <div class="grid grid-1 grid-md-3 gap-3">
+      <div class="grid grid-1 grid-md-3 gap-3 gap-md-4 px-md-2">
         
         <!-- Column 1: Image -->
         <div v-if="image" class="opening-times-prices__image">
-          <NuxtImg 
-            :src="getImageUrl(image)" 
-            :alt="title || 'Opening Times and Prices'"
-            class="opening-times-prices__image-img"
-            loading="lazy"
-          />
+          <button 
+            type="button" 
+            class="opening-times-prices__image-button"
+            @click="openLightbox"
+          >
+            <NuxtImg 
+              :src="getImageUrl(image)" 
+              :alt="title || 'Opening Times and Prices'"
+              class="opening-times-prices__image-img"
+              loading="lazy"
+            />
+          </button>
         </div>
         <div v-else class="opening-times-prices__image-placeholder"></div>
 
         <!-- Column 2: Title, Opening Times, Prices, Book Now Button -->
         <div class="opening-times-prices__content">
-          <h2 v-if="title" class="opening-times-prices__title">{{ title }}</h2>
+          <h2 v-if="title" class="opening-times-prices__title h4" style="white-space: pre-line;">{{ title }}</h2>
           
           <!-- Opening Times -->
           <div v-if="openingTimes && openingTimes.length > 0" class="opening-times-prices__opening-times">
@@ -25,7 +31,7 @@
               :key="index"
               class="opening-times-item"
             >
-              <span class="opening-times-item__title">{{ item.title }}</span>
+              <span class="opening-times-item__title h5">{{ item.title }}</span>
               <span class="opening-times-item__time">{{ item.time }}</span>
             </div>
           </div>
@@ -35,7 +41,7 @@
             <div 
               v-for="(item, index) in prices" 
               :key="index"
-              class="price-item"
+              class="price-item h6"
             >
               <span class="price-item__category">{{ item.category }}</span>
               <span class="price-item__price">{{ item.price }}</span>
@@ -48,7 +54,7 @@
               :href="bookingLink" 
               target="_blank" 
               rel="noopener noreferrer"
-              class="opening-times-prices__booking-button"
+              class="button"
             >
               {{ bookingTitle }}
             </a>
@@ -62,13 +68,37 @@
             :key="index"
             class="information-block"
           >
-            <h3 v-if="block.title" class="information-block__title">{{ block.title }}</h3>
+            <h3 v-if="block.title" class="information-block__title h4">{{ block.title }}</h3>
             <div v-if="block.description" class="information-block__description">
               <SanityBlocks :blocks="block.description" />
             </div>
           </div>
         </div>
 
+      </div>
+
+      <!-- Lightbox -->
+      <div 
+        v-if="isLightboxOpen && image" 
+        class="opening-times-prices__lightbox"
+      >
+        <div class="opening-times-prices__lightbox-backdrop" @click="closeLightbox"></div>
+        <div class="opening-times-prices__lightbox-content">
+          <button 
+            type="button" 
+            class="opening-times-prices__lightbox-close"
+            @click="closeLightbox"
+            aria-label="Close image"
+          >
+            ×
+          </button>
+          <NuxtImg
+            :src="getImageUrl(image)"
+            :alt="title || 'Opening Times and Prices'"
+            class="opening-times-prices__lightbox-img"
+            loading="lazy"
+          />
+        </div>
       </div>
     </div>
   </section>
@@ -95,6 +125,18 @@ const openingTimes = computed(() => props.section?.openingTimesAndPricesContent?
 const prices = computed(() => props.section?.openingTimesAndPricesContent?.prices || [])
 const informationBlocks = computed(() => props.section?.openingTimesAndPricesContent?.informationBlocks || [])
 const image = computed(() => props.section?.openingTimesAndPricesContent?.image || null)
+
+const isLightboxOpen = ref(false)
+
+const openLightbox = () => {
+  if (image.value) {
+    isLightboxOpen.value = true
+  }
+}
+
+const closeLightbox = () => {
+  isLightboxOpen.value = false
+}
 </script>
 
 <style scoped>
@@ -102,20 +144,14 @@ const image = computed(() => props.section?.openingTimesAndPricesContent?.image 
   padding: var(--section-padding, 2rem) 0;
 }
 
-.section-opening-times-prices :deep(.grid) {
-  align-items: stretch;
-}
-
 .opening-times-prices__image {
   width: 100%;
-  display: flex;
-  align-items: stretch;
 }
 
 .opening-times-prices__image-img {
   width: 100%;
+  height: auto;
   object-fit: cover;
-  aspect-ratio: 4 / 3;
 }
 
 .opening-times-prices__image-placeholder {
@@ -124,21 +160,13 @@ const image = computed(() => props.section?.openingTimesAndPricesContent?.image 
   min-height: 200px;
 }
 
-@media (min-width: 768px) {
-  .opening-times-prices__image {
-    height: 100%;
-    align-self: stretch;
-  }
-  
-  .opening-times-prices__image-img {
-    aspect-ratio: auto;
-    height: 100%;
-  }
-  
-  .opening-times-prices__image-placeholder {
-    aspect-ratio: auto;
-    height: 100%;
-  }
+.opening-times-prices__image-button {
+  display: block;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  width: 100%;
 }
 
 .opening-times-prices__content {
@@ -150,12 +178,13 @@ const image = computed(() => props.section?.openingTimesAndPricesContent?.image 
 .opening-times-prices__title {
   margin: 0;
   font-family: var(--heading, inherit);
+  white-space: pre-line;
 }
 
 .opening-times-prices__opening-times {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: calc(var(--pad-1) * 1.5);
 }
 
 .opening-times-item {
@@ -164,14 +193,6 @@ const image = computed(() => props.section?.openingTimesAndPricesContent?.image 
   gap: 0.25rem;
 }
 
-.opening-times-item__title {
-  font-weight: 600;
-}
-
-.opening-times-item__time {
-  color: inherit;
-  opacity: 0.8;
-}
 
 .opening-times-prices__prices {
   display: flex;
@@ -180,35 +201,17 @@ const image = computed(() => props.section?.openingTimesAndPricesContent?.image 
 }
 
 .price-item {
+  padding: calc(var(--pad-1) * .8) calc(var(--pad-1) * 1.5);
+  border-radius: 100px;
+  background-color: var(--secondary-background-color);
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1rem;
 }
 
 .price-item__category {
   flex: 1;
 }
 
-.price-item__price {
-  font-weight: 600;
-}
 
-.opening-times-prices__booking {
-  margin-top: 1rem;
-}
-
-.opening-times-prices__booking-button {
-  display: inline-block;
-  padding: 0.75rem 2rem;
-  text-decoration: none;
-  border: 1px solid currentColor;
-  transition: all 0.3s ease;
-}
-
-.opening-times-prices__booking-button:hover {
-  opacity: 0.7;
-}
 
 .opening-times-prices__information {
   display: flex;
@@ -231,6 +234,51 @@ const image = computed(() => props.section?.openingTimesAndPricesContent?.image 
 .information-block__description {
   color: inherit;
   opacity: 0.9;
+}
+
+.opening-times-prices__lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.opening-times-prices__lightbox-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.opening-times-prices__lightbox-content {
+  position: relative;
+  z-index: 1;
+  max-width: 90vw;
+  max-height: 90vh;
+}
+
+.opening-times-prices__lightbox-img {
+  width: 100%;
+  height: auto;
+  max-height: 90vh;
+  object-fit: contain;
+}
+
+.opening-times-prices__lightbox-close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
 }
 
 @media (max-width: 768px) {

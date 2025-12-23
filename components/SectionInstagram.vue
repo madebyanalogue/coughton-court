@@ -1,5 +1,5 @@
 <template>
-  <section :class="['section-instagram py2 py-sm-3', { 'section-border-top': section.borderTop }]">
+  <section :class="['section-instagram py2 py-sm-3', { 'section-border-top': section.borderTop, 'section-border-bottom': section.borderBottom }]">
     <div class="wrapper">
       <div class="grid grid-1 gap-1 gap-sm-2">
       <!-- Section Image -->

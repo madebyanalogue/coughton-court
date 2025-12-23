@@ -14,25 +14,27 @@
       </div>
     </template>
     <template v-else-if="garden">
-      <!-- Hero with featured image and title -->
-      <section class="garden-hero">
-        <div class="garden-hero__image" :class="{ 'garden-hero__image--no-image': !garden.featuredImage }">
-          <NuxtImg 
-            v-if="garden.featuredImage"
-            :src="getImageUrl(garden.featuredImage)" 
-            :alt="garden.title"
-            class="garden-hero__img"
-            loading="eager"
-            preload
-          />
+      <!-- Hero with featured image and title (with parallax similar to PageHero) -->
+      <section class="garden-hero scheme overlay" ref="gardenHeroRef">
+        <div class="garden-hero__image-wrapper">
+          <div class="garden-hero__image" :class="{ 'garden-hero__image--no-image': !garden.featuredImage }">
+            <NuxtImg 
+              v-if="garden.featuredImage"
+              :src="getImageUrl(garden.featuredImage)" 
+              :alt="garden.title"
+              class="garden-hero__img"
+              loading="eager"
+              preload
+            />
+          </div>
         </div>
         <div class="garden-hero__overlay">
-          <h1 class="garden-hero__title">{{ garden.title }}</h1>
+          <h1 class="garden-hero__title h1">{{ garden.title }}</h1>
         </div>
       </section>
 
       <!-- Garden subnavigation -->
-      <section class="garden-subnav">
+      <section class="garden-subnav h6">
         <div class="wrapper">
           <nav class="garden-subnav__menu">
             <NuxtLink 
@@ -51,9 +53,13 @@
       <!-- Two Column Layout: Description + Gallery Carousel -->
       <section class="garden-content-section">
         <div class="wrapper">
-          <div class="grid grid-1 grid-md-2 gap-3">
+          <div class="grid grid-1 grid-md-2 gap-3 px-md-3">
+
+            
             <!-- Left: Main Description -->
-            <div v-if="garden.mainDescription" class="garden-description">
+            <div v-if="garden.mainDescription" class="garden-description flex column gap-2" style="max-width: 480px;">
+              <h2 class="h4">{{ garden.title }}</h2>
+
               <SanityBlocks :blocks="garden.mainDescription" />
             </div>
 
@@ -87,22 +93,22 @@
                         loading="lazy"
                       />
                     </div>
-                    <p v-if="image.caption" class="garden-carousel__caption">{{ image.caption }}</p>
+                    <p v-if="image.caption" class="carousel__caption">{{ image.caption }}</p>
                   </div>
                 </div>
-                <button @click="prevSlide" class="garden-carousel__btn garden-carousel__btn--prev" aria-label="Previous">
+                <button @click="prevSlide" class="carousel__btn carousel__btn--prev" aria-label="Previous">
                   ←
                 </button>
-                <button @click="nextSlide" class="garden-carousel__btn garden-carousel__btn--next" aria-label="Next">
+                <button @click="nextSlide" class="carousel__btn carousel__btn--next" aria-label="Next">
                   →
                 </button>
-                <div class="garden-carousel__dots">
+                <div class="carousel__dots">
                   <button
                     v-for="(image, index) in garden.gallery"
                     :key="index"
                     @click="goToSlide(index)"
-                    class="garden-carousel__dot"
-                    :class="{ 'garden-carousel__dot--active': currentSlide === index }"
+                    class="carousel__dot"
+                    :class="{ 'carousel__dot--active': currentSlide === index }"
                     :aria-label="`Go to slide ${index + 1}`"
                   ></button>
                 </div>
@@ -116,7 +122,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useSanityImage } from '~/composables/useSanityImage.js'
 import { useSiteSettings } from '~/composables/useSiteSettings'
@@ -153,6 +159,34 @@ const { data: allGardens } = await useAsyncData(
 useHead(() => ({
   title: `${websiteTitle.value} | ${garden.value?.title || 'Garden'}`
 }))
+
+// Garden hero parallax (match PageHero behavior)
+const gardenHeroRef = ref(null)
+let gardenHeroScrollHandler = null
+
+const handleGardenHeroScroll = () => {
+  if (!gardenHeroRef.value) return
+  const wrapper = gardenHeroRef.value.querySelector('.garden-hero__image-wrapper')
+  if (!wrapper) return
+
+  const scrollY = window.scrollY || window.pageYOffset
+  const parallaxOffset = scrollY * 0.3
+  wrapper.style.transform = `translateY(${parallaxOffset}px)`
+}
+
+onMounted(() => {
+  if (typeof window !== 'undefined' && garden.value?.featuredImage) {
+    gardenHeroScrollHandler = handleGardenHeroScroll
+    window.addEventListener('scroll', gardenHeroScrollHandler, { passive: true })
+    handleGardenHeroScroll()
+  }
+})
+
+onUnmounted(() => {
+  if (gardenHeroScrollHandler && typeof window !== 'undefined') {
+    window.removeEventListener('scroll', gardenHeroScrollHandler)
+  }
+})
 
 // Gallery carousel
 const currentSlide = ref(0)
@@ -223,10 +257,19 @@ const endDrag = () => {
 
 .garden-hero {
   position: relative;
-  height: 60vh;
+  height: 37vh;
   min-height: 400px;
   overflow: hidden;
   padding-top: var(--header-height, 80px);
+}
+
+.garden-hero__image-wrapper {
+  position: absolute;
+  top: -20%;
+  left: 0;
+  width: 100%;
+  height: 140%;
+  will-change: transform;
 }
 
 .garden-hero__image {
@@ -251,18 +294,16 @@ const endDrag = () => {
   align-items: center;
   justify-content: center;
   background: rgba(0, 0, 0, 0.3);
+  padding-top: var(--header-bar-height, 80px);
 }
 
 .garden-hero__title {
-  color: white;
   text-align: center;
-  font-size: clamp(2rem, 5vw, 4rem);
 }
 
 .garden-subnav {
-  padding: 2rem 0;
-  border-bottom: 1px solid var(--gray-200, #e5e5e5);
-  background: var(--white, #fff);
+  padding: var(--pad-2) 0;
+  border-bottom: 1px solid currentColor;
 }
 
 .garden-subnav__menu {
@@ -275,33 +316,32 @@ const endDrag = () => {
 
 .garden-subnav__link {
   text-decoration: none;
-  color: var(--gray-600, #666);
   transition: color 0.2s;
-  font-size: 0.875rem;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  padding: 0.5rem 0;
   position: relative;
 }
 
-.garden-subnav__link:hover {
-  color: var(--black, #000);
-}
-
-.garden-subnav__link--active {
-  color: var(--black, #000);
-  font-weight: 600;
-}
-
-.garden-subnav__link--active::after {
+.garden-subnav__link::after {
   content: '';
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
-  height: 2px;
-  background: var(--black, #000);
+  height: 1px;
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+  transform-origin: bottom left;
+  background: currentColor;
 }
+.garden-subnav__link:hover::after,
+.garden-subnav__link--active::after {
+  transform: scaleX(1);
+}
+
+.garden-subnav__link--active {
+  font-weight: 500;
+}
+
 
 .garden-content-section {
   padding: 4rem 0;
@@ -318,7 +358,7 @@ const endDrag = () => {
 .garden-carousel {
   position: relative;
   overflow: hidden;
-  aspect-ratio: 5 / 4;
+  aspect-ratio: 8 / 7;
 }
 
 .garden-carousel__track {
@@ -357,73 +397,11 @@ const endDrag = () => {
   -webkit-user-drag: none;
 }
 
-.garden-carousel__caption {
+.carousel__caption {
   text-align: center;
-  margin-top: 0.5rem;
-  font-size: 0.875rem;
-  color: var(--gray-600, #666);
   padding: 0 1rem;
 }
 
-.garden-carousel__btn {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 48px;
-  height: 48px;
-  border: 1px solid var(--gray-300, #ccc);
-  background: white;
-  cursor: pointer;
-  font-size: 1.25rem;
-  transition: all 0.2s;
-  z-index: 10;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.garden-carousel__btn:hover {
-  background: var(--black, #000);
-  color: white;
-  border-color: var(--black, #000);
-}
-
-.garden-carousel__btn--prev {
-  left: 1rem;
-}
-
-.garden-carousel__btn--next {
-  right: 1rem;
-}
-
-.garden-carousel__dots {
-  position: absolute;
-  bottom: 1rem;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 0.5rem;
-  z-index: 10;
-}
-
-.garden-carousel__dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  border: 2px solid white;
-  background: transparent;
-  cursor: pointer;
-  transition: all 0.2s;
-  padding: 0;
-}
-
-.garden-carousel__dot:hover {
-  background: rgba(255, 255, 255, 0.5);
-}
-
-.garden-carousel__dot--active {
-  background: white;
-}
 
 .loading-placeholder {
   display: flex;

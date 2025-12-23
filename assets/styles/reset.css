@@ -27,7 +27,7 @@ footer, header, hgroup, menu, nav, section {
 }
 body {
   line-height: 1.5;
-  min-height: 100vh;
+  min-height: 100svh;
   text-rendering: optimizeSpeed;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;

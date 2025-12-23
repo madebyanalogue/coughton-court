@@ -1,10 +1,48 @@
 import { useAsyncData } from '#app'
 import { computed } from 'vue'
 
+// Helper function to generate anchor ID from section title
+const generateAnchorId = (title) => {
+  if (!title) return null
+  return title
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+}
+
+// Helper function to process menu items and auto-generate anchors
+const processMenuItems = (items) => {
+  if (!items || !Array.isArray(items)) return items
+  
+  return items.map(item => {
+    if (item.to?.section?.title && !item.to.anchor) {
+      // Auto-generate anchor from section title if section is selected but anchor is not set
+      item.to.anchor = generateAnchorId(item.to.section.title)
+    }
+    return item
+  })
+}
+
 export const useSiteSettings = () => {
   const { data: settings, error, pending } = useAsyncData('siteSettings-v2', async () => {
     try {
       const result = await $fetch('/api/sanity', { params: { type: 'siteSettings' } })
+      
+      // Process footer menus to auto-generate anchors
+      if (result?.footerMenusLeft) {
+        result.footerMenusLeft = result.footerMenusLeft.map(menu => ({
+          ...menu,
+          items: processMenuItems(menu.items)
+        }))
+      }
+      if (result?.footerMenusRight) {
+        result.footerMenusRight = result.footerMenusRight.map(menu => ({
+          ...menu,
+          items: processMenuItems(menu.items)
+        }))
+      }
+      
       return result || {}
     } catch (err) {
       console.warn('Failed to fetch site settings, using defaults:', err)
@@ -14,6 +52,22 @@ export const useSiteSettings = () => {
     server: true,
     default: () => ({})
   })
+
+  // Sync a body class when page transitions are disabled so we can
+  // hard-disable visual recalibration (header/footer/bg) in CSS.
+  if (typeof window !== 'undefined') {
+    watch(
+      () => settings.value?.disablePageTransition === true,
+      (disabled) => {
+        if (disabled) {
+          document.body.classList.add('no-page-transition')
+        } else {
+          document.body.classList.remove('no-page-transition')
+        }
+      },
+      { immediate: true }
+    )
+  }
 
   return {
     settings,

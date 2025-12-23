@@ -1,3 +1,26 @@
+// Helper function to generate anchor ID from section title
+const generateAnchorId = (title) => {
+  if (!title) return null
+  return title
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+}
+
+// Helper function to process menu items and auto-generate anchors
+const processMenuItems = (items) => {
+  if (!items || !Array.isArray(items)) return items
+  
+  return items.map(item => {
+    if (item.to?.section?.title && !item.to.anchor) {
+      // Auto-generate anchor from section title if section is selected but anchor is not set
+      item.to.anchor = generateAnchorId(item.to.section.title)
+    }
+    return item
+  })
+}
+
 export const useMenu = () => {
   // Fetch main menu from Sanity
   const { data: mainMenu, pending: mainMenuPending, error: mainMenuError } = useAsyncData('mainMenu', async () => {
@@ -5,6 +28,9 @@ export const useMenu = () => {
       const result = await $fetch('/api/sanity', {
         query: { type: 'menu', menuTitle: 'Main Menu' }
       })
+      if (result && result.items) {
+        result.items = processMenuItems(result.items)
+      }
       return result
     } catch (error) {
       mainMenuError.value = error
@@ -19,6 +45,9 @@ export const useMenu = () => {
       const result = await $fetch('/api/sanity', {
         query: { type: 'menu', menuTitle: 'Footer' }
       })
+      if (result && result.items) {
+        result.items = processMenuItems(result.items)
+      }
       return result
     } catch (error) {
       footerMenuError.value = error

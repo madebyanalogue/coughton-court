@@ -77,6 +77,14 @@ Submitted on ${new Date().toLocaleString()}
     // Send email using Resend
     const resend = new Resend(apiKey)
     
+    console.log('[Contact Form] Attempting to send email:', {
+      from: fromEmail,
+      to: toEmail,
+      subject,
+      hasApiKey: !!apiKey,
+      apiKeyLength: apiKey?.length || 0
+    })
+    
     const emailResponse = await resend.emails.send({
       from: fromEmail,
       to: toEmail,
@@ -85,17 +93,30 @@ Submitted on ${new Date().toLocaleString()}
       text: textContent
     })
 
+    console.log('[Contact Form] Email sent successfully:', emailResponse)
+
     return {
       success: true,
       message: 'Contact form submitted successfully',
       data: emailResponse
     }
   } catch (error: any) {
-    console.error('Contact form error:', error)
+    console.error('[Contact Form] Error details:', {
+      message: error?.message,
+      name: error?.name,
+      statusCode: error?.statusCode,
+      stack: error?.stack,
+      response: error?.response
+    })
     
     // If it's already a createError, re-throw it
     if (error.statusCode) {
       throw error
+    }
+
+    // Log Resend-specific errors
+    if (error?.response) {
+      console.error('[Contact Form] Resend API error response:', error.response)
     }
 
     // Otherwise, create a generic error

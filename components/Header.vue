@@ -10,11 +10,20 @@
     }"
   >
   
-    <div class="header-bar flex flex-row flex-center flex-middle px1 px-md-2">
+    <div class="header-bar grid header-grid-area px2">
       <div class="header-left">
-        <div class="page-title-container">
+        <!-- <div class="page-title-container">
           <div class="page-title mono" :data-page-title="pageTitle" ref="pageTitleRef">{{ displayTitle }}</div>
-        </div>
+        </div> -->
+        <a 
+          v-if="bookingLink"
+          :href="bookingLink"
+          target="_blank"
+          rel="noopener"
+          class="button header-booking-button"
+        >
+          {{ bookingTitle }}
+        </a>
       </div>
       <NuxtLink
         v-if="!pageData?.hideHeaderLogo"
@@ -37,29 +46,46 @@
           :href="bookingLink"
           target="_blank"
           rel="noopener"
-          class="header-booking-btn"
+          class="button header-booking-button"
         >
           {{ bookingTitle }}
         </a>
-        <MobileMenu 
-          :is-open="menuOpen" 
-          @close-menu="closeMenu" 
-        />
-        <MenuButton :is-active="menuOpen" @toggle-menu="toggleMenu" />
+        <div class="header-mobile-menu">
+          <MobileMenu 
+            :is-open="menuOpen" 
+            @close-menu="closeMenu" 
+          />
+          <MenuButton :is-active="menuOpen" @toggle-menu="toggleMenu" />
+        </div>
       </div>
 
     </div>
 
-    <nav v-if="mainMenuItems.length > 0" class="header-nav">
-      <ul class="header-nav-list">
-        <li v-for="item in mainMenuItems" :key="item._key || item.text" class="header-nav-item">
+    <!-- Always render nav so it's permanent; list may be empty briefly while menu loads -->
+    <nav class="header-nav">
+      <ul v-if="mainMenuItems.length > 0" class="header-nav-list h8">
+        <li 
+          v-for="item in mainMenuItems" 
+          :key="item._key || item.text" 
+          class="header-nav-item"
+          :class="{ 'header-nav-item--current': isCurrentPage(item) }"
+        >
           <NuxtLink 
-            v-if="getMenuItemUrl(item)" 
+            v-if="getMenuItemUrl(item) && !isExternalUrl(item.to?.url)" 
             :to="getMenuItemUrl(item)" 
             class="header-nav-link"
           >
             {{ item.text }}
           </NuxtLink>
+          <a 
+            v-else-if="getMenuItemUrl(item)" 
+            :href="getMenuItemUrl(item)" 
+            target="_blank" 
+            rel="noopener"
+            class="header-nav-link"
+          >
+            {{ item.text }}
+          </a>
           <span v-else class="header-nav-link">{{ item.text }}</span>
         </li>
       </ul>
@@ -191,6 +217,16 @@ const mainMenuItems = computed(() => {
   return items.filter(item => item && item.text) // Filter out any invalid items
 })
 
+// Helper function to determine if a custom URL should be treated as external
+const isExternalUrl = (url) => {
+  if (!url) return false
+  // Explicit external protocols
+  if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('//')) return true
+  if (url.startsWith('mailto:') || url.startsWith('tel:')) return true
+  // Treat any URL that doesn't start with "/" or "#" as external (e.g. example.com)
+  return !url.startsWith('/') && !url.startsWith('#')
+}
+
 // Helper function to get the URL for a menu item
 const getMenuItemUrl = (item) => {
   if (item.to?.page?.slug?.current) {
@@ -206,6 +242,33 @@ const getMenuItemUrl = (item) => {
     return item.to.url
   }
   return null
+}
+
+// Check if a menu item is the current page
+const isCurrentPage = (item) => {
+  const itemUrl = getMenuItemUrl(item)
+  if (!itemUrl) return false
+  
+  // For external URLs, don't mark as current
+  if (isExternalUrl(itemUrl)) return false
+  
+  // Get current route path without hash/anchor
+  const currentPath = route.path.split('#')[0].replace(/\/$/, '') || '/'
+  
+  // Get menu item path without hash/anchor
+  const itemPath = itemUrl.split('#')[0].replace(/\/$/, '') || '/'
+  
+  // For home page, exact match only
+  if (currentPath === '/' && itemPath === '/') {
+    return true
+  }
+  
+  // For other pages, exact match or if current path starts with item path (for nested routes)
+  if (itemPath === '/') {
+    return false // Don't mark home as active when on other pages
+  }
+  
+  return currentPath === itemPath || currentPath.startsWith(itemPath + '/')
 }
 
 // Website title from Sanity
@@ -285,7 +348,15 @@ const initializeMomentumHover = () => {
 
 onMounted(() => {
   window.addEventListener('resize', updateHeights);
-  nextTick(updateHeights);
+  nextTick(() => {
+    updateHeights();
+    // Enable header scroll animation once header is measured
+    if (headerRef.value && window.gsap) {
+      // Ensure header starts visible at the top
+      window.gsap.set(headerRef.value, { y: '0%', opacity: 1 });
+    }
+    headerAnimated.value = true;
+  });
 
   // Watch for title changes
   const observer = new MutationObserver((mutations) => {
@@ -377,7 +448,6 @@ const closeMenu = () => {
   left: 0;
   right: 0;
   z-index: 1000;
-  transition: background 0.3s ease, color 0.3s ease;
   justify-content: space-between;
   display:grid;
   grid-template-areas:
@@ -446,31 +516,6 @@ const closeMenu = () => {
   align-items: center;
 }
 
-.header-booking-btn {
-  padding: 0.5rem 1rem;
-  background: var(--black, #000);
-  color: var(--white, #fff);
-  text-decoration: none;
-  font-size: 0.875rem;
-  white-space: nowrap;
-  transition: all 0.2s;
-  border-radius: 2px;
-  cursor: pointer;
-}
-
-.header-booking-btn:hover {
-  background: var(--gray-700, #333);
-}
-
-header.overlay .header-booking-btn {
-  background: var(--white, #fff);
-  color: var(--black, #000);
-}
-
-header.overlay .header-booking-btn:hover {
-  background: var(--gray-100, #f5f5f5);
-}
-
 .hamburger {
   display: flex;
   flex-direction: column;
@@ -508,6 +553,15 @@ header.overlay .header-booking-btn:hover {
   background: white;
 }
 
+.header-bar {
+  position: relative;
+  grid-template-areas:
+        "left center right";
+  grid-template-columns: 1fr auto 1fr;
+  grid-template-rows: auto;
+  gap: 10px;
+}
+
 /* Replacing the previous CSS rule for .header-bar.no-transform-transition */
 .header-bar.no-transform-transition {
   transition: none !important;
@@ -519,30 +573,77 @@ header.overlay .header-booking-btn:hover {
   align-items: center;
 }
 
+.header-right .header-booking-button {
+    display: none;
+  }
+@media (min-width: 800px) {
+  .header-left .header-booking-button {
+    display: none;
+  }
+  .header-right .header-booking-button {
+    display: block;
+  }
+}
+
 .header-nav {
-  display: block;
+  display: none;
   width: 100%;
-  border-bottom: 1px solid currentColor;
-  border-top: 1px solid currentColor;
   height: var(--header-nav-height);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  position: relative;
+}
+.header-bar:after,
+.header-nav:after {
+  content: '';
+  position: absolute;
+  left: var(--pad-2);
+  right: var(--pad-2);
+  width: calc(100% - var(--pad-2) * 2);
+  border-bottom: 1px solid currentColor;
+  bottom: 0;
+}
+@media (min-width: 800px) {
+  .header-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 }
 
 .header-nav-list {
   display: flex;
   list-style: none;
   margin: 0;
-  padding: 0.5em 1em;
-  gap: 10px;
+  padding: 0px;
+  gap: 90px;
   flex-wrap: wrap;
   justify-content: center;
-  align-items: center;
+  height: 100%;
+  padding-top: calc(var(--pad-1) * 0.25);
 }
 
 .header-nav-item {
   margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  height: 100%;
+}
+.header-nav-item:after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: 2px;
+  transform: scaleY(0);
+  transform-origin: bottom center;
+  background: currentColor;
+  transition: transform 0.3s ease;
+}
+.header-nav-item.header-nav-item--current:after {
+  transform: scaleY(1);
 }
 
 .header-nav-link {
@@ -555,6 +656,19 @@ header.overlay .header-booking-btn:hover {
 
 .header-nav-link:hover {
   opacity: 0.7;
+}
+
+/* Hide mobile menu (hamburger) on desktop */
+.header-mobile-menu {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+@media (min-width: 800px) {
+  .header-mobile-menu {
+    display: none;
+  }
 }
 
 

@@ -1,11 +1,15 @@
 <template>
-  <section ref="sectionRef" :class="['section-directions', { 'section-border-top': section.borderTop }]">
+  <section
+    :id="sectionId"
+    ref="sectionRef"
+    :class="['section-directions', { 'section-border-top': section.borderTop, 'section-border-bottom': section.borderBottom }]"
+  >
     <div class="wrapper">
-      <div class="grid grid-1 grid-md-2 gap-3">
+      <div class="grid grid-1 grid-md-2 gap-3 gap-6-md px-md-4">
         
         <!-- Left: Title and Tabs -->
-        <div class="directions-content">
-          <h2 v-if="title" class="directions-title">{{ title }}</h2>
+        <div class="directions-content py-md-1 gap-2">
+          <h2 v-if="title" class="directions-title h4">{{ title }}</h2>
           
           <div v-if="tabs && tabs.length > 0" class="directions-tabs">
             <div class="directions-tabs__header">
@@ -13,14 +17,14 @@
                 v-for="(tab, index) in tabs"
                 :key="index"
                 @click="activeTab = index"
-                class="directions-tabs__button"
+                class="directions-tabs__button h5"
                 :class="{ 'directions-tabs__button--active': activeTab === index }"
               >
                 {{ tab.tabTitle }}
               </button>
             </div>
             
-            <div class="directions-tabs__content">
+            <div class="directions-tabs__content rte">
               <div
                 v-for="(tab, index) in tabs"
                 :key="index"
@@ -56,6 +60,16 @@ const props = defineProps({
 const sectionRef = ref(null)
 const activeTab = ref(0)
 
+// Generate a stable ID from the section title (used for anchor links)
+const sectionId = computed(() => {
+  const title = props.section?.title || ''
+  return title
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+})
+
 const title = computed(() => props.section?.directionsContent?.title || '')
 const tabs = computed(() => props.section?.directionsContent?.tabs || [])
 const mapEmbedCode = computed(() => props.section?.directionsContent?.mapEmbedCode || '')
@@ -69,7 +83,6 @@ const mapEmbedCode = computed(() => props.section?.directionsContent?.mapEmbedCo
 .directions-content {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
 }
 
 .directions-title {
@@ -86,18 +99,14 @@ const mapEmbedCode = computed(() => props.section?.directionsContent?.mapEmbedCo
 .directions-tabs__header {
   display: flex;
   flex-wrap: wrap;
-  gap: 1.5rem;
-  border-bottom: 1px solid currentColor;
+  gap: var(--pad-2);
   padding-bottom: 0.5rem;
 }
 
 .directions-tabs__button {
   background: none;
   border: none;
-  padding: 0.5rem 0;
   cursor: pointer;
-  font-family: inherit;
-  font-size: inherit;
   color: inherit;
   text-decoration: none;
   position: relative;

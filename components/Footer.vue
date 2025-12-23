@@ -1,17 +1,17 @@
 <template>
   <div>
-    <footer class="scheme dark h6">
-      <div id="footer" class="py2 py-sm-3 py-md-2 grid grid-1 gap-2">
+    <footer class="scheme dark">
+      <div id="footer" class="py2 py-sm-3 py-md-4 grid grid-1 gap-2">
 
 
 
         <div class="wrapper">
 
-          <div class="flex flex-between">
+          <div class="grid grid-1 grid-md-3 gap-2">
 
             <!-- FOOTER MENUS LEFT -->
             <div v-if="footerMenusLeft?.length > 0" class="footer-menus-left grid grid-3 gap-2">
-              <div v-for="menu in footerMenusLeft" :key="menu._id" class="footer-menu h6">
+              <div v-for="menu in footerMenusLeft" :key="menu._id" class="footer-menu">
                 <div class="grid grid-1 gap-1">
                   <h5 v-if="menu.title" class="footer-menu-title h5">{{ menu.title }}</h5>
                   <ul v-if="menu.items && menu.items.length > 0" class="footer-menu-list">
@@ -41,7 +41,7 @@
 
             <!-- COPYRIGHT -->
             <div class="">
-              <div class="flex flex-col flex-center gap-1">
+              <div class="flex flex-col flex-center gap-1 text-center uppercase medium">
                 <div class="flex flex-center">
                   <NuxtLink to="/">
                     <div class="footer-logo">
@@ -49,7 +49,7 @@
                     </div>
                   </NuxtLink>
                 </div>
-                <div class="h7">© <span>{{ websiteTitle }}</span> {{ new Date().getFullYear() }}. All Rights Reserved.</div>
+                <div class="h7 medium">© <span>{{ websiteTitle }}</span> {{ new Date().getFullYear() }}. All Rights Reserved.</div>
               </div>
             </div>
 
@@ -61,7 +61,7 @@
 
                   <div v-for="menu in footerMenusRight" :key="menu._id" class="footer-menu">
                     <div class="grid grid-1 gap-1">
-                      <h3 v-if="menu.title" class="footer-menu-title">{{ menu.title }}</h3>
+                      <h3 v-if="menu.title" class="footer-menu-title h5 uppercase medium">{{ menu.title }}</h3>
                       <ul v-if="menu.items && menu.items.length > 0" class="footer-menu-list">
                         <li v-for="item in menu.items" :key="item._key || item.text" class="footer-menu-item">
                           <NuxtLink 
@@ -155,14 +155,28 @@ const {
 const mainMenuItems = computed(() => mainMenu?.value?.items || []);
 const footerMenuItems = computed(() => footerMenu?.value?.items || []);
 
-// Helper function to check if URL is external
+// Helper function to check if URL is external (including mailto/tel/custom domains)
 const isExternalUrl = (url) => {
   if (!url) return false
-  return url.startsWith('http://') || url.startsWith('https://') || url.startsWith('//')
+  // Explicit external protocols
+  if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('//')) return true
+  if (url.startsWith('mailto:') || url.startsWith('tel:')) return true
+  // Treat any URL that doesn't start with "/" or "#" as external (e.g. example.com)
+  return !url.startsWith('/') && !url.startsWith('#')
 }
 
 // Helper function to get menu item URL
 const getMenuItemUrl = (item) => {
+  if (item.to?.page?._type === 'garden' && item.to?.page?.slug?.current) {
+    // Garden detail pages live under /gardens/:slug
+    let url = `/gardens/${item.to.page.slug.current}`
+    if (item.to?.anchor) {
+      const anchor = item.to.anchor.startsWith('#') ? item.to.anchor : `#${item.to.anchor}`
+      url += anchor
+    }
+    return url
+  }
+
   if (item.to?.page?.slug?.current) {
     let url = `/${item.to.page.slug.current}`
     // Append anchor if provided
@@ -352,5 +366,9 @@ onUnmounted(() => {
 
 .opening-times-table .time {
   color: inherit;
+}
+
+.footer-menu-list {
+  line-height: 1.6;
 }
 </style> 

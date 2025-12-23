@@ -1,13 +1,13 @@
 <template>
-  <section ref="sectionRef" :class="['section-contact-form', { 'section-border-top': section.borderTop }]">
+  <section ref="sectionRef" :class="['section-contact-form', { 'section-border-top': section.borderTop, 'section-border-bottom': section.borderBottom }]">
     <div class="wrapper">
-      <div class="grid grid-1 grid-md-2 gap-3">
+      <div class="grid grid-1 grid-md-2 gap-3 px-md-4 gap-md-4">
         
         <!-- Left: Form Content -->
-        <div class="contact-form-content">
-          <h2 v-if="title" class="contact-form-title">{{ title }}</h2>
+        <div class="contact-form-content grid grid-1 gap-1">
+          <h2 v-if="title" class="contact-form-title h4">{{ title }}</h2>
           
-          <div v-if="description" class="contact-form-description">
+          <div v-if="description" class="contact-form-description rte">
             <SanityBlocks :blocks="description" />
           </div>
 
@@ -62,10 +62,11 @@
                 class="contact-form-input contact-form-textarea"
               ></textarea>
             </div>
-
-            <button type="submit" class="contact-form-submit" :disabled="isSubmitting">
-              {{ isSubmitting ? 'Sending...' : 'Send' }}
-            </button>
+            <div>
+              <button type="submit" class="contact-form-submit button" :disabled="isSubmitting">
+                {{ isSubmitting ? 'Sending...' : 'Send' }}
+              </button>
+            </div>
 
             <div v-if="message" class="contact-form-message" :class="{ 'contact-form-message--error': isError }">
               {{ message }}
@@ -172,21 +173,12 @@ onUnmounted(() => {
 <style scoped>
 .section-contact-form {
   opacity: 0;
-  padding: 4rem 0;
 }
 
 .contact-form-content {
   width: 100%;
 }
 
-.contact-form-title {
-  font-size: 2rem;
-  margin-bottom: 1.5rem;
-}
-
-.contact-form-description {
-  margin-bottom: 2rem;
-}
 
 .contact-form {
   display: flex;
@@ -201,11 +193,6 @@ onUnmounted(() => {
 }
 
 .contact-form-label {
-  font-size: 0.875rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--gray-700, #555);
 }
 
 .required {
@@ -215,17 +202,14 @@ onUnmounted(() => {
 .contact-form-input {
   background: transparent;
   border: none;
-  border-bottom: 1px solid var(--gray-400, #999);
-  padding: 0.5rem 0;
-  font-size: 1rem;
-  color: var(--black, #000);
+  border-bottom: 1px solid currentColor;
   outline: none;
   transition: border-color 0.2s;
   font-family: inherit;
 }
 
 .contact-form-input:focus {
-  border-bottom-color: var(--black, #000);
+  border-bottom-color: currentColor;
 }
 
 .contact-form-input::placeholder {
@@ -238,40 +222,13 @@ onUnmounted(() => {
 }
 
 .contact-form-submit {
-  align-self: flex-start;
-  padding: 0.75rem 2rem;
-  background: var(--black, #000);
-  color: var(--white, #fff);
-  border: none;
-  cursor: pointer;
-  font-size: 1rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  transition: background 0.2s;
-  margin-top: 0.5rem;
+  min-width: 180px;
 }
-
-.contact-form-submit:hover:not(:disabled) {
-  background: var(--gray-700, #333);
-}
-
 .contact-form-submit:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
-.contact-form-message {
-  padding: 1rem;
-  border-radius: 4px;
-  margin-top: 1rem;
-}
-
-.contact-form-message--error {
-  background: rgba(220, 38, 38, 0.1);
-  color: var(--red, #dc2626);
-  border: 1px solid rgba(220, 38, 38, 0.3);
-}
 
 .contact-form-image {
   width: 100%;

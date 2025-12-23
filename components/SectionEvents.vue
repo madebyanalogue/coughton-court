@@ -1,13 +1,13 @@
 <template>
-  <section ref="sectionRef" :class="{ 'section-border-top': section.borderTop }">
+  <section ref="sectionRef" :class="{ 'section-border-top': section.borderTop, 'section-border-bottom': section.borderBottom }">
     <div class="wrapper">
-      <div class="grid grid-1">
+      <div class="grid grid-1 py-md-1">
 
         <div v-if="title" class="text-center py1">
           <div class="h4 mono">{{ title }}</div>
         </div>
 
-        <div class="grid grid-1 grid-md-4 gap-2">
+        <div class="grid grid-1 grid-md-3 gap-3">
           <div v-for="event in activeEvents" :key="event._id" class="event-card">
             <NuxtLink 
               v-if="event.slug?.current" 
@@ -15,7 +15,7 @@
               class="event-link"
             >
               <div class="grid grid-1 gap-1">
-                <div class="h2">{{ event.title }}</div>
+                <div class="h6 medium">{{ event.title }}</div>
                 <div class="image-wrapper">
                   <NuxtImg 
                     v-if="event.featuredImage"
@@ -33,10 +33,10 @@
                 <div class="event-date">{{ formatDateRange(event.startDate, event.endDate) }}</div>
                 <div class="flex gap-1">
                     <div class="col-xs">
-                    <p v-if="event.shortDescription" class="p-small">{{ event.shortDescription }}</p>
+                    <p v-if="event.shortDescription" class="h7">{{ event.shortDescription }}</p>
                     </div>
                     <div class="">
-                      <div class="">→</div>
+                      <div class="arrow">→</div>
                     </div>
                 </div>
               </div>
@@ -61,7 +61,7 @@
                 <div class="event-date">{{ formatDateRange(event.startDate, event.endDate) }}</div>
                 <div class="flex gap-1">
                     <div class="col-xs">
-                    <p v-if="event.shortDescription" class="p-small">{{ event.shortDescription }}</p>
+                    <p v-if="event.shortDescription" class="h7">{{ event.shortDescription }}</p>
                     </div>
                 </div>
               </div>
@@ -178,9 +178,12 @@ section {
   cursor: pointer;
 }
 
+.image-wrapper {
+  aspect-ratio: 3/2;
+}
+
 .event-date {
-  font-size: 0.875rem;
-  color: var(--gray-600, #666);
+  font-style: italic;
 }
 
 .event-image {
