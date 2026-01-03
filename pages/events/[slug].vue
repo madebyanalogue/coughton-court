@@ -368,7 +368,7 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   padding-top: var(--header-bar-height, 80px);
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(0, 0, 0, 0.4);
 }
 
 .event-hero__title {

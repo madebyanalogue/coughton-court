@@ -32,7 +32,7 @@ export default defineEventHandler(async (event) => {
     }
 
     // Get email service configuration from environment variables
-    const apiKey = process.env.EMAIL_API_KEY || process.env.RESEND_API_KEY
+    const apiKey = process.env.RESEND_API_KEY || process.env.EMAIL_API_KEY
     const fromEmail = process.env.EMAIL_FROM || 'onboarding@resend.dev'
     const toEmail = process.env.EMAIL_TO
 

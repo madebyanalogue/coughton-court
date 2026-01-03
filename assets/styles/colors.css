@@ -24,10 +24,12 @@ svg > * {
 .button {
     background-color: var(--button-background-color);
     color: var(--button-text-color);
+    border-color: var(--button-border-color);
 }
 .button:hover {
     background-color: var(--button-hover-background-color);
     color: var(--button-hover-text-color);
+    border-color: var(--button-hover-border-color);
 }
 
 .light, body {
@@ -39,10 +41,10 @@ svg > * {
     --tertiary-text-color: rgba(var(--dark-green), 1);
     --button-background-color: rgb(var(--dark-green));
     --button-text-color: rgba(var(--light-green), 1);
-    --button-hover-background-color: rgba(var(--dark-green), 1);
-    --button-hover-text-color: rgba(var(--light-green), 1);
     --button-border-color: rgba(var(--dark-green), 1);
-    --button-hover-border-color: rgba(var(--dark-green), 1);
+    --button-hover-background-color: rgba(var(--mid-green), 0);
+    --button-hover-text-color: rgba(var(--dark-green), 1);
+    --button-hover-border-color: rgba(var(--mid-green), 1);
 }
 .dark, html {
     --background-color: rgba(var(--mid-green), 1);
@@ -67,8 +69,8 @@ svg > * {
     --tertiary-text-color: #ffffff;
     --button-background-color: white;
     --button-text-color: rgba(var(--dark-green), 1);
-    --button-hover-background-color: rgba(var(--dark-green), 1);
-    --button-hover-text-color: rgba(var(--light-green), 1);
+    --button-hover-background-color: rgba(var(--dark-green), 0);
+    --button-hover-text-color: white;
     --button-border-color: white;
-    --button-hover-border-color: rgba(var(--light-green), 1);
+    --button-hover-border-color: white;
 }

@@ -11,6 +11,10 @@ export default defineNuxtConfig({
     useCdn: true
   },
   runtimeConfig: {
+    // Private keys (server-side only)
+    resendApiKey: process.env.RESEND_API_KEY || process.env.EMAIL_API_KEY,
+    emailTo: process.env.EMAIL_TO,
+    emailFrom: process.env.EMAIL_FROM || 'onboarding@resend.dev',
     public: {
       googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY || ''
     }

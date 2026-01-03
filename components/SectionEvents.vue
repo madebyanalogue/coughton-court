@@ -7,7 +7,11 @@
           <div class="h4 mono">{{ title }}</div>
         </div>
 
-        <div class="grid grid-1 grid-md-3 gap-3">
+        <div v-if="activeEvents.length === 0" class="text-center py4">
+          <p class="h7">No events at the moment.</p>
+        </div>
+
+        <div v-else class="grid grid-1 grid-md-3 gap-3">
           <div v-for="event in activeEvents" :key="event._id" class="event-card">
             <NuxtLink 
               v-if="event.slug?.current" 

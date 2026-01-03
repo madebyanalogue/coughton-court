@@ -1,13 +1,13 @@
 <template>
   <div class="garden-page">
     <template v-if="error">
-      <div class="wrapper py6">
+      <div class="wrapper py6 garden-page__state-wrapper">
         <h1>Error</h1>
         <p>{{ error.message }}</p>
       </div>
     </template>
     <template v-else-if="pending">
-      <div class="wrapper py6">
+      <div class="garden-page__loading-wrapper">
         <div class="loading-placeholder">
           <div class="loading-spinner"></div>
         </div>
@@ -133,7 +133,7 @@ const { title: websiteTitle } = useSiteSettings()
 
 const slug = computed(() => route.params.slug)
 
-// Fetch single garden
+// Fetch single garden - load on server to prevent footer flash
 const { data: garden, error, pending } = await useAsyncData(
   `garden-${slug.value}`,
   () => $fetch('/api/sanity', { 
@@ -141,8 +141,12 @@ const { data: garden, error, pending } = await useAsyncData(
       type: 'garden',
       slug: slug.value
     } 
-  })
+  }),
+  {
+    server: true
+  }
 )
+
 
 // Fetch all gardens for navigation
 const { data: allGardens } = await useAsyncData(
@@ -152,7 +156,10 @@ const { data: allGardens } = await useAsyncData(
       type: 'garden',
       all: true
     } 
-  })
+  }),
+  {
+    server: true
+  }
 )
 
 // Page title
@@ -253,6 +260,27 @@ const endDrag = () => {
 <style scoped>
 .garden-page {
   margin-top: calc(var(--header-height, 80px) * -1);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh + var(--header-height, 80px));
+  position: relative;
+}
+
+.garden-page__state-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.garden-page__loading-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  align-items: center;
+  justify-content: center;
+  padding-top: var(--header-height, 80px);
 }
 
 .garden-hero {
@@ -407,7 +435,6 @@ const endDrag = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 200px;
 }
 
 .loading-spinner {

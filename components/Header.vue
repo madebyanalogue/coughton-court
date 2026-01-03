@@ -137,15 +137,18 @@ const isGardenPage = computed(() => {
 
 // Determine if we should use overlay scheme
 const shouldUseOverlay = computed(() => {
-  // Events and gardens always have a hero
-  if (isEventPage.value || isGardenPage.value) {
-    return !hasScrolledPastHero.value
+  // During page transitions, keep current state to prevent flashing
+  if (typeof document !== 'undefined' && document.body.classList.contains('page-transitioning')) {
+    return true // Keep overlay during transition
   }
-  if (!props.pageData?.enableHeroImage) {
+  
+  // Default to overlay scheme
+  // Only switch to light scheme if explicitly scrolled past hero
+  if (hasScrolledPastHero.value) {
     return false
   }
-  // If we've scrolled past the hero, use light scheme
-  return !hasScrolledPastHero.value
+  // Default to overlay for all pages
+  return true
 })
 
 // Check if we've scrolled past the hero section
@@ -379,7 +382,14 @@ onMounted(() => {
 });
 
 watch(() => route.path, () => {
-  nextTick(updateHeights);
+  // Delay height update to avoid flashing during transitions
+  if (typeof document !== 'undefined' && document.body.classList.contains('page-transitioning')) {
+    setTimeout(() => {
+      nextTick(updateHeights);
+    }, 300)
+  } else {
+    nextTick(updateHeights);
+  }
 });
 
 // Watch for header visibility changes and animate smoothly

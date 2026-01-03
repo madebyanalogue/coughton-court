@@ -6,25 +6,55 @@
     />
   </ClientOnly>
   
-  <!-- Page transitions (wrap header + page content so whole app fades) -->
-  <Transition
-    v-if="!disablePageTransition"
-    name="page"
-    mode="out-in"
-    appear
-    @before-enter="onPageBeforeEnter"
-    @after-enter="onPageEnter"
-  >
-    <div v-if="preloaderReady" class="app-shell" :key="route.fullPath">
-      <VisibleGrid />
-      <Header :page-data="page" />
-
-      <div class="page-container">
-        <Suspense>
+  <!-- Page transitions (entire app-shell transitions as one unit) -->
+  <div v-if="preloaderReady" class="app-shell-wrapper">
+    <VisibleGrid />
+    <Header :page-data="page" />
+    <Transition
+      v-if="!disablePageTransition && pageReady"
+      name="page"
+      appear
+      @before-enter="onPageBeforeEnter"
+      @after-enter="onPageEnter"
+      @leave="onPageLeave"
+    >
+      <div v-if="pageReady" class="app-shell" :key="route.fullPath">
+        <div class="page-container">
           <main :style="{ paddingTop: mainPaddingVar }">
-            <NuxtPage />
+            <Suspense>
+              <NuxtPage />
+              <template #fallback>
+                <div class="page-loading-placeholder" style="min-height: calc(100vh - var(--header-height, 80px));"></div>
+              </template>
+            </Suspense>
           </main>
-        </Suspense>
+          <ClientOnly>
+            <template #default>
+              <Footer
+                v-if="!page?.value?.hideFooter"
+                :page-data="page"
+                :key="route.path"
+              />
+            </template>
+            <template #fallback>
+              <!-- No footer during SSR -->
+            </template>
+          </ClientOnly>
+        </div>
+      </div>
+    </Transition>
+    
+    <!-- Fallback when transition is disabled or page not ready -->
+    <div v-else class="app-shell">
+      <div class="page-container">
+        <main :style="{ paddingTop: mainPaddingVar }">
+          <Suspense>
+            <NuxtPage />
+            <template #fallback>
+              <div class="page-loading-placeholder" style="min-height: calc(100vh - var(--header-height, 80px));"></div>
+            </template>
+          </Suspense>
+        </main>
         <ClientOnly>
           <template #default>
             <Footer
@@ -39,22 +69,25 @@
         </ClientOnly>
       </div>
     </div>
-  </Transition>
+  </div>
 
   <!-- No page transitions: render instantly with no animation -->
   <div v-else-if="preloaderReady" class="app-shell" :key="route.fullPath">
     <VisibleGrid />
     <Header :page-data="page" />
     <div class="page-container">
-      <Suspense>
-        <main :style="{ paddingTop: mainPaddingVar }">
+      <main :style="{ paddingTop: mainPaddingVar }">
+        <Suspense>
           <NuxtPage />
-        </main>
-      </Suspense>
+          <template #fallback>
+            <div class="page-loading-placeholder" style="min-height: calc(100vh - var(--header-height, 80px));"></div>
+          </template>
+        </Suspense>
+      </main>
       <ClientOnly>
         <template #default>
           <Footer
-            v-if="!page?.value?.hideFooter"
+            v-if="shouldShowFooter"
             :page-data="page"
             :key="route.path"
           />
@@ -92,6 +125,7 @@ const { enableScrollAnimations } = useScrollTrigger();
 // Preloader state
 const preloaderReady = ref(false)
 const isPageTransitioning = ref(false)
+const pageReady = ref(true)
 
 // Use custom transition hooks to control scroll position instead of router.scrollBehavior
 
@@ -99,6 +133,7 @@ const isPageTransitioning = ref(false)
 router.beforeEach(() => {
   if (!disablePageTransition.value) {
     isPageTransitioning.value = true
+    pageReady.value = false
     // Add class to body to prevent footer scroll trigger during transitions
     if (typeof document !== 'undefined') {
       document.body.classList.add('page-transitioning')
@@ -112,9 +147,36 @@ router.beforeEach(() => {
   }
 })
 
-router.afterEach((to) => {
+router.afterEach(async (to) => {
   // Keep footer hidden until page transition is complete
   // The footer will be shown again in onPageEnter after fade-in completes
+
+  // Wait for page to load before starting transition
+  if (!disablePageTransition.value && typeof window !== 'undefined') {
+    await nextTick()
+    
+    // Wait for Suspense to resolve by checking if page content is ready
+    await new Promise((resolve) => {
+      const checkReady = () => {
+        // Check if Suspense fallback is gone and page content exists
+        const fallback = document.querySelector('.page-loading-placeholder')
+        const pageContent = document.querySelector('main > div:not(.page-loading-placeholder)')
+        
+        if (!fallback && pageContent) {
+          // Wait one more tick for rendering to complete
+          nextTick(() => {
+            pageReady.value = true
+            resolve()
+          })
+        } else {
+          // Check again after a short delay
+          setTimeout(checkReady, 50)
+        }
+      }
+      // Start checking after a brief delay to let Suspense start
+      setTimeout(checkReady, 100)
+    })
+  }
 
   // For garden detail pages, always reset scroll to top after navigation
   // so we don't land at the footer when moving between /gardens/* routes.
@@ -226,6 +288,10 @@ const onPageEnter = () => {
 const onPageBeforeEnter = () => {
   // Intentionally left empty: we no longer force scroll position on route changes
   // so the footer doesn't appear to "jump" to the top on short pages.
+}
+
+const onPageLeave = () => {
+  // Fade out the old page (header and content, but body background stays)
 }
 </script>
 

@@ -52,22 +52,43 @@
   display:block;
 }
 
-/* App shell that wraps header + page content for transitions */
-.app-shell {
+/* App shell wrapper - keeps header stable during transitions */
+.app-shell-wrapper {
   min-height: 100svh;
   display: flex;
   flex-direction: column;
+  position: relative;
+}
+
+/* App shell that wraps page content for transitions */
+.app-shell {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  opacity: 1;
 }
 
 /* Page transition fade (enabled mode, Transition name=\"page\") */
+/* Entire app-shell transitions as one unit - header, content, footer all together */
 .page-enter-active {
-  transition: opacity 0s ease-out;
+  transition: opacity 0.8s ease-out;
+  position: relative;
+  z-index: 1;
+  will-change: opacity;
 }
 .page-leave-active {
-  transition: opacity 0.25s ease-in;
+  transition: opacity 0.3s ease-in;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  z-index: 0;
+  will-change: opacity;
 }
 .page-enter-from {
-  opacity: 0.5;  /* start slightly visible to avoid a hard 'pop' */
+  opacity: 0;
 }
 .page-enter-to {
   opacity: 1;
@@ -76,7 +97,7 @@
   opacity: 1;
 }
 .page-leave-to {
-  opacity: 1;  /* fade out only halfway so background never shows through fully */
+  opacity: 0;
 }
 
 
@@ -134,7 +155,7 @@ section {
 .button:hover {
   background: var(--button-hover-background-color);
   color: var(--button-hover-text-color);
-  border-color: var(--button-border-color);
+  border-color: var(--button-hover-border-color);
 }
 
 
@@ -167,6 +188,7 @@ footer {
 body:not(.preloader-ready) footer {
   opacity: 0;
 }
+
 
 header {
   position: fixed;
@@ -237,6 +259,8 @@ header {
 main {
   flex: 1 0 auto;
   min-height: 100svh;
+  display: flex;
+  flex-direction: column;
   /* Optional: add padding or margin as needed */
   padding-top: calc(var(--header-height));
 }
@@ -876,11 +900,12 @@ main > div, .page-container main {
   align-items: center;
   justify-content: center;
   background-color: rgba(var(--mid-green), 1);
+  color: rgba(var(--light-green), 1);
 }
 
 .carousel__btn:hover {
   background: rgba(var(--dark-green), 1);
-  color: rgba(var(--light-green), 1);
+  color: var(--white);
 }
 
 .carousel__btn--prev {
