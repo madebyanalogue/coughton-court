@@ -241,9 +241,8 @@ onUnmounted(() => {
 .page-hero {
   position: relative;
   width: 100%;
-  height: 37vh;
-  min-height: 400px;
-  max-height: 800px;
+  height: 40vh;
+  min-height: 600px;
   overflow: hidden;
   z-index: 1;
   padding-top: var(--header-height);
@@ -255,7 +254,7 @@ onUnmounted(() => {
 }
 
 .page-hero--custom-content {
-  height: 60vh;
+  height: 100svh;
 }
 
 .page-hero-image-wrapper {

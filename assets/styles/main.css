@@ -69,36 +69,8 @@
   opacity: 1;
 }
 
-/* Page transition fade (enabled mode, Transition name=\"page\") */
-/* Entire app-shell transitions as one unit - header, content, footer all together */
-.page-enter-active {
-  transition: opacity 0.8s ease-out;
-  position: relative;
-  z-index: 1;
-  will-change: opacity;
-}
-.page-leave-active {
-  transition: opacity 0.3s ease-in;
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  width: 100%;
-  z-index: 0;
-  will-change: opacity;
-}
-.page-enter-from {
-  opacity: 0;
-}
-.page-enter-to {
-  opacity: 1;
-}
-.page-leave-from {
-  opacity: 1;
-}
-.page-leave-to {
-  opacity: 0;
-}
+/* Page transitions disabled - instant swap when ready */
+/* Transition CSS removed for instant page changes */
 
 
 
@@ -900,7 +872,7 @@ main > div, .page-container main {
   align-items: center;
   justify-content: center;
   background-color: rgba(var(--mid-green), 1);
-  color: rgba(var(--light-green), 1);
+  color: var(--white);
 }
 
 .carousel__btn:hover {

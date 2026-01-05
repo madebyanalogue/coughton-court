@@ -135,19 +135,61 @@ const isGardenPage = computed(() => {
   return route.path.startsWith('/gardens/')
 })
 
+// Check if the current page has a hero enabled
+const hasPageHero = computed(() => {
+  // Event and garden pages always have heroes
+  if (isEventPage.value || isGardenPage.value) {
+    return true
+  }
+  // Regular pages need enableHeroImage to be true
+  return !!props.pageData?.enableHeroImage
+})
+
+// Store previous overlay state to prevent flashing during transitions
+const previousOverlayState = ref(true)
+
 // Determine if we should use overlay scheme
 const shouldUseOverlay = computed(() => {
-  // During page transitions, keep current state to prevent flashing
+  // Check route first for gardens/events pages (they always have heroes)
+  // This check happens before transition check to ensure correct state
+  const isGardenOrEvent = isGardenPage.value || isEventPage.value
+  
+  // During page transitions, keep previous state to prevent flashing
   if (typeof document !== 'undefined' && document.body.classList.contains('page-transitioning')) {
-    return true // Keep overlay during transition
+    // If transitioning to/from gardens/events, they always use overlay
+    if (isGardenOrEvent) {
+      previousOverlayState.value = true
+      return true
+    }
+    // Otherwise keep previous state
+    return previousOverlayState.value
   }
   
-  // Default to overlay scheme
-  // Only switch to light scheme if explicitly scrolled past hero
-  if (hasScrolledPastHero.value) {
+  // Gardens/events pages always use overlay unless scrolled past hero
+  if (isGardenOrEvent) {
+    // Only switch to light scheme if explicitly scrolled past hero
+    if (hasScrolledPastHero.value) {
+      previousOverlayState.value = false
+      return false
+    }
+    previousOverlayState.value = true
+    return true
+  }
+  
+  // For regular pages, check if hero is enabled
+  if (!hasPageHero.value) {
+    previousOverlayState.value = false
     return false
   }
-  // Default to overlay for all pages
+  
+  // Only switch to light scheme if explicitly scrolled past hero
+  if (hasScrolledPastHero.value) {
+    previousOverlayState.value = false
+    return false
+  }
+  
+  // Use overlay when hero is present and we haven't scrolled past it
+  previousOverlayState.value = true
   return true
 })
 
@@ -195,8 +237,30 @@ const checkHeroScroll = () => {
   hasScrolledPastHero.value = heroRect.bottom < 50
 }
 
+// Initialize previous overlay state based on current route
+onMounted(() => {
+  if (isGardenPage.value || isEventPage.value) {
+    previousOverlayState.value = true
+  } else if (props.pageData?.enableHeroImage) {
+    previousOverlayState.value = true
+  } else {
+    previousOverlayState.value = false
+  }
+})
+
 // Watch for route changes and pageData to detect hero
 watch([() => route.path, () => props.pageData?.enableHeroImage], () => {
+  // Update previous state when route/pageData changes (but not during transition)
+  if (!document.body.classList.contains('page-transitioning')) {
+    if (isGardenPage.value || isEventPage.value) {
+      previousOverlayState.value = true
+    } else if (props.pageData?.enableHeroImage) {
+      previousOverlayState.value = true
+    } else {
+      previousOverlayState.value = false
+    }
+  }
+  
   if (isEventPage.value || isGardenPage.value || props.pageData?.enableHeroImage) {
     nextTick(() => {
       checkHeroScroll()

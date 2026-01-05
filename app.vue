@@ -6,46 +6,11 @@
     />
   </ClientOnly>
   
-  <!-- Page transitions (entire app-shell transitions as one unit) -->
+  <!-- Instant page transitions: hold current page until new content is ready -->
   <div v-if="preloaderReady" class="app-shell-wrapper">
     <VisibleGrid />
     <Header :page-data="page" />
-    <Transition
-      v-if="!disablePageTransition && pageReady"
-      name="page"
-      appear
-      @before-enter="onPageBeforeEnter"
-      @after-enter="onPageEnter"
-      @leave="onPageLeave"
-    >
-      <div v-if="pageReady" class="app-shell" :key="route.fullPath">
-        <div class="page-container">
-          <main :style="{ paddingTop: mainPaddingVar }">
-            <Suspense>
-              <NuxtPage />
-              <template #fallback>
-                <div class="page-loading-placeholder" style="min-height: calc(100vh - var(--header-height, 80px));"></div>
-              </template>
-            </Suspense>
-          </main>
-          <ClientOnly>
-            <template #default>
-              <Footer
-                v-if="!page?.value?.hideFooter"
-                :page-data="page"
-                :key="route.path"
-              />
-            </template>
-            <template #fallback>
-              <!-- No footer during SSR -->
-            </template>
-          </ClientOnly>
-        </div>
-      </div>
-    </Transition>
-    
-    <!-- Fallback when transition is disabled or page not ready -->
-    <div v-else class="app-shell">
+    <div class="app-shell" :key="route.fullPath">
       <div class="page-container">
         <main :style="{ paddingTop: mainPaddingVar }">
           <Suspense>
@@ -70,34 +35,6 @@
       </div>
     </div>
   </div>
-
-  <!-- No page transitions: render instantly with no animation -->
-  <div v-else-if="preloaderReady" class="app-shell" :key="route.fullPath">
-    <VisibleGrid />
-    <Header :page-data="page" />
-    <div class="page-container">
-      <main :style="{ paddingTop: mainPaddingVar }">
-        <Suspense>
-          <NuxtPage />
-          <template #fallback>
-            <div class="page-loading-placeholder" style="min-height: calc(100vh - var(--header-height, 80px));"></div>
-          </template>
-        </Suspense>
-      </main>
-      <ClientOnly>
-        <template #default>
-          <Footer
-            v-if="shouldShowFooter"
-            :page-data="page"
-            :key="route.path"
-          />
-        </template>
-        <template #fallback>
-          <!-- No footer during SSR -->
-        </template>
-      </ClientOnly>
-    </div>
-  </div>
 </template>
 
 <script setup>
@@ -108,7 +45,7 @@ import { useDarkMode } from '~/composables/usePageUi.js';
 import { useFavicon } from '~/composables/useFavicon.js';
 import { usePageSettings } from '~/composables/usePageSettings';
 import { useScrollTrigger } from '~/composables/useScrollTrigger.js';
-import { computed, onMounted, watch, ref } from 'vue';
+import { computed, onMounted, ref, nextTick } from 'vue';
 import { useRoute } from 'vue-router'
 import { useHead, useRouter } from '#app'
 import { useSiteSettings } from '~/composables/useSiteSettings'
@@ -117,7 +54,7 @@ import { useSiteSettings } from '~/composables/useSiteSettings'
 const { isDark, page } = usePageSettings();
 const route = useRoute();
 const router = useRouter();
-const { disablePreloader, disablePageTransition } = useSiteSettings()
+const { disablePreloader } = useSiteSettings()
 
 // Initialize scroll trigger system
 const { enableScrollAnimations } = useScrollTrigger();
@@ -125,34 +62,22 @@ const { enableScrollAnimations } = useScrollTrigger();
 // Preloader state
 const preloaderReady = ref(false)
 const isPageTransitioning = ref(false)
-const pageReady = ref(true)
 
-// Use custom transition hooks to control scroll position instead of router.scrollBehavior
-
-// Handle page transitions
+// Handle page transitions - instant swap when ready
+// Suspense will keep old page visible until new page is ready
 router.beforeEach(() => {
-  if (!disablePageTransition.value) {
-    isPageTransitioning.value = true
-    pageReady.value = false
-    // Add class to body to prevent footer scroll trigger during transitions
-    if (typeof document !== 'undefined') {
-      document.body.classList.add('page-transitioning')
-    }
-  } else {
-    // Ensure any stale state is cleared when transitions are disabled
-    isPageTransitioning.value = false
-    if (typeof document !== 'undefined') {
-      document.body.classList.remove('page-transitioning')
-    }
+  isPageTransitioning.value = true
+  
+  // Add class to body to prevent footer scroll trigger during transitions
+  if (typeof document !== 'undefined') {
+    document.body.classList.add('page-transitioning')
   }
 })
 
 router.afterEach(async (to) => {
-  // Keep footer hidden until page transition is complete
-  // The footer will be shown again in onPageEnter after fade-in completes
-
-  // Wait for page to load before starting transition
-  if (!disablePageTransition.value && typeof window !== 'undefined') {
+  // Wait for new page to be fully loaded before showing it
+  // Suspense keeps the old page visible until the new one resolves
+  if (typeof window !== 'undefined') {
     await nextTick()
     
     // Wait for Suspense to resolve by checking if page content is ready
@@ -165,7 +90,23 @@ router.afterEach(async (to) => {
         if (!fallback && pageContent) {
           // Wait one more tick for rendering to complete
           nextTick(() => {
-            pageReady.value = true
+            // Instant swap - no transition
+            isPageTransitioning.value = false
+            
+            // Remove page-transitioning class
+            if (typeof document !== 'undefined') {
+              document.body.classList.remove('page-transitioning')
+            }
+            
+            // Refresh scroll triggers
+            if (typeof window !== 'undefined' && window.gsap && window.gsap.ScrollTrigger) {
+              window.gsap.ScrollTrigger.refresh()
+            }
+            
+            // Dispatch events
+            document.dispatchEvent(new CustomEvent('page-transition-in-complete'))
+            document.dispatchEvent(new CustomEvent('route-changed'))
+            
             resolve()
           })
         } else {
@@ -185,8 +126,6 @@ router.afterEach(async (to) => {
   }
 })
 
-
-
 // Use header height padding unless hero is enabled
 const mainPaddingVar = computed(() => {
   if (page.value?.enableHeroImage) {
@@ -194,10 +133,6 @@ const mainPaddingVar = computed(() => {
   }
   return 'var(--header-height)'
 });
-
-
-
-
 
 // Update favicon based on dark mode
 useFavicon(isDark);
@@ -244,7 +179,6 @@ const onPreloaderReady = () => {
   // Enable scrolling on body
   if (typeof document !== 'undefined') {
     document.body.classList.add('preloader-ready')
-    //console.log('Added preloader-ready class to body')
   }
 }
 
@@ -263,38 +197,8 @@ onMounted(() => {
     window.scrollTo({ top: 0, behavior: 'instant' })
   }
 })
-
-// Called when page fade-in completes; refresh scroll-based systems
-const onPageEnter = () => {
-  // Show footer again after page transition completes
-  isPageTransitioning.value = false
-  
-  // Remove page-transitioning class to re-enable footer scroll trigger
-  if (typeof document !== 'undefined') {
-    document.body.classList.remove('page-transitioning')
-  }
-  
-  if (typeof window !== 'undefined' && window.gsap && window.gsap.ScrollTrigger) {
-    window.gsap.ScrollTrigger.refresh()
-  }
-  
-  // Let fade-in system and others know page content is visible
-  document.dispatchEvent(new CustomEvent('page-transition-in-complete'))
-  
-  // Dispatch route-changed event for other plugins
-  document.dispatchEvent(new CustomEvent('route-changed'))
-}
-
-const onPageBeforeEnter = () => {
-  // Intentionally left empty: we no longer force scroll position on route changes
-  // so the footer doesn't appear to "jump" to the top on short pages.
-}
-
-const onPageLeave = () => {
-  // Fade out the old page (header and content, but body background stays)
-}
 </script>
 
 <style>
-
+/* No page transitions - instant swap when ready */
 </style>
