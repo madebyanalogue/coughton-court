@@ -12,13 +12,27 @@
     <Header :page-data="page" />
     <div class="app-shell" :key="route.fullPath">
       <div class="page-container">
-        <main :style="{ paddingTop: mainPaddingVar }">
-          <Suspense>
-            <NuxtPage />
-            <template #fallback>
-              <div class="page-loading-placeholder" style="min-height: calc(100vh - var(--header-height, 80px));"></div>
-            </template>
-          </Suspense>
+        <main :style="{ paddingTop: mainPaddingVar }" class="main-content">
+          <div class="page-wrapper">
+            <!-- Old page HTML - captured before navigation, stays visible until new page is ready -->
+            <div v-if="oldPageHtml && oldPageHtml.trim().length > 0" 
+                 class="page-old" 
+                 v-html="oldPageHtml">
+            </div>
+            
+            <!-- New page - loads in background, appears over old when ready -->
+            <div class="page-new" 
+                 :class="{ 'page-new-ready': pageReady }"
+                 :key="route.fullPath"
+                 ref="pageNewRef">
+              <Suspense>
+                <NuxtPage :key="route.fullPath" />
+                <template #fallback>
+                  <div v-if="!oldPageHtml || oldPageHtml.trim().length === 0" class="page-loading-placeholder" style="min-height: calc(100vh - var(--header-height, 80px));"></div>
+                </template>
+              </Suspense>
+            </div>
+          </div>
         </main>
         <ClientOnly>
           <template #default>
@@ -45,7 +59,7 @@ import { useDarkMode } from '~/composables/usePageUi.js';
 import { useFavicon } from '~/composables/useFavicon.js';
 import { usePageSettings } from '~/composables/usePageSettings';
 import { useScrollTrigger } from '~/composables/useScrollTrigger.js';
-import { computed, onMounted, ref, nextTick } from 'vue';
+import { computed, onMounted, ref, nextTick, onBeforeUnmount } from 'vue';
 import { useRoute } from 'vue-router'
 import { useHead, useRouter } from '#app'
 import { useSiteSettings } from '~/composables/useSiteSettings'
@@ -62,67 +76,135 @@ const { enableScrollAnimations } = useScrollTrigger();
 // Preloader state
 const preloaderReady = ref(false)
 const isPageTransitioning = ref(false)
+const previousRouteKey = ref(null)
+const pageReady = ref(false)
+const pageNewRef = ref(null)
+const oldPageHtml = ref('')
+let unwatchRouter = null
 
-// Handle page transitions - instant swap when ready
-// Suspense will keep old page visible until new page is ready
-router.beforeEach(() => {
-  isPageTransitioning.value = true
-  
-  // Add class to body to prevent footer scroll trigger during transitions
-  if (typeof document !== 'undefined') {
-    document.body.classList.add('page-transitioning')
+// Handle page transitions - capture old page HTML before navigation
+onMounted(() => {
+  unwatchRouter = router.beforeEach((to, from, next) => {
+    isPageTransitioning.value = true
+    pageReady.value = false
+    
+    // Store the previous route key to keep old page mounted
+    if (from.fullPath) {
+      previousRouteKey.value = from.fullPath
+    }
+    
+    // Capture current page HTML before it unmounts
+    if (typeof document !== 'undefined') {
+      const pageWrapper = document.querySelector('main .page-wrapper .page-new')
+      if (pageWrapper) {
+        // Use requestAnimationFrame to ensure content is painted before capture
+        requestAnimationFrame(() => {
+          const clone = pageWrapper.cloneNode(true)
+          clone.classList.remove('page-new-hidden')
+          oldPageHtml.value = clone.innerHTML
+        })
+      } else {
+        oldPageHtml.value = '' // Clear if no content to capture
+      }
+    }
+    
+    // Add class to body to prevent footer scroll trigger during transitions
+    if (typeof document !== 'undefined') {
+      document.body.classList.add('page-transitioning')
+    }
+    next()
+  })
+})
+
+onBeforeUnmount(() => {
+  if (unwatchRouter) {
+    unwatchRouter()
   }
 })
 
 router.afterEach(async (to) => {
-  // Wait for new page to be fully loaded before showing it
-  // Suspense keeps the old page visible until the new one resolves
+  // Wait for new page to be fully loaded
   if (typeof window !== 'undefined') {
     await nextTick()
+    await nextTick() // Extra tick for async components
     
-    // Wait for Suspense to resolve by checking if page content is ready
+    // Check immediately and very frequently
     await new Promise((resolve) => {
+      let attempts = 0
+      const maxAttempts = 300
+      
       const checkReady = () => {
-        // Check if Suspense fallback is gone and page content exists
-        const fallback = document.querySelector('.page-loading-placeholder')
-        const pageContent = document.querySelector('main > div:not(.page-loading-placeholder)')
+        attempts++
         
-        if (!fallback && pageContent) {
-          // Wait one more tick for rendering to complete
-          nextTick(() => {
-            // Instant swap - no transition
-            isPageTransitioning.value = false
-            
-            // Remove page-transitioning class
-            if (typeof document !== 'undefined') {
-              document.body.classList.remove('page-transitioning')
-            }
-            
-            // Refresh scroll triggers
-            if (typeof window !== 'undefined' && window.gsap && window.gsap.ScrollTrigger) {
-              window.gsap.ScrollTrigger.refresh()
-            }
-            
-            // Dispatch events
-            document.dispatchEvent(new CustomEvent('page-transition-in-complete'))
-            document.dispatchEvent(new CustomEvent('route-changed'))
-            
+        // Check the new page container specifically
+        const newPageContainer = pageNewRef.value
+        if (!newPageContainer) {
+          if (attempts < maxAttempts) {
+            setTimeout(checkReady, 5)
+          } else {
             resolve()
+          }
+          return
+        }
+        
+        // Check for loading placeholder
+        const fallback = newPageContainer.querySelector('.page-loading-placeholder')
+        
+        // Check for actual content
+        const hasContent = newPageContainer && (
+          newPageContainer.querySelectorAll('section, .page-builder, .page-content, .garden-page, .page-hero, .garden-hero, .wrapper, h1').length > 0 ||
+          (newPageContainer.children.length > 0 && !fallback)
+        )
+        
+        // Page is ready when it has content and no loading state
+        if (hasContent && !fallback) {
+          // New page is ready - show it over old page
+          nextTick(() => {
+            pageReady.value = true
+            
+            // Wait a frame for the CSS transition, then remove old page
+            requestAnimationFrame(() => {
+              setTimeout(() => {
+                oldPageHtml.value = ''
+                previousRouteKey.value = null
+                isPageTransitioning.value = false
+                
+                if (typeof document !== 'undefined') {
+                  document.body.classList.remove('page-transitioning')
+                }
+                
+                window.scrollTo({ top: 0, behavior: 'instant' })
+                
+                if (window.gsap && window.gsap.ScrollTrigger) {
+                  window.gsap.ScrollTrigger.refresh()
+                }
+                
+                document.dispatchEvent(new CustomEvent('page-transition-in-complete'))
+                document.dispatchEvent(new CustomEvent('route-changed'))
+                
+                resolve()
+              }, 300) // Small delay to ensure visual swap is complete
+            })
           })
+        } else if (attempts >= maxAttempts) {
+          // Timeout - show page anyway
+          pageReady.value = true
+          oldPageHtml.value = ''
+          previousRouteKey.value = null
+          isPageTransitioning.value = false
+          if (typeof document !== 'undefined') {
+            document.body.classList.remove('page-transitioning')
+          }
+          resolve()
         } else {
-          // Check again after a short delay
-          setTimeout(checkReady, 50)
+          // Check very quickly
+          setTimeout(checkReady, 5)
         }
       }
-      // Start checking after a brief delay to let Suspense start
-      setTimeout(checkReady, 100)
+      
+      // Start immediately
+      checkReady()
     })
-  }
-
-  // For garden detail pages, always reset scroll to top after navigation
-  // so we don't land at the footer when moving between /gardens/* routes.
-  if (typeof window !== 'undefined' && to.path.startsWith('/gardens/')) {
-    window.scrollTo({ top: 0, behavior: 'instant' })
   }
 })
 
@@ -190,15 +272,88 @@ const onPreloaderComplete = () => {
   enableScrollAnimations()
 }
 
-// Log initial state for debugging
+// Initialize page ready state
 onMounted(() => {
   // Ensure page starts at top on mount
   if (typeof window !== 'undefined') {
     window.scrollTo({ top: 0, behavior: 'instant' })
   }
+  
+  // Initial page is ready
+  pageReady.value = true
 })
 </script>
 
 <style>
-/* No page transitions - instant swap when ready */
+/* Ensure main always has background and content */
+main.main-content {
+  position: relative;
+  min-height: calc(100vh - var(--header-height, 80px));
+  background-color: var(--background-color);
+}
+
+/* Page wrapper - contains both old and new pages */
+.page-wrapper {
+  position: relative;
+  min-height: calc(100vh - var(--header-height, 80px));
+  background-color: var(--background-color);
+}
+
+/* Old page - stays visible during transition */
+.page-old {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  z-index: 1;
+  pointer-events: none;
+  min-height: calc(100vh - var(--header-height, 80px));
+  background-color: var(--background-color);
+  overflow: hidden;
+  /* Ensure it covers everything and is visible */
+  will-change: auto;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Ensure old page content is visible */
+.page-old,
+.page-old > * {
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: block !important;
+}
+
+/* New page - loads behind old, appears on top when ready */
+.page-new {
+  position: relative;
+  z-index: 2;
+  opacity: 1;
+  visibility: visible;
+  min-height: calc(100vh - var(--header-height, 80px));
+  background-color: var(--background-color);
+  transition: opacity 0s ease 0.25s;
+}
+
+/* New page not ready yet - hide it */
+.page-new:not(.page-new-ready) {
+  opacity: 0;
+  visibility: hidden;
+  position: absolute;
+  width: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Hide Suspense fallback during transitions when old page is visible */
+body.page-transitioning .page-old .page-loading-placeholder,
+body.page-transitioning .page-new:not(.page-new-ready) .page-loading-placeholder {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+}
 </style>

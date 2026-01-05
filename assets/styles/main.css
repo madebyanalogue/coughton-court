@@ -167,7 +167,7 @@ header {
   top: 0;
   left: 0;
   right: 0;
-  z-index: 2;
+  z-index: 5;
   width: 100%;
   pointer-events: none;
 }

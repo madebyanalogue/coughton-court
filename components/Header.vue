@@ -97,7 +97,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue';
 import { gsap } from 'gsap';
-import { useRoute } from '#app';
+import { useRoute, useRouter } from '#app';
 import { useHeaderScroll } from '~/composables/useHeaderScroll';
 import { useSiteSettings } from '~/composables/useSiteSettings';
 import { useMenu } from '~/composables/useMenu';
@@ -117,6 +117,7 @@ const props = defineProps({
 const headerAnimated = ref(false)
 
 const route = useRoute();
+const router = useRouter();
 const headerRef = ref(null);
 const { isHeaderVisible } = useHeaderScroll()
 const { settings: siteSettings, bookingLink, bookingTitle } = useSiteSettings()
@@ -147,20 +148,24 @@ const hasPageHero = computed(() => {
 
 // Store previous overlay state to prevent flashing during transitions
 const previousOverlayState = ref(true)
+const previousRoutePath = ref('')
 
 // Determine if we should use overlay scheme
 const shouldUseOverlay = computed(() => {
   // Check route first for gardens/events pages (they always have heroes)
-  // This check happens before transition check to ensure correct state
   const isGardenOrEvent = isGardenPage.value || isEventPage.value
   
   // During page transitions, keep previous state to prevent flashing
   if (typeof document !== 'undefined' && document.body.classList.contains('page-transitioning')) {
-    // If transitioning to/from gardens/events, they always use overlay
-    if (isGardenOrEvent) {
-      previousOverlayState.value = true
+    // Check if we're transitioning between garden/event pages (both from and to)
+    const wasGardenOrEvent = previousRoutePath.value.startsWith('/gardens/') || previousRoutePath.value.startsWith('/events/')
+    const isGardenOrEventNow = isGardenOrEvent
+    
+    // If both old and new routes are garden/event pages, keep overlay
+    if (wasGardenOrEvent && isGardenOrEventNow) {
       return true
     }
+    
     // Otherwise keep previous state
     return previousOverlayState.value
   }
@@ -237,8 +242,23 @@ const checkHeroScroll = () => {
   hasScrolledPastHero.value = heroRect.bottom < 50
 }
 
+// Watch for route changes to capture previous route before transition
+router.beforeEach((to, from) => {
+  // Capture the "from" route path before navigation
+  previousRoutePath.value = from.path
+  // Capture current overlay state before it changes
+  if (from.path.startsWith('/gardens/') || from.path.startsWith('/events/')) {
+    previousOverlayState.value = true
+  } else {
+    // Try to determine from current computed value
+    const currentOverlay = shouldUseOverlay.value
+    previousOverlayState.value = currentOverlay
+  }
+})
+
 // Initialize previous overlay state based on current route
 onMounted(() => {
+  previousRoutePath.value = route.path
   if (isGardenPage.value || isEventPage.value) {
     previousOverlayState.value = true
   } else if (props.pageData?.enableHeroImage) {
@@ -252,6 +272,9 @@ onMounted(() => {
 watch([() => route.path, () => props.pageData?.enableHeroImage], () => {
   // Update previous state when route/pageData changes (but not during transition)
   if (!document.body.classList.contains('page-transitioning')) {
+    // Update previous route path after transition completes
+    previousRoutePath.value = route.path
+    
     if (isGardenPage.value || isEventPage.value) {
       previousOverlayState.value = true
     } else if (props.pageData?.enableHeroImage) {
