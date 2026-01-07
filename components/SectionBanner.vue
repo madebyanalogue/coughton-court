@@ -3,10 +3,26 @@
     <div class="wrapper">
       <div class="relative py9">
         <div v-if="section.bannerContent?.image" class="cover object-fit-child show-md">
-          <NuxtImg :src="getImageUrl(section.bannerContent.image)" :alt="section.title" loading="lazy" data-image-overlay />
+          <NuxtImg 
+            :src="getImageUrl(section.bannerContent.image, { width: 1920, quality: 85 })" 
+            :alt="section.title" 
+            width="1920"
+            quality="85"
+            format="webp"
+            loading="lazy" 
+            data-image-overlay 
+          />
         </div>
         <div v-if="section.bannerContent?.image" class="hide-md">
-          <NuxtImg :src="getImageUrl(section.bannerContent.image)" :alt="section.title" loading="lazy" data-image-overlay />
+          <NuxtImg 
+            :src="getImageUrl(section.bannerContent.image, { width: 1200, quality: 85 })" 
+            :alt="section.title" 
+            width="1200"
+            quality="85"
+            format="webp"
+            loading="lazy" 
+            data-image-overlay 
+          />
         </div>
         <div class="grid grid-center-items">
           <div class="col-span-12 col-span-6-md white-text-md">

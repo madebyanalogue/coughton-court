@@ -20,9 +20,12 @@
           <div class="garden-hero__image" :class="{ 'garden-hero__image--no-image': !garden.featuredImage }">
             <NuxtImg 
               v-if="garden.featuredImage"
-              :src="getImageUrl(garden.featuredImage)" 
+              :src="getImageUrl(garden.featuredImage, { width: 1920, quality: 85 })" 
               :alt="garden.title"
               class="garden-hero__img"
+              width="1920"
+              quality="85"
+              format="webp"
               loading="eager"
               preload
             />
@@ -90,7 +93,10 @@
                         :src="getGalleryImageUrl(image)" 
                         :alt="image.alt || garden.title"
                         class="garden-carousel__image"
-                        loading="lazy"
+                        width="1200"
+                        quality="85"
+                        format="webp"
+                        loading="eager"
                       />
                     </div>
                     <p v-if="image.caption" class="carousel__caption">{{ image.caption }}</p>
@@ -204,7 +210,7 @@ const dragOffset = ref(0)
 
 const getGalleryImageUrl = (image) => {
   if (image?.asset?.url) return image.asset.url
-  return getImageUrl(image)
+  return getImageUrl(image, { width: 1200, quality: 85 })
 }
 
 const nextSlide = () => {
@@ -259,7 +265,6 @@ const endDrag = () => {
 
 <style scoped>
 .garden-page {
-  margin-top: calc(var(--header-height, 80px) * -1);
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -280,13 +285,12 @@ const endDrag = () => {
   min-height: 100vh;
   align-items: center;
   justify-content: center;
-  padding-top: var(--header-height, 80px);
 }
 
 .garden-hero {
   position: relative;
-  height: 37vh;
-  min-height: 400px;
+  height: 50vh;
+  min-height: 600px;
   overflow: hidden;
   padding-top: var(--header-height, 80px);
 }

@@ -780,6 +780,21 @@ export default defineEventHandler(async (event) => {
                   metadata { dimensions }
                 }
               }
+            },
+            textAndImagesContent {
+              title,
+              text,
+              images[] {
+                asset-> {
+                  _id,
+                  url,
+                  metadata { dimensions }
+                },
+                alt,
+                caption
+              },
+              textRight,
+              useNarrowText
             }
           }
         }`

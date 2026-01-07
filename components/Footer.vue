@@ -26,8 +26,8 @@
                       <a 
                         v-else-if="getMenuItemUrl(item) && isExternalUrl(item.to?.url)"
                         :href="getMenuItemUrl(item)" 
-                        target="_blank"
-                        rel="noopener"
+                        :target="shouldOpenInNewTab(item.to?.url) ? '_blank' : undefined"
+                        :rel="shouldOpenInNewTab(item.to?.url) ? 'noopener' : undefined"
                         class="footer-menu-link"
                       >
                         {{ item.text }}
@@ -74,8 +74,8 @@
                           <a 
                             v-else-if="getMenuItemUrl(item) && isExternalUrl(item.to?.url)"
                             :href="getMenuItemUrl(item)" 
-                            target="_blank"
-                            rel="noopener"
+                            :target="shouldOpenInNewTab(item.to?.url) ? '_blank' : undefined"
+                            :rel="shouldOpenInNewTab(item.to?.url) ? 'noopener' : undefined"
                             class="footer-menu-link"
                           >
                             {{ item.text }}
@@ -165,6 +165,15 @@ const isExternalUrl = (url) => {
   return !url.startsWith('/') && !url.startsWith('#')
 }
 
+// Helper function to determine if link should open in new tab (mailto/tel should not)
+const shouldOpenInNewTab = (url) => {
+  if (!url) return false
+  // mailto: and tel: should not open in new tab
+  if (url.startsWith('mailto:') || url.startsWith('tel:')) return false
+  // Other external URLs should open in new tab
+  return isExternalUrl(url)
+}
+
 // Helper function to get menu item URL
 const getMenuItemUrl = (item) => {
   if (item.to?.page?._type === 'garden' && item.to?.page?.slug?.current) {
@@ -195,6 +204,11 @@ const getMenuItemUrl = (item) => {
 // Function to process external URLs consistently
 const getProcessedUrl = (url) => {
   if (!url) return '#'
+  
+  // Preserve mailto: and tel: links as-is
+  if (url.startsWith('mailto:') || url.startsWith('tel:')) {
+    return url
+  }
   
   if (url.startsWith('http://') || url.startsWith('https://')) {
     return url

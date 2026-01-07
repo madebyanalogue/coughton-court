@@ -12,7 +12,12 @@
         </div>
 
         <div v-else class="grid grid-1 grid-md-3 gap-3">
-          <div v-for="event in activeEvents" :key="event._id" class="event-card">
+          <div 
+            v-for="(event, index) in activeEvents" 
+            :key="event._id" 
+            :ref="el => setEventCardRef(el, index)"
+            class="event-card"
+          >
             <NuxtLink 
               v-if="event.slug?.current" 
               :to="`/events/${event.slug.current}`" 
@@ -79,7 +84,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, nextTick, onUnmounted } from 'vue'
+import { ref, computed, onMounted, nextTick, onUnmounted, watch } from 'vue'
 import { useScrollTrigger } from '~/composables/useScrollTrigger.js'
 import { useSanityImage } from '~/composables/useSanityImage.js'
 
@@ -93,6 +98,8 @@ const props = defineProps({
 const { registerSection, unregisterSection } = useScrollTrigger()
 const { getImageUrl } = useSanityImage()
 const sectionRef = ref(null)
+const eventCardRefs = ref([])
+const hasAnimated = ref(false)
 
 const title = computed(() => props.section?.eventsContent?.title || '')
 
@@ -142,6 +149,73 @@ const formatDateRange = (startDate, endDate) => {
   return `${startFormatted} - ${endFormatted}`
 }
 
+// Set ref for event cards
+const setEventCardRef = (el, index) => {
+  if (el) {
+    // Ensure array is large enough
+    if (!eventCardRefs.value[index]) {
+      eventCardRefs.value[index] = el
+    } else if (eventCardRefs.value[index] !== el) {
+      eventCardRefs.value[index] = el
+    }
+  }
+}
+
+// Animate events sequentially
+const animateEventsIn = () => {
+  // Prevent multiple animations
+  if (hasAnimated.value) return
+  
+  const gsap = window.gsap
+  if (!gsap) return
+  
+  // Wait for refs to be set
+  nextTick(() => {
+    // Filter out null refs - refs should be DOM elements directly
+    const validRefs = eventCardRefs.value.filter(ref => ref !== null && ref !== undefined)
+    
+    if (validRefs.length === 0) {
+      // If no refs yet, try again after a short delay
+      setTimeout(() => {
+        if (!hasAnimated.value) {
+          animateEventsIn()
+        }
+      }, 50)
+      return
+    }
+    
+    // Check if already animated by checking opacity
+    const alreadyAnimated = validRefs.some(ref => {
+      const computed = window.getComputedStyle(ref)
+      return parseFloat(computed.opacity) > 0
+    })
+    
+    if (alreadyAnimated) {
+      hasAnimated.value = true
+      return
+    }
+    
+    // Mark as animated before setting initial state to prevent race conditions
+    hasAnimated.value = true
+    
+    // Set initial state
+    gsap.set(validRefs, {
+      opacity: 0,
+      y: 20
+    })
+    
+    // Animate in sequentially with stagger
+    gsap.to(validRefs, {
+      opacity: 1,
+      y: 0,
+      duration: 0.6,
+      stagger: 0.15,
+      ease: 'power2.out',
+      delay: 0.2
+    })
+  })
+}
+
 onMounted(async () => {
   nextTick(() => {
     window.dispatchEvent(new CustomEvent('events-loaded'))
@@ -154,16 +228,59 @@ onMounted(async () => {
       onEnter: () => {
         const gsap = window.gsap
         if (gsap) {
+          // Fade in the section container
           gsap.to(sectionRef.value, {
             opacity: 1,
             duration: 0.8,
-            ease: 'power2.out'
+            ease: 'power2.out',
+            onComplete: () => {
+              // After section fades in, animate events sequentially
+              nextTick(() => {
+                animateEventsIn()
+              })
+            }
           })
         }
       }
     })
   }
+  
+  // Also animate on initial load if section is already visible
+  await nextTick()
+  // Wait a bit more for events to load and refs to be set
+  setTimeout(() => {
+    if (sectionRef.value && !hasAnimated.value) {
+      const rect = sectionRef.value.getBoundingClientRect()
+      const isVisible = rect.top < window.innerHeight * 0.8
+      if (isVisible) {
+        // Section is already visible, animate immediately
+        const gsap = window.gsap
+        if (gsap) {
+          gsap.to(sectionRef.value, {
+            opacity: 1,
+            duration: 0.8,
+            ease: 'power2.out',
+            onComplete: () => {
+              nextTick(() => {
+                animateEventsIn()
+              })
+            }
+          })
+        }
+      }
+    }
+  }, 200)
 })
+
+// Watch for when events are loaded - reset animation flag when events change
+watch(activeEvents, (newEvents, oldEvents) => {
+  // Reset animation flag if events actually changed
+  if (oldEvents && newEvents.length !== oldEvents.length) {
+    hasAnimated.value = false
+    // Reset refs array when events change
+    eventCardRefs.value = []
+  }
+}, { immediate: false })
 
 onUnmounted(() => {
   unregisterSection(`events-${props.section._id}`)
@@ -199,6 +316,10 @@ section {
 .event-image-fallback {
   width: 100%;
   height: 100%;
+}
+
+.event-card {
+  will-change: opacity, transform;
 }
 </style>
 

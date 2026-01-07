@@ -3,10 +3,10 @@
 
   <header 
     ref="headerRef" 
-    class="scheme"
+    class="scheme overlay"
     :class="{
-      'overlay': shouldUseOverlay,
-      'light': !shouldUseOverlay
+      'light': !shouldUseOverlay,
+      'over-hero': shouldUseOverlay && !hasScrolledPastHero
     }"
   >
   
@@ -80,8 +80,8 @@
           <a 
             v-else-if="getMenuItemUrl(item)" 
             :href="getMenuItemUrl(item)" 
-            target="_blank" 
-            rel="noopener"
+            :target="shouldOpenInNewTab(item.to?.url) ? '_blank' : undefined"
+            :rel="shouldOpenInNewTab(item.to?.url) ? 'noopener' : undefined"
             class="header-nav-link"
           >
             {{ item.text }}
@@ -317,6 +317,15 @@ const isExternalUrl = (url) => {
   return !url.startsWith('/') && !url.startsWith('#')
 }
 
+// Helper function to determine if link should open in new tab (mailto/tel should not)
+const shouldOpenInNewTab = (url) => {
+  if (!url) return false
+  // mailto: and tel: should not open in new tab
+  if (url.startsWith('mailto:') || url.startsWith('tel:')) return false
+  // Other external URLs should open in new tab
+  return isExternalUrl(url)
+}
+
 // Helper function to get the URL for a menu item
 const getMenuItemUrl = (item) => {
   if (item.to?.page?.slug?.current) {
@@ -442,8 +451,8 @@ onMounted(() => {
     updateHeights();
     // Enable header scroll animation once header is measured
     if (headerRef.value && window.gsap) {
-      // Ensure header starts visible at the top
-      window.gsap.set(headerRef.value, { y: '0%', opacity: 1 });
+      // Ensure header starts visible at the top (fixed position, no transform)
+      window.gsap.set(headerRef.value, { y: '0%' });
     }
     headerAnimated.value = true;
   });
@@ -483,18 +492,16 @@ watch(() => route.path, () => {
 watch(isHeaderVisible, (newValue) => {
   if (headerRef.value && headerAnimated.value) {
     if (newValue) {
-      // Animate header in
+      // Animate header in (transform back to 0)
       gsap.to(headerRef.value, {
         y: '0%',
-        opacity: 1,
         duration: 0.4,
         ease: 'power2.out'
       })
     } else {
-      // Animate header out
+      // Animate header out (translate -100% on scroll down)
       gsap.to(headerRef.value, {
         y: '-100%',
-        opacity: 0.8,
         duration: 0.4,
         ease: 'power2.in'
       })

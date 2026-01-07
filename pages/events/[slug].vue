@@ -133,7 +133,10 @@
                         :src="getGalleryImageUrl(image)" 
                         :alt="image.alt || event.title"
                         class="event-carousel__image"
-                        loading="lazy"
+                        width="1200"
+                        quality="85"
+                        format="webp"
+                        loading="eager"
                       />
                     </div>
                     <p v-if="image.caption" class="carousel__caption">{{ image.caption }}</p>
@@ -248,7 +251,7 @@ const dragOffset = ref(0)
 
 const getGalleryImageUrl = (image) => {
   if (image?.asset?.url) return image.asset.url
-  return getImageUrl(image)
+  return getImageUrl(image, { width: 1200, quality: 85 })
 }
 
 const nextSlide = () => {

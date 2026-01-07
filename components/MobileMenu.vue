@@ -26,8 +26,8 @@
             <a 
               v-else-if="item.to?.url" 
               :href="getProcessedUrl(item.to.url)" 
-              target="_blank" 
-              rel="noopener"
+              :target="isExternalLink(item.to.url) ? '_blank' : undefined"
+              :rel="isExternalLink(item.to.url) ? 'noopener' : undefined"
               class="menu-link w-inline-block"
               @click="closeMenu"
             >
@@ -100,6 +100,17 @@ const { linkedinUrl, instagramUrl, facebookUrl } = useSiteSettings()
 const { getProcessedUrl } = useUrlProcessing()
 
 const menuItems = computed(() => mainMenu?.value?.items || [])
+
+// Helper function to check if URL is external (excluding mailto/tel)
+const isExternalLink = (url) => {
+  if (!url) return false
+  // mailto: and tel: are not external links (don't need target="_blank")
+  if (url.startsWith('mailto:') || url.startsWith('tel:')) return false
+  // Other external protocols
+  if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('//')) return true
+  // Treat any URL that doesn't start with "/" or "#" as external
+  return !url.startsWith('/') && !url.startsWith('#')
+}
 
 const hasAnySocials = computed(() => {
   const hasLinkedIn = Boolean(linkedinUrl && String(linkedinUrl).trim().length > 0)

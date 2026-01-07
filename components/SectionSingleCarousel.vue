@@ -46,6 +46,7 @@
               :src="getMediaUrl(media)" 
               :alt="media.alt || 'Carousel image'"
               class="carousel-image"
+              loading="eager"
             />
             <video 
               v-else
@@ -65,6 +66,7 @@
             :src="getMediaUrl(carouselImages[0])" 
             :alt="carouselImages[0].alt || 'Carousel image'"
             class="carousel-image"
+            loading="eager"
           />
           <video 
             v-else
@@ -85,6 +87,7 @@
           :src="getMediaUrl(overlay)" 
           :alt="overlay.alt || 'Overlay image'"
           class="overlay-img"
+          loading="eager"
         />
       </div>
       

@@ -13,7 +13,8 @@ export function useHeaderScroll() {
       return
     }
 
-    // Hide header when scrolling down, show when scrolling up
+    // Hide header when scrolling down (translate -100%), show when scrolling up (translate back)
+    // Always show if near top of page
     isHeaderVisible.value = currentScrollY < lastScrollY.value || currentScrollY < 100
     
     lastScrollY.value = currentScrollY

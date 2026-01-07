@@ -20,6 +20,7 @@
               :src="getMediaUrl(media)" 
               :alt="media.alt || 'Carousel image'"
               class="carousel-image"
+              loading="eager"
             />
             <video 
               v-else
@@ -39,6 +40,7 @@
             :src="getMediaUrl(leftImages[0])" 
             :alt="leftImages[0].alt || 'Carousel image'"
             class="carousel-image"
+            loading="eager"
           />
           <video 
             v-else
@@ -58,6 +60,7 @@
             :src="getMediaUrl(leftOverlay)" 
             :alt="leftOverlay.alt || 'Overlay image'"
             class="overlay-img"
+            loading="eager"
           />
         </div>
       </div>
@@ -80,6 +83,7 @@
               :src="getMediaUrl(media)" 
               :alt="media.alt || 'Carousel image'"
               class="carousel-image"
+              loading="eager"
             />
             <video 
               v-else
@@ -99,6 +103,7 @@
             :src="getMediaUrl(rightImages[0])" 
             :alt="rightImages[0].alt || 'Carousel image'"
             class="carousel-image"
+            loading="eager"
           />
           <video 
             v-else
@@ -118,6 +123,7 @@
             :src="getMediaUrl(rightOverlay)" 
             :alt="rightOverlay.alt || 'Overlay image'"
             class="overlay-img"
+            loading="eager"
           />
         </div>
       </div>
@@ -175,11 +181,12 @@
       
       <!-- Mobile Overlay (show left overlay if available, otherwise right overlay) -->
       <div v-if="mobileOverlay" class="overlay-image mobile-overlay">
-        <img 
-          :src="getMediaUrl(mobileOverlay)" 
-          :alt="mobileOverlay.alt || 'Overlay image'"
-          class="overlay-img"
-        />
+          <img 
+            :src="getMediaUrl(mobileOverlay)" 
+            :alt="mobileOverlay.alt || 'Overlay image'"
+            class="overlay-img"
+            loading="eager"
+          />
       </div>
     </div>
   </section>

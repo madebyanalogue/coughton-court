@@ -13,6 +13,8 @@
         format="webp"
         width="1920"
         height="1080"
+        quality="85"
+        sizes="100vw"
       />
     </div>
     <div v-else class="page-hero-placeholder">
@@ -179,7 +181,11 @@ const imageUrl = computed(() => {
     return null
   }
   try {
-    const url = getImageUrl(props.featuredImage)
+    // Use optimized image URL with max width and quality settings
+    const url = getImageUrl(props.featuredImage, {
+      width: 1920,
+      quality: 85
+    })
     if (process.env.NODE_ENV === 'development') {
       console.log('[PageHero] Image URL:', url, 'FeaturedImage:', props.featuredImage)
     }
@@ -241,8 +247,8 @@ onUnmounted(() => {
 .page-hero {
   position: relative;
   width: 100%;
-  height: 40vh;
-  min-height: 600px;
+  height: 60vh;
+  min-height: 800px;
   overflow: hidden;
   z-index: 1;
   padding-top: var(--header-height);

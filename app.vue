@@ -17,6 +17,7 @@
             <!-- Old page HTML - captured before navigation, stays visible until new page is ready -->
             <div v-if="oldPageHtml && oldPageHtml.trim().length > 0" 
                  class="page-old" 
+                 :style="{ top: `calc(${oldPageMainPadding} - ${newPageMainPadding})` }"
                  v-html="oldPageHtml">
             </div>
             
@@ -80,6 +81,8 @@ const previousRouteKey = ref(null)
 const pageReady = ref(false)
 const pageNewRef = ref(null)
 const oldPageHtml = ref('')
+const oldPageMainPadding = ref('0')
+const newPageMainPadding = ref('0')
 let unwatchRouter = null
 
 // Handle page transitions - capture old page HTML before navigation
@@ -93,19 +96,42 @@ onMounted(() => {
       previousRouteKey.value = from.fullPath
     }
     
-    // Capture current page HTML before it unmounts
+    // Capture current page HTML and prevent scroll from being visible
     if (typeof document !== 'undefined') {
       const pageWrapper = document.querySelector('main .page-wrapper .page-new')
+      const main = document.querySelector('main.main-content')
+      
+      // Capture the current main padding before it changes
+      if (main) {
+        const computedPadding = window.getComputedStyle(main).paddingTop
+        oldPageMainPadding.value = computedPadding || '0'
+      }
+      
+      // Capture current scroll position
+      const currentScrollY = window.scrollY || window.pageYOffset
+      
+      // Lock scroll position using CSS to prevent visual scroll
+      document.body.style.position = 'fixed'
+      document.body.style.top = `-${currentScrollY}px`
+      document.body.style.width = '100%'
+      document.body.style.overflow = 'hidden'
+      
       if (pageWrapper) {
-        // Use requestAnimationFrame to ensure content is painted before capture
-        requestAnimationFrame(() => {
-          const clone = pageWrapper.cloneNode(true)
-          clone.classList.remove('page-new-hidden')
-          oldPageHtml.value = clone.innerHTML
-        })
+        // Capture the page HTML immediately
+        const clone = pageWrapper.cloneNode(true)
+        clone.classList.remove('page-new-hidden')
+        oldPageHtml.value = clone.innerHTML
+        
+        // Hide current page content
+        pageWrapper.style.opacity = '0'
+        pageWrapper.style.visibility = 'hidden'
+        pageWrapper.style.pointerEvents = 'none'
       } else {
         oldPageHtml.value = '' // Clear if no content to capture
       }
+      
+      // Reset scroll position programmatically (won't be visible due to fixed body)
+      window.scrollTo({ top: 0, behavior: 'instant' })
     }
     
     // Add class to body to prevent footer scroll trigger during transitions
@@ -125,7 +151,13 @@ onBeforeUnmount(() => {
 router.afterEach(async (to) => {
   // Wait for new page to be fully loaded
   if (typeof window !== 'undefined') {
+    // Capture new page's main padding
     await nextTick()
+    const main = document.querySelector('main.main-content')
+    if (main) {
+      newPageMainPadding.value = window.getComputedStyle(main).paddingTop || '0'
+    }
+    
     await nextTick() // Extra tick for async components
     
     // Check immediately and very frequently
@@ -158,9 +190,22 @@ router.afterEach(async (to) => {
         
         // Page is ready when it has content and no loading state
         if (hasContent && !fallback) {
+          // Check if this is a garden/event page transition (should be instant)
+          const isGardenOrEvent = to.path.startsWith('/gardens/') || to.path.startsWith('/events/')
+          const wasGardenOrEvent = previousRouteKey.value?.includes('/gardens/') || previousRouteKey.value?.includes('/events/')
+          const isGardenToGarden = isGardenOrEvent && wasGardenOrEvent
+          
+          // Add class to body for instant garden transitions
+          if (isGardenToGarden && typeof document !== 'undefined') {
+            document.body.classList.add('garden-transition')
+          }
+          
           // New page is ready - show it over old page
           nextTick(() => {
             pageReady.value = true
+            
+            // For garden-to-garden transitions, make it instant (no delay)
+            const delay = isGardenToGarden ? 0 : 300
             
             // Wait a frame for the CSS transition, then remove old page
             requestAnimationFrame(() => {
@@ -170,10 +215,19 @@ router.afterEach(async (to) => {
                 isPageTransitioning.value = false
                 
                 if (typeof document !== 'undefined') {
-                  document.body.classList.remove('page-transitioning')
+                  document.body.classList.remove('page-transitioning', 'garden-transition')
+                  
+                  // Restore body scroll position (remove fixed positioning)
+                  document.body.style.position = ''
+                  document.body.style.top = ''
+                  document.body.style.width = ''
+                  document.body.style.overflow = ''
                 }
                 
-                window.scrollTo({ top: 0, behavior: 'instant' })
+                // Ensure scroll is at top (already reset in beforeEach, but double-check)
+                if (typeof window !== 'undefined') {
+                  window.scrollTo({ top: 0, behavior: 'instant' })
+                }
                 
                 if (window.gsap && window.gsap.ScrollTrigger) {
                   window.gsap.ScrollTrigger.refresh()
@@ -183,7 +237,7 @@ router.afterEach(async (to) => {
                 document.dispatchEvent(new CustomEvent('route-changed'))
                 
                 resolve()
-              }, 300) // Small delay to ensure visual swap is complete
+              }, delay)
             })
           })
         } else if (attempts >= maxAttempts) {
@@ -194,6 +248,11 @@ router.afterEach(async (to) => {
           isPageTransitioning.value = false
           if (typeof document !== 'undefined') {
             document.body.classList.remove('page-transitioning')
+            // Restore body scroll position
+            document.body.style.position = ''
+            document.body.style.top = ''
+            document.body.style.width = ''
+            document.body.style.overflow = ''
           }
           resolve()
         } else {
@@ -208,12 +267,9 @@ router.afterEach(async (to) => {
   }
 })
 
-// Use header height padding unless hero is enabled
+// Main content padding - removed on all pages
 const mainPaddingVar = computed(() => {
-  if (page.value?.enableHeroImage) {
-    return '0'
-  }
-  return 'var(--header-height)'
+  return '0'
 });
 
 // Update favicon based on dark mode
@@ -288,14 +344,14 @@ onMounted(() => {
 /* Ensure main always has background and content */
 main.main-content {
   position: relative;
-  min-height: calc(100vh - var(--header-height, 80px));
+  min-height: calc(100vh);
   background-color: var(--background-color);
 }
 
 /* Page wrapper - contains both old and new pages */
 .page-wrapper {
   position: relative;
-  min-height: calc(100vh - var(--header-height, 80px));
+  min-height: calc(100vh);
   background-color: var(--background-color);
 }
 
@@ -308,13 +364,25 @@ main.main-content {
   width: 100%;
   z-index: 1;
   pointer-events: none;
-  min-height: calc(100vh - var(--header-height, 80px));
+  min-height: calc(100vh);
   background-color: var(--background-color);
   overflow: hidden;
   /* Ensure it covers everything and is visible */
   will-change: auto;
   opacity: 1 !important;
   visibility: visible !important;
+}
+
+/* Fix garden/event pages in old content - remove negative margin that affects header */
+.page-old .garden-page,
+.page-old .event-page {
+  margin-top: 0 !important;
+}
+
+/* Adjust garden hero in old content to remove extra padding since main already accounts for header */
+.page-old .garden-hero,
+.page-old .event-hero {
+  padding-top: 0 !important;
 }
 
 /* Ensure old page content is visible */
@@ -334,6 +402,11 @@ main.main-content {
   min-height: calc(100vh - var(--header-height, 80px));
   background-color: var(--background-color);
   transition: opacity 0s ease 0.25s;
+}
+
+/* Garden/event pages - instant transition (no delay) */
+body.garden-transition .page-new {
+  transition: opacity 0s ease 0s;
 }
 
 /* New page not ready yet - hide it */

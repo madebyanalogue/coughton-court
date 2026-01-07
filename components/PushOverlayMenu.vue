@@ -27,8 +27,8 @@
                     <a 
                       v-else-if="item.to?.url" 
                       :href="getProcessedUrl(item.to.url)" 
-                      target="_blank" 
-                      rel="noopener"
+                      :target="isExternalLink(item.to.url) ? '_blank' : undefined"
+                      :rel="isExternalLink(item.to.url) ? 'noopener' : undefined"
                       @click="closeMenu"
                     >
                       {{ item.text }}
@@ -96,6 +96,11 @@ const menuItems = computed(() => mainMenu?.value?.items || [])
 const getProcessedUrl = (url) => {
   if (!url) return '#'
   
+  // Preserve mailto: and tel: links as-is
+  if (url.startsWith('mailto:') || url.startsWith('tel:')) {
+    return url
+  }
+  
   if (url.startsWith('http://') || url.startsWith('https://')) {
     return url
   } else if (url.startsWith('//')) {
@@ -108,6 +113,17 @@ const getProcessedUrl = (url) => {
     // Relative URL or domain without protocol - treat as external
     return `https://${url}`
   }
+}
+
+// Helper function to check if URL is external (excluding mailto/tel)
+const isExternalLink = (url) => {
+  if (!url) return false
+  // mailto: and tel: are not external links (don't need target="_blank")
+  if (url.startsWith('mailto:') || url.startsWith('tel:')) return false
+  // Other external protocols
+  if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('//')) return true
+  // Treat any URL that doesn't start with "/" or "#" as external
+  return !url.startsWith('/') && !url.startsWith('#')
 }
 
 

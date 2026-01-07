@@ -155,10 +155,10 @@ body         { font-size: var(--body); }
   --h3: calc(var(--unit) * 2.0); /* 20px */
   --h4: clamp(16px, 1.45vw, 20px); /* 16px */
   --h5: clamp(13px, 1.12vw, 16px); /* 14px */
-  --h6:  clamp(13px, 1vw, 14px); /* 12px */
-  --h7: clamp(12px, 1vw, 14px); /* 12px */
-  --h8: 13px; /* 10px */
-  --body: clamp(14px, 1.12vw, 16px); /* 14px */
+  --h6:  clamp(13px, 1vw, 16px); /* 12px */
+  --h7: clamp(12px, 1vw, 16px); /* 12px */
+  --h8: 14px; /* 10px */
+  --body: clamp(14px, 1.12vw, 18px); /* 14px */
 }
 
 @media (min-width: 1000px) {

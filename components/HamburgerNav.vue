@@ -11,8 +11,8 @@
             <a 
               v-if="item.isExternal" 
               :href="item.to" 
-              target="_blank" 
-              rel="noopener noreferrer"
+              :target="shouldOpenInNewTab(item.to) ? '_blank' : undefined"
+              :rel="shouldOpenInNewTab(item.to) ? 'noopener noreferrer' : undefined"
               class="hamburger-nav__a" 
               @click="closeMenu"
             >
@@ -59,6 +59,17 @@ const closeMenu = () => {
   if (navStatusEl) {
     navStatusEl.setAttribute('data-navigation-status', 'not-active')
   }
+}
+
+// Helper function to determine if link should open in new tab (mailto/tel should not)
+const shouldOpenInNewTab = (url) => {
+  if (!url) return false
+  // mailto: and tel: should not open in new tab
+  if (url.startsWith('mailto:') || url.startsWith('tel:')) return false
+  // Other external URLs should open in new tab
+  if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('//')) return true
+  // Treat any URL that doesn't start with "/" or "#" as external
+  return !url.startsWith('/') && !url.startsWith('#')
 }
 
 const normalizedMenuItems = computed(() => {

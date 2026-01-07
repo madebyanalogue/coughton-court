@@ -18,10 +18,13 @@
                 <!-- Image Item -->
                 <div v-if="isImageItem(item) && item.asset?.asset" class="carousel-media">
                   <NuxtImg
-                    :src="getImageUrl(item.asset)"
+                    :src="getImageUrl(item.asset, { width: 1200, quality: 85 })"
                     :alt="item.alt || 'Carousel image'"
                     class="carousel-image"
-                    loading="lazy"
+                    width="1200"
+                    quality="85"
+                    format="webp"
+                    loading="eager"
                   />
                 </div>
                 
@@ -77,6 +80,7 @@ import { computed, onMounted, ref } from 'vue'
 import { gsap } from 'gsap'
 import { Draggable } from 'gsap/Draggable'
 import { InertiaPlugin } from 'gsap/InertiaPlugin'
+import { useSanityImage } from '~/composables/useSanityImage'
 
 const props = defineProps({
   section: {

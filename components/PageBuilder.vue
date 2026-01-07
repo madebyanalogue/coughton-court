@@ -112,6 +112,12 @@
         :section="section"
       />
 
+      <!-- Text and Images Section -->
+      <SectionTextAndImages
+        v-else-if="section._type === 'section' && section.sectionType === 'textAndImages'"
+        :section="section"
+      />
+
       <!-- Contact Form Section -->
       <SectionContactForm
         v-else-if="section._type === 'section' && section.sectionType === 'contactForm'"
@@ -281,6 +287,11 @@ import SectionReviews from '~/components/SectionReviews.vue'
 import SectionInstagram from '~/components/SectionInstagram.vue'
 import SectionGalleries from '~/components/SectionGalleries.vue'
 import SectionHorizontalCarousel from '~/components/SectionHorizontalCarousel.vue'
+import SectionFAQs from '~/components/SectionFAQs.vue'
+import SectionContactForm from '~/components/SectionContactForm.vue'
+import SectionDirections from '~/components/SectionDirections.vue'
+import SectionOpeningTimesAndPrices from '~/components/SectionOpeningTimesAndPrices.vue'
+import SectionTextAndImages from '~/components/SectionTextAndImages.vue'
 
 const props = defineProps({
   sections: {

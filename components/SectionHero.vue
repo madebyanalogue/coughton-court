@@ -4,7 +4,17 @@
       <!-- Hero section -->
       <section ref="heroSectionRef" :class="['hero-section', { 'section-border-top': section.borderTop, 'section-border-bottom': section.borderBottom }]" data-momentum-hover-init style="opacity: 0; visibility: hidden;">
         <div v-if="isSvg && svgContent" class="hero-image svg-loading" data-momentum-hover-element v-html="svgContent"></div>
-        <img v-else :src="imageUrl" alt="Hero Image" class="hero-image" />
+        <NuxtImg 
+          v-else-if="imageUrl" 
+          :src="imageUrl" 
+          alt="Hero Image" 
+          class="hero-image"
+          width="1920"
+          quality="85"
+          format="webp"
+          loading="eager"
+          preload
+        />
       </section>
     </div>
   </div>
@@ -31,7 +41,10 @@ const { getImageUrl } = useSanityImage()
 
 const imageUrl = computed(() => {
   if (props.section?.heroContent?.image) {
-    return getImageUrl(props.section.heroContent.image)
+    return getImageUrl(props.section.heroContent.image, {
+      width: 1920,
+      quality: 85
+    })
   }
   return null
 })

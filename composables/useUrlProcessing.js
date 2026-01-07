@@ -7,6 +7,11 @@ export const useUrlProcessing = () => {
   const getProcessedUrl = (url) => {
     if (!url) return '#'
     
+    // Preserve mailto: and tel: links as-is
+    if (url.startsWith('mailto:') || url.startsWith('tel:')) {
+      return url
+    }
+    
     if (url.startsWith('http://') || url.startsWith('https://')) {
       return url
     } else if (url.startsWith('//')) {

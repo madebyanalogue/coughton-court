@@ -1,12 +1,14 @@
 <template style="aspect-ratio: 32/16.4;background:url('~@/assets/sectons/hero.jpg') no-repeat center center;background-size: cover;">
   <div class="hero-image" v-if="src">
-    <img
+    <NuxtImg
       :src="src"
       :alt="alt"
       :class="{ roundal: isRoundal }"
-      loading="lazy"
       :width="width"
       :height="height"
+      quality="85"
+      format="webp"
+      loading="lazy"
     />
   </div>
 </template>

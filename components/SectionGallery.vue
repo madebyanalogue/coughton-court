@@ -17,11 +17,14 @@
               `ratio-${item.imageRatio}`,
             ]">
             <NuxtImg
-              :src="getImageUrl(item.image)"
+              :src="getImageUrl(item.image, { width: 1200, quality: 85 })"
               :alt="`Gallery image ${index + 1}`"
               :class="[
                 'gallery-image',
               ]"
+              width="1200"
+              quality="85"
+              format="webp"
               data-image-overlay
               loading="lazy"
             />
