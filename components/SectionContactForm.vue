@@ -62,7 +62,7 @@
                 class="contact-form-input contact-form-textarea"
               ></textarea>
             </div>
-            <div>
+            <div class="contact-form-submit-wrapper">
               <button type="submit" class="contact-form-submit button" :disabled="isSubmitting">
                 {{ isSubmitting ? 'Sending...' : 'Send' }}
               </button>
@@ -183,16 +183,18 @@ onUnmounted(() => {
 .contact-form {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1rem;
 }
 
 .contact-form-field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  display: grid;
+  grid-template-columns: 1fr;
+  border-bottom: 1px solid currentColor;
+  padding-bottom: 15px;
 }
 
 .contact-form-label {
+  padding: 15px 0px;
 }
 
 .required {
@@ -202,10 +204,10 @@ onUnmounted(() => {
 .contact-form-input {
   background: transparent;
   border: none;
-  border-bottom: 1px solid currentColor;
   outline: none;
-  transition: border-color 0.2s;
+  transition: color 999999s ease 999999s, background-color 999999s ease 999999s;
   font-family: inherit;
+  padding: 0px 0px 5px 0px;
 }
 
 .contact-form-input:focus {
@@ -221,6 +223,13 @@ onUnmounted(() => {
   min-height: 100px;
 }
 
+.contact-form-submit-wrapper {
+  margin-top: 1rem;
+}
+.contact-form-submit-wrapper {
+  display: flex;
+  justify-content: flex-end;
+}
 .contact-form-submit {
   min-width: 180px;
 }
@@ -238,6 +247,19 @@ onUnmounted(() => {
 @media (min-width: 768px) {
   .contact-form-image {
     order: 0;
+  }
+  .contact-form-field {
+    display: grid;
+    grid-template-columns: 180px 1fr;
+    gap: 0.5rem;
+  }
+  .contact-form-input {
+    padding: 15px;    
+  }
+}
+@media (max-width: 767px) {
+  .contact-form-submit {
+    width:100%;  
   }
 }
 

@@ -24,8 +24,10 @@
               :alt="garden.title"
               class="garden-hero__img"
               width="1920"
+              height="1080"
               quality="85"
               format="webp"
+              sizes="1920px"
               loading="eager"
               preload
             />
@@ -302,6 +304,8 @@ const endDrag = () => {
   width: 100%;
   height: 140%;
   will-change: transform;
+  /* Safari fix: ensure container has explicit dimensions */
+  min-height: 100vh;
 }
 
 .garden-hero__image {
@@ -316,7 +320,12 @@ const endDrag = () => {
 .garden-hero__img {
   width: 100%;
   height: 100%;
+  /* Safari fix: use -webkit prefix and ensure dimensions */
+  -webkit-object-fit: cover;
   object-fit: cover;
+  /* Force Safari to respect dimensions */
+  min-width: 100%;
+  min-height: 100%;
 }
 
 .garden-hero__overlay {

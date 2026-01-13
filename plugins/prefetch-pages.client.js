@@ -6,6 +6,11 @@ export default defineNuxtPlugin((nuxtApp) => {
   // Prefetch pages on link hover for instant navigation
   if (typeof document !== 'undefined') {
     document.addEventListener('mouseenter', (e) => {
+      // Check if target is an Element and has closest method
+      if (!e.target || typeof e.target.closest !== 'function') {
+        return
+      }
+      
       const link = e.target.closest('a[href]')
       if (link && link.href) {
         try {

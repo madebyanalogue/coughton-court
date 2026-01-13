@@ -14,7 +14,7 @@
         width="1920"
         height="1080"
         quality="85"
-        sizes="100vw"
+        sizes="1920px"
       />
     </div>
     <div v-else class="page-hero-placeholder">
@@ -275,9 +275,14 @@ onUnmounted(() => {
 .page-hero-image {
   width: 100%;
   height: 100%;
+  /* Safari fix: use -webkit prefix and ensure dimensions */
+  -webkit-object-fit: cover;
   object-fit: cover;
   display: block;
   pointer-events: none;
+  /* Force Safari to respect dimensions */
+  min-width: 100%;
+  min-height: 100%;
 }
 
 .page-hero-overlay {

@@ -20,9 +20,14 @@
           <div class="event-hero__image" :class="{ 'event-hero__image--no-image': !event.featuredImage }">
             <NuxtImg 
               v-if="event.featuredImage"
-              :src="getImageUrl(event.featuredImage)" 
+              :src="getImageUrl(event.featuredImage, { width: 1920, quality: 85 })" 
               :alt="event.title"
               class="event-hero__img"
+              width="1920"
+              height="1080"
+              quality="85"
+              format="webp"
+              sizes="1920px"
               loading="eager"
               preload
             />
@@ -347,6 +352,8 @@ onMounted(() => {
   width: 100%;
   height: 140%;
   will-change: transform;
+  /* Safari fix: ensure container has explicit dimensions */
+  min-height: 100vh;
 }
 
 .event-hero__image {
@@ -361,7 +368,12 @@ onMounted(() => {
 .event-hero__img {
   width: 100%;
   height: 100%;
+  /* Safari fix: use -webkit prefix and ensure dimensions */
+  -webkit-object-fit: cover;
   object-fit: cover;
+  /* Force Safari to respect dimensions */
+  min-width: 100%;
+  min-height: 100%;
 }
 
 .event-hero__overlay {
