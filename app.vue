@@ -64,12 +64,13 @@ import { computed, onMounted, ref, nextTick, onBeforeUnmount } from 'vue';
 import { useRoute } from 'vue-router'
 import { useHead, useRouter } from '#app'
 import { useSiteSettings } from '~/composables/useSiteSettings'
+import { useSanityImage } from '~/composables/useSanityImage'
 
 // Initialize page settings first
 const { isDark, page } = usePageSettings();
 const route = useRoute();
 const router = useRouter();
-const { disablePreloader, disablePageTransition } = useSiteSettings()
+const { disablePreloader, disablePageTransition, defaultMetaDescription, defaultOgImage, title: websiteTitle } = useSiteSettings()
 
 // Initialize scroll trigger system
 const { enableScrollAnimations } = useScrollTrigger();
@@ -315,6 +316,68 @@ const mainPaddingVar = computed(() => {
 
 // Update favicon based on dark mode
 useFavicon(isDark);
+
+// Set up default SEO meta tags from site settings
+const { getImageUrl } = useSanityImage()
+const defaultOgImageUrl = computed(() => {
+  if (defaultOgImage.value?.asset) {
+    return getImageUrl(defaultOgImage.value, { width: 1200, quality: 85 })
+  }
+  return null
+})
+
+// Set default meta tags that will be used if pages don't override them
+useHead(() => {
+  const meta = []
+  
+  // Default meta description
+  if (defaultMetaDescription.value) {
+    meta.push({
+      name: 'description',
+      content: defaultMetaDescription.value
+    })
+  }
+  
+  // Default OG image
+  if (defaultOgImageUrl.value) {
+    meta.push(
+      {
+        property: 'og:image',
+        content: defaultOgImageUrl.value
+      },
+      {
+        property: 'og:image:width',
+        content: '1200'
+      },
+      {
+        property: 'og:image:height',
+        content: '630'
+      }
+    )
+  }
+  
+  // OG type, site name, and URL
+  meta.push(
+    {
+      property: 'og:type',
+      content: 'website'
+    },
+    {
+      property: 'og:site_name',
+      content: websiteTitle.value
+    }
+  )
+  
+  // OG title (will be overridden by pages if they set it)
+  if (websiteTitle.value) {
+    meta.push({
+      property: 'og:title',
+      content: websiteTitle.value
+    })
+  }
+  
+  return { meta }
+})
 
 // Add script to head to prevent flash of incorrect mode
 useHead({

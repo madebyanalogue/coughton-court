@@ -179,11 +179,12 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useSanityImage } from '~/composables/useSanityImage.js'
 import { useSiteSettings } from '~/composables/useSiteSettings'
+import { useHead } from '#app'
 import PageIntroduction from '~/components/PageIntroduction.vue'
 
 const route = useRoute()
 const { getImageUrl } = useSanityImage()
-const { title: websiteTitle, bookingTitle } = useSiteSettings()
+const { title: websiteTitle, bookingTitle, defaultMetaDescription, defaultOgImage } = useSiteSettings()
 
 const slug = computed(() => route.params.slug)
 
@@ -198,10 +199,67 @@ const { data: event, error, pending } = await useAsyncData(
   })
 )
 
-// Page title
-useHead(() => ({
-  title: `${websiteTitle.value} | ${event.value?.title || 'Event'}`
-}))
+// Page meta - use page-specific SEO data if available, otherwise use defaults
+useHead(() => {
+  const pageTitle = event.value?.seo?.metaTitle || event.value?.title || 'Event'
+  const fullTitle = event.value?.seo?.metaTitle 
+    ? `${websiteTitle.value} | ${event.value.seo.metaTitle}`
+    : `${websiteTitle.value} | ${event.value?.title || 'Event'}`
+  
+  const metaDescription = event.value?.seo?.metaDescription || defaultMetaDescription.value || ''
+  
+  // Get OG image - use page-specific if available, otherwise use default
+  let ogImageUrl = null
+  if (event.value?.seo?.ogImage?.asset) {
+    ogImageUrl = getImageUrl(event.value.seo.ogImage, { width: 1200, quality: 85 })
+  } else if (event.value?.featuredImage?.asset) {
+    ogImageUrl = getImageUrl(event.value.featuredImage, { width: 1200, quality: 85 })
+  } else if (defaultOgImage.value?.asset) {
+    ogImageUrl = getImageUrl(defaultOgImage.value, { width: 1200, quality: 85 })
+  }
+  
+  const meta = []
+  
+  if (metaDescription) {
+    meta.push({
+      name: 'description',
+      content: metaDescription
+    })
+  }
+  
+  if (ogImageUrl) {
+    meta.push(
+      {
+        property: 'og:image',
+        content: ogImageUrl
+      },
+      {
+        property: 'og:image:width',
+        content: '1200'
+      },
+      {
+        property: 'og:image:height',
+        content: '630'
+      }
+    )
+  }
+  
+  meta.push(
+    {
+      property: 'og:title',
+      content: fullTitle
+    },
+    {
+      property: 'og:url',
+      content: typeof window !== 'undefined' ? window.location.href : ''
+    }
+  )
+  
+  return {
+    title: fullTitle,
+    meta
+  }
+})
 
 // Format date
 const formatDate = (dateString) => {

@@ -134,10 +134,11 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useSanityImage } from '~/composables/useSanityImage.js'
 import { useSiteSettings } from '~/composables/useSiteSettings'
+import { useHead } from '#app'
 
 const route = useRoute()
 const { getImageUrl } = useSanityImage()
-const { title: websiteTitle } = useSiteSettings()
+const { title: websiteTitle, defaultMetaDescription, defaultOgImage } = useSiteSettings()
 
 const slug = computed(() => route.params.slug)
 
@@ -170,10 +171,67 @@ const { data: allGardens } = await useAsyncData(
   }
 )
 
-// Page title
-useHead(() => ({
-  title: `${websiteTitle.value} | ${garden.value?.title || 'Garden'}`
-}))
+// Page meta - use page-specific SEO data if available, otherwise use defaults
+useHead(() => {
+  const pageTitle = garden.value?.seo?.metaTitle || garden.value?.title || 'Garden'
+  const fullTitle = garden.value?.seo?.metaTitle 
+    ? `${websiteTitle.value} | ${garden.value.seo.metaTitle}`
+    : `${websiteTitle.value} | ${garden.value?.title || 'Garden'}`
+  
+  const metaDescription = garden.value?.seo?.metaDescription || defaultMetaDescription.value || ''
+  
+  // Get OG image - use page-specific if available, otherwise use default
+  let ogImageUrl = null
+  if (garden.value?.seo?.ogImage?.asset) {
+    ogImageUrl = getImageUrl(garden.value.seo.ogImage, { width: 1200, quality: 85 })
+  } else if (garden.value?.featuredImage?.asset) {
+    ogImageUrl = getImageUrl(garden.value.featuredImage, { width: 1200, quality: 85 })
+  } else if (defaultOgImage.value?.asset) {
+    ogImageUrl = getImageUrl(defaultOgImage.value, { width: 1200, quality: 85 })
+  }
+  
+  const meta = []
+  
+  if (metaDescription) {
+    meta.push({
+      name: 'description',
+      content: metaDescription
+    })
+  }
+  
+  if (ogImageUrl) {
+    meta.push(
+      {
+        property: 'og:image',
+        content: ogImageUrl
+      },
+      {
+        property: 'og:image:width',
+        content: '1200'
+      },
+      {
+        property: 'og:image:height',
+        content: '630'
+      }
+    )
+  }
+  
+  meta.push(
+    {
+      property: 'og:title',
+      content: fullTitle
+    },
+    {
+      property: 'og:url',
+      content: typeof window !== 'undefined' ? window.location.href : ''
+    }
+  )
+  
+  return {
+    title: fullTitle,
+    meta
+  }
+})
 
 // Garden hero parallax (match PageHero behavior)
 const gardenHeroRef = ref(null)

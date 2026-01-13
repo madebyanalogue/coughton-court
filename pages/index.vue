@@ -40,11 +40,12 @@
 </template>
 
 <script setup>
-import { watch } from 'vue'
 import { useRuntimeConfig } from '#app'
 import { computed } from 'vue'
 import { usePageSettings } from '~/composables/usePageSettings'
 import { useSiteSettings } from '~/composables/useSiteSettings'
+import { useSanityImage } from '~/composables/useSanityImage'
+import { useHead } from '#app'
 
 const config = useRuntimeConfig()
 
@@ -52,26 +53,69 @@ const config = useRuntimeConfig()
 const { page: pageData, error, pending } = usePageSettings()
 
 // Get site settings once
-const { title: websiteTitle } = useSiteSettings()
+const { title: websiteTitle, defaultMetaDescription, defaultOgImage } = useSiteSettings()
+const { getImageUrl } = useSanityImage()
 
-
-// Watch for changes in pageData to update title
-watch(() => pageData.value, (newData) => {
-  if (newData) {
-    const pageTitle = newData.title || 'Home'
-    const fullTitle = `${websiteTitle.value} | ${pageTitle}`
-    useHead({
-      title: fullTitle
+// Page meta - use page-specific SEO data if available, otherwise use defaults
+useHead(() => {
+  const pageTitle = pageData.value?.seo?.metaTitle || pageData.value?.title || 'Home'
+  const fullTitle = pageData.value?.seo?.metaTitle 
+    ? `${websiteTitle.value} | ${pageData.value.seo.metaTitle}`
+    : `${websiteTitle.value} | ${pageData.value?.title || 'Home'}`
+  
+  const metaDescription = pageData.value?.seo?.metaDescription || defaultMetaDescription.value || ''
+  
+  // Get OG image - use page-specific if available, then featured image, then default
+  let ogImageUrl = null
+  if (pageData.value?.seo?.ogImage?.asset) {
+    ogImageUrl = getImageUrl(pageData.value.seo.ogImage, { width: 1200, quality: 85 })
+  } else if (pageData.value?.featuredImage?.asset) {
+    ogImageUrl = getImageUrl(pageData.value.featuredImage, { width: 1200, quality: 85 })
+  } else if (defaultOgImage.value?.asset) {
+    ogImageUrl = getImageUrl(defaultOgImage.value, { width: 1200, quality: 85 })
+  }
+  
+  const meta = []
+  
+  if (metaDescription) {
+    meta.push({
+      name: 'description',
+      content: metaDescription
     })
   }
-}, { immediate: true })
-
-// Page meta
-useHead(() => {
-  const title = pageData.value?.title || 'Home';
-  return { 
-    title: `${websiteTitle.value} | ${title}`
-  };
+  
+  if (ogImageUrl) {
+    meta.push(
+      {
+        property: 'og:image',
+        content: ogImageUrl
+      },
+      {
+        property: 'og:image:width',
+        content: '1200'
+      },
+      {
+        property: 'og:image:height',
+        content: '630'
+      }
+    )
+  }
+  
+  meta.push(
+    {
+      property: 'og:title',
+      content: fullTitle
+    },
+    {
+      property: 'og:url',
+      content: typeof window !== 'undefined' ? window.location.href : ''
+    }
+  )
+  
+  return {
+    title: fullTitle,
+    meta
+  }
 })
 
 // Computed property for development mode

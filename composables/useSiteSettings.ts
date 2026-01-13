@@ -101,6 +101,10 @@ export const useSiteSettings = () => {
     cookiesMessage: computed(() => settings.value?.cookiesMessage || []),
     googleAnalyticsId: computed(() => settings.value?.googleAnalyticsId || ''),
     preloaderBackgroundColor: computed(() => settings.value?.preloaderBackgroundColor || null),
-    preloaderSvgColor: computed(() => settings.value?.preloaderSvgColor || null)
+    preloaderSvgColor: computed(() => settings.value?.preloaderSvgColor || null),
+    defaultMetaDescription: computed(() => settings.value?.seo?.defaultMetaDescription || ''),
+    defaultOgImage: computed(() => settings.value?.seo?.defaultOgImage || null),
+    facebookAppId: computed(() => settings.value?.seo?.facebookAppId || ''),
+    twitterHandle: computed(() => settings.value?.seo?.twitterHandle || '')
   }
 } 
