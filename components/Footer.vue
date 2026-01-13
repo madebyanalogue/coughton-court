@@ -1,7 +1,7 @@
 <template>
   <div>
     <footer class="scheme dark">
-      <div id="footer" class="py2 py-sm-3 py-md-4 grid grid-1 gap-2">
+      <div id="footer" class="py6 py-sm-3 py-md-4 grid grid-1 gap-6 gap-md-2">
 
 
 
@@ -39,22 +39,8 @@
               </div>
             </div>
 
-            <!-- COPYRIGHT -->
-            <div class="">
-              <div class="flex flex-col flex-center gap-1 text-center uppercase medium">
-                <div class="flex flex-center">
-                  <NuxtLink to="/">
-                    <div class="footer-logo">
-                      <Logo />
-                    </div>
-                  </NuxtLink>
-                </div>
-                <div class="h7 medium">© <span>{{ websiteTitle }}</span> {{ new Date().getFullYear() }}. All Rights Reserved.</div>
-              </div>
-            </div>
-
             <!--FOOTER RIGHT-->
-            <div class="footer-right grid grid-1 gap-2">
+            <div class="footer-right grid grid-1 gap-6 gap-md-2">
 
                 <!-- FOOTER MENUS RIGHT -->
                 <div v-if="footerMenusRight?.length > 0" class="footer-menus-right grid grid-3 gap-2">
@@ -94,6 +80,21 @@
                 />
 
 
+            </div>
+
+
+            <!-- COPYRIGHT -->
+            <div class="hide-on-desktop">
+              <div class="flex flex-col flex-center gap-2 text-center uppercase medium">
+                <div class="flex flex-center">
+                  <NuxtLink to="/">
+                    <div class="footer-logo">
+                      <Logo />
+                    </div>
+                  </NuxtLink>
+                </div>
+                <div class="h7 medium">© <span>{{ websiteTitle }}</span> {{ new Date().getFullYear() }}. All Rights Reserved.</div>
+              </div>
             </div>
                 
           </div>
@@ -388,5 +389,11 @@ onUnmounted(() => {
 
 .footer-menu-link:hover {
   opacity: 0.7;
+}
+
+@media all and (min-width:1024px) {
+  .footer-right {
+    order:1;
+  }
 }
 </style> 
