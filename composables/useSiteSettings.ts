@@ -99,6 +99,8 @@ export const useSiteSettings = () => {
     newsletterTitleHero: computed(() => settings.value?.newsletterTitleHero || ''),
     newsletterPlaceholder: computed(() => settings.value?.newsletterPlaceholder || 'Enter your email'),
     cookiesMessage: computed(() => settings.value?.cookiesMessage || []),
-    googleAnalyticsId: computed(() => settings.value?.googleAnalyticsId || '')
+    googleAnalyticsId: computed(() => settings.value?.googleAnalyticsId || ''),
+    preloaderBackgroundColor: computed(() => settings.value?.preloaderBackgroundColor || null),
+    preloaderSvgColor: computed(() => settings.value?.preloaderSvgColor || null)
   }
 } 

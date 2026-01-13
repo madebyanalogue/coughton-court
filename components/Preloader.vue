@@ -9,6 +9,7 @@
   <div 
     v-show="showPreloader" 
     class="preloader-container"
+    :style="backgroundColorStyle"
     data-loading-container
   >
     <div class="preloader-content" :class="{ 'has-images': preloaderImages.length > 0 }">
@@ -39,7 +40,7 @@
           </div>
       </div>
 
-      <div class="website-icon-container">
+      <div class="website-icon-container" :style="svgColorStyle">
         <!-- Show SVG content if it's an SVG, otherwise show as image -->
         <div 
           v-if="logotypeSvgContent"
@@ -90,7 +91,7 @@ const props = defineProps({
 const emit = defineEmits(['preloader-complete', 'preloader-ready'])
 
 const { getImageUrl } = useSanityImage()
-const { settings: siteSettings, disablePreloader } = useSiteSettings()
+const { settings: siteSettings, disablePreloader, preloaderBackgroundColor, preloaderSvgColor } = useSiteSettings()
 
 // Preloader state - respect disablePreloader flag
 const showPreloader = ref(true)
@@ -109,6 +110,21 @@ const logotypeImageUrl = computed(() => {
   const logotype = siteSettings.value?.logotype
   if (!logotype?.asset?.url) return null
   return getImageUrl(logotype)
+})
+
+// Computed styles for background and SVG colors
+const backgroundColorStyle = computed(() => {
+  if (preloaderBackgroundColor.value) {
+    return { backgroundColor: preloaderBackgroundColor.value }
+  }
+  return {}
+})
+
+const svgColorStyle = computed(() => {
+  if (preloaderSvgColor.value) {
+    return { color: preloaderSvgColor.value }
+  }
+  return {}
 })
 
 const logotypeSvgContent = ref(null)
@@ -189,22 +205,22 @@ const initPreloaderAnimation = () => {
     animationTimeline.set('.image-sequence', { opacity: 0 })
     animationTimeline.to('.image-sequence', { 
       opacity: 1, 
-      duration: 1.5, 
+      duration: 0.8, 
       ease: "power2.in" 
     })
     
     // Stage 2: Logotype fades in overlaid (after image)
-    const logotypeStart = 1 // Start after image fade in
+    const logotypeStart = 0.5 // Start after image fade in
     animationTimeline.set('.website-icon-container', { opacity: 0, visibility: 'visible' }, logotypeStart)
     animationTimeline.to('.website-icon-container', { 
       opacity: 1, 
-      duration: 1.5, 
+      duration: 0.8, 
       ease: "power2.in" 
     }, logotypeStart)
     
     // Stage 3: Transform up and out (after logotype)
-    const holdTime = logotypeStart + 1.2 // Hold for 1 second after logotype appears
-    const exitTime = holdTime + 0.6 // Exit animation duration
+    const holdTime = logotypeStart + 0.8 // Hold for 0.8 seconds after logotype appears
+    const exitTime = 0.9 // Exit animation duration
     
     // Animate preloader container up and out
     animationTimeline.to('.preloader-container', {
@@ -237,13 +253,13 @@ const initPreloaderAnimation = () => {
     animationTimeline.set('.website-icon-container', { opacity: 0, visibility: 'visible' })
     animationTimeline.to('.website-icon-container', { 
       opacity: 1, 
-      duration: 1.0, 
+      duration: 0.8, 
       ease: "power2.out" 
     })
     
     // Hold for a moment then translate up and out
-    const holdTime = 1.0 // Hold for 1 second after fade in
-    const exitTime = holdTime + 0.8 // Exit animation duration
+    const holdTime = 0.8 // Hold for 0.8 seconds after fade in
+    const exitTime = 0.9 // Exit animation duration
     
      // Animate preloader container up and out
      animationTimeline.to('.preloader-container', {
@@ -427,19 +443,43 @@ onUnmounted(() => {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: auto;
+  width: 60%;
+  max-width: 320px;
   height: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .has-images .website-icon-container {
- top:84%;
+  top: 50%;
+  transform: translate(-50%, -50%);
 }
 
 
-svg > * {
-  fill:currentColor;
+.logotype-svg {
   width: 100%;
-  height: 100%;
+  height: auto;
+  color: inherit;
+}
+
+.logotype-svg svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  color: inherit;
+}
+
+.logotype-svg svg,
+.logotype-svg svg * {
+  fill: currentColor !important;
+  stroke: currentColor !important;
+}
+
+.logotype-image {
+  width: 100%;
+  height: auto;
+  display: block;
 }
 
 .preloader-image {
@@ -470,12 +510,13 @@ svg > * {
 }
 
 /* Ensure preloader covers everything */
+/* Default background colors - can be overridden by inline styles from site settings */
 .preloader-container {
-  background: rgba(255, 255, 255, 1) !important; /* Force 0.5 opacity for debugging */
+  background: rgba(255, 255, 255, 1);
 }
 
 /* Dark mode support */
 :root.dark-mode .preloader-container {
-  background: rgba(0, 0, 0, 1) !important; /* Force 0.5 opacity for debugging */
+  background: rgba(0, 0, 0, 1);
 }
 </style>
