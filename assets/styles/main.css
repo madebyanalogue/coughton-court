@@ -181,11 +181,10 @@ header a, header button {
   pointer-events: auto;
 }
 
-/* When page transitions are disabled, freeze visual recalibration effects */
-body.no-page-transition,
-body.no-page-transition * {
+/* When page transitions are disabled, only disable page-level transitions */
+body.no-page-transition .page-new,
+body.no-page-transition .page-old {
   transition: none !important;
-  animation: none !important;
 }
 
 .page-builder {

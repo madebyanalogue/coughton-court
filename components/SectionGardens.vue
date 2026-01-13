@@ -156,6 +156,12 @@ section {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.6s ease;
+  transform-origin: center;
+}
+
+.garden-link:hover .garden-image {
+  transform: scale(1.05);
 }
 
 .garden-image-fallback {

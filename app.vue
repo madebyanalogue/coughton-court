@@ -203,18 +203,21 @@ router.afterEach(async (to) => {
             document.body.classList.add('garden-transition')
           }
           
-          // New page is ready - show it over old page
+          // New page is ready - show it over old page immediately
           nextTick(() => {
+            // First, make new page visible (it will cover old page)
             pageReady.value = true
             
-            // Zero delay if: page transitions disabled, garden-to-garden, or cached pages
-            // Otherwise use a small delay for visual smoothness
-            const delay = (disablePageTransition.value || isGardenToGarden || wasReadyImmediately) ? 0 : 150
-            
-            // Wait a frame for the CSS transition, then remove old page
+            // Wait for next frame to ensure new page is painted and covering old page
             requestAnimationFrame(() => {
+              // Now remove old page - new page is already visible and covering it
+              oldPageHtml.value = ''
+              
+              // Zero delay if: page transitions disabled, garden-to-garden, or cached pages
+              // Otherwise use a small delay for cleanup
+              const delay = (disablePageTransition.value || isGardenToGarden || wasReadyImmediately) ? 0 : 150
+              
               setTimeout(() => {
-                oldPageHtml.value = ''
                 previousRouteKey.value = null
                 isPageTransitioning.value = false
                 
@@ -359,7 +362,7 @@ main.main-content {
   background-color: var(--background-color);
 }
 
-/* Old page - stays visible during transition */
+/* Old page - stays visible during transition until new page covers it */
 .page-old {
   position: absolute;
   top: 0;
@@ -375,6 +378,8 @@ main.main-content {
   will-change: auto;
   opacity: 1 !important;
   visibility: visible !important;
+  /* Keep old page visible until new page is ready and covering it */
+  display: block !important;
 }
 
 /* Fix garden/event pages in old content - remove negative margin that affects header */
@@ -406,6 +411,8 @@ main.main-content {
   min-height: calc(100vh - var(--header-height, 80px));
   background-color: var(--background-color);
   transition: opacity 0s ease 0s;
+  /* Ensure it covers old page completely */
+  width: 100%;
 }
 
 /* Garden/event pages - instant transition (no delay) */
@@ -413,14 +420,25 @@ body.garden-transition .page-new {
   transition: opacity 0s ease 0s;
 }
 
-/* New page not ready yet - hide it */
+/* New page not ready yet - hide it but keep it positioned */
 .page-new:not(.page-new-ready) {
   opacity: 0;
   visibility: hidden;
   position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   pointer-events: none;
   z-index: 0;
+}
+
+/* When new page is ready, ensure it's on top and visible */
+.page-new.page-new-ready {
+  position: relative;
+  z-index: 3;
+  opacity: 1;
+  visibility: visible;
+  background-color: var(--background-color);
 }
 
 /* Hide Suspense fallback during transitions when old page is visible */
