@@ -227,10 +227,11 @@ const handleSubmit = async () => {
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: var(--pad-1);
+  gap: var(--pad-2);
 }
 
 .newsletter-title {
+  padding-right: var(--pad-2);
 }
 
 .newsletter-form {

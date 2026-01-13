@@ -98,15 +98,17 @@ onMounted(() => {
   flex-direction: column;
   gap: 1rem;
   align-items: center;
+  min-height: var(--pad-4);
+  padding:calc(var(--pad-1) * 1.5) 0px;
   justify-content: space-between;
-  height: var(--pad-4);
+
   border-top: 1px solid currentColor;
 }
 
 @media (min-width: 768px) {
   .hero-cookies-banner__content {
     flex-direction: row;
-  }
+  }  
 }
 
 .hero-cookies-banner__message {

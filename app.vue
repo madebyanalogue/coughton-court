@@ -197,56 +197,90 @@ router.afterEach(async (to) => {
           
           // Detect if page was ready immediately (cached/prefetched)
           const wasReadyImmediately = attempts <= 2
+          const isInstant = disablePageTransition.value || isGardenToGarden || wasReadyImmediately
           
           // Add class to body for instant garden transitions
           if (isGardenToGarden && typeof document !== 'undefined') {
             document.body.classList.add('garden-transition')
           }
           
-          // New page is ready - show it over old page immediately
-          nextTick(() => {
-            // First, make new page visible (it will cover old page)
+          // For instant transitions (cached/disabled), skip all delays
+          if (isInstant) {
+            // Make new page visible immediately
             pageReady.value = true
             
-            // Wait for next frame to ensure new page is painted and covering old page
-            requestAnimationFrame(() => {
-              // Now remove old page - new page is already visible and covering it
-              oldPageHtml.value = ''
+            // Remove old page immediately - new page is already covering it
+            oldPageHtml.value = ''
+            
+            // Clean up immediately
+            previousRouteKey.value = null
+            isPageTransitioning.value = false
+            
+            if (typeof document !== 'undefined') {
+              document.body.classList.remove('page-transitioning', 'garden-transition')
               
-              // Zero delay if: page transitions disabled, garden-to-garden, or cached pages
-              // Otherwise use a small delay for cleanup
-              const delay = (disablePageTransition.value || isGardenToGarden || wasReadyImmediately) ? 0 : 150
+              // Restore body scroll position (remove fixed positioning)
+              document.body.style.position = ''
+              document.body.style.top = ''
+              document.body.style.width = ''
+              document.body.style.overflow = ''
+            }
+            
+            // Ensure scroll is at top
+            if (typeof window !== 'undefined') {
+              window.scrollTo({ top: 0, behavior: 'instant' })
+            }
+            
+            if (window.gsap && window.gsap.ScrollTrigger) {
+              window.gsap.ScrollTrigger.refresh()
+            }
+            
+            document.dispatchEvent(new CustomEvent('page-transition-in-complete'))
+            document.dispatchEvent(new CustomEvent('route-changed'))
+            
+            resolve()
+          } else {
+            // For non-cached pages, use small delay for visual smoothness
+            nextTick(() => {
+              // First, make new page visible (it will cover old page)
+              pageReady.value = true
               
-              setTimeout(() => {
-                previousRouteKey.value = null
-                isPageTransitioning.value = false
+              // Wait for next frame to ensure new page is painted and covering old page
+              requestAnimationFrame(() => {
+                // Now remove old page - new page is already visible and covering it
+                oldPageHtml.value = ''
                 
-                if (typeof document !== 'undefined') {
-                  document.body.classList.remove('page-transitioning', 'garden-transition')
+                setTimeout(() => {
+                  previousRouteKey.value = null
+                  isPageTransitioning.value = false
                   
-                  // Restore body scroll position (remove fixed positioning)
-                  document.body.style.position = ''
-                  document.body.style.top = ''
-                  document.body.style.width = ''
-                  document.body.style.overflow = ''
-                }
-                
-                // Ensure scroll is at top (already reset in beforeEach, but double-check)
-                if (typeof window !== 'undefined') {
-                  window.scrollTo({ top: 0, behavior: 'instant' })
-                }
-                
-                if (window.gsap && window.gsap.ScrollTrigger) {
-                  window.gsap.ScrollTrigger.refresh()
-                }
-                
-                document.dispatchEvent(new CustomEvent('page-transition-in-complete'))
-                document.dispatchEvent(new CustomEvent('route-changed'))
-                
-                resolve()
-              }, delay)
+                  if (typeof document !== 'undefined') {
+                    document.body.classList.remove('page-transitioning', 'garden-transition')
+                    
+                    // Restore body scroll position (remove fixed positioning)
+                    document.body.style.position = ''
+                    document.body.style.top = ''
+                    document.body.style.width = ''
+                    document.body.style.overflow = ''
+                  }
+                  
+                  // Ensure scroll is at top (already reset in beforeEach, but double-check)
+                  if (typeof window !== 'undefined') {
+                    window.scrollTo({ top: 0, behavior: 'instant' })
+                  }
+                  
+                  if (window.gsap && window.gsap.ScrollTrigger) {
+                    window.gsap.ScrollTrigger.refresh()
+                  }
+                  
+                  document.dispatchEvent(new CustomEvent('page-transition-in-complete'))
+                  document.dispatchEvent(new CustomEvent('route-changed'))
+                  
+                  resolve()
+                }, 150)
+              })
             })
-          })
+          }
         } else if (attempts >= maxAttempts) {
           // Timeout - show page anyway
           pageReady.value = true

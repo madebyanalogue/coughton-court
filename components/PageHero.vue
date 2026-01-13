@@ -332,7 +332,7 @@ onUnmounted(() => {
     position: absolute;
     right: var(--wrapper-padding);
     top: unset;
-    bottom: var(--pad-5);
+    bottom: var(--pad-7);
 }
 @media (min-width: 700px) {
     .page-hero-newsletter {
@@ -374,7 +374,11 @@ width: 100%;
 @media (max-width: 768px) {
   .page-hero {
     height: 50vh;
-    min-height: 300px;
+    min-height: 500px;
+  }
+  .page-hero-newsletter {
+    position:fixed;
+    bottom: var(--pad-1);
   }
 }
 </style>
