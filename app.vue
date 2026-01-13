@@ -69,7 +69,7 @@ import { useSiteSettings } from '~/composables/useSiteSettings'
 const { isDark, page } = usePageSettings();
 const route = useRoute();
 const router = useRouter();
-const { disablePreloader } = useSiteSettings()
+const { disablePreloader, disablePageTransition } = useSiteSettings()
 
 // Initialize scroll trigger system
 const { enableScrollAnimations } = useScrollTrigger();
@@ -195,6 +195,9 @@ router.afterEach(async (to) => {
           const wasGardenOrEvent = previousRouteKey.value?.includes('/gardens/') || previousRouteKey.value?.includes('/events/')
           const isGardenToGarden = isGardenOrEvent && wasGardenOrEvent
           
+          // Detect if page was ready immediately (cached/prefetched)
+          const wasReadyImmediately = attempts <= 2
+          
           // Add class to body for instant garden transitions
           if (isGardenToGarden && typeof document !== 'undefined') {
             document.body.classList.add('garden-transition')
@@ -204,8 +207,9 @@ router.afterEach(async (to) => {
           nextTick(() => {
             pageReady.value = true
             
-            // For garden-to-garden transitions, make it instant (no delay)
-            const delay = isGardenToGarden ? 0 : 300
+            // Zero delay if: page transitions disabled, garden-to-garden, or cached pages
+            // Otherwise use a small delay for visual smoothness
+            const delay = (disablePageTransition.value || isGardenToGarden || wasReadyImmediately) ? 0 : 150
             
             // Wait a frame for the CSS transition, then remove old page
             requestAnimationFrame(() => {
@@ -401,7 +405,7 @@ main.main-content {
   visibility: visible;
   min-height: calc(100vh - var(--header-height, 80px));
   background-color: var(--background-color);
-  transition: opacity 0s ease 0.25s;
+  transition: opacity 0s ease 0s;
 }
 
 /* Garden/event pages - instant transition (no delay) */
