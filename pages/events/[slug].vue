@@ -404,7 +404,7 @@ onMounted(() => {
 
 .event-hero {
   position: relative;
-  height: 31vw;
+  height: calc(31vw + var(--header-bar-height, 80px));
   min-height: 400px;
   overflow: hidden;
   padding-top: var(--header-height, 80px);
@@ -453,6 +453,7 @@ onMounted(() => {
 
 .event-hero__title {
   text-align: center;
+  padding-top: var(--header-bar-height, 80px);
 }
 
 
