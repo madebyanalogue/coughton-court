@@ -100,7 +100,12 @@
 
                   <!-- Booking Button -->
                   <div v-if="event.bookingUrl" class="event-booking">
-                    <a :href="event.bookingUrl" target="_blank" rel="noopener" class="button min-180">
+                    <a 
+                      :href="getProcessedUrl(event.bookingUrl)" 
+                      :target="shouldOpenInNewTab(event.bookingUrl) ? '_blank' : undefined"
+                      :rel="shouldOpenInNewTab(event.bookingUrl) ? 'noopener' : undefined"
+                      class="button min-180"
+                    >
                       <span class="btn__text">{{ bookingTitle || 'Book Now' }}</span>
                       <div class="btn__circle"></div>
                     </a>
@@ -179,12 +184,14 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useSanityImage } from '~/composables/useSanityImage.js'
 import { useSiteSettings } from '~/composables/useSiteSettings'
+import { useUrlProcessing } from '~/composables/useUrlProcessing'
 import { useHead } from '#app'
 import PageIntroduction from '~/components/PageIntroduction.vue'
 
 const route = useRoute()
 const { getImageUrl } = useSanityImage()
 const { title: websiteTitle, bookingTitle, defaultMetaDescription, defaultOgImage } = useSiteSettings()
+const { getProcessedUrl, shouldOpenInNewTab } = useUrlProcessing()
 
 const slug = computed(() => route.params.slug)
 

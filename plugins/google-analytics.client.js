@@ -1,4 +1,5 @@
 import { defineNuxtPlugin } from '#app'
+import { nextTick } from 'vue'
 
 export default defineNuxtPlugin(async () => {
   if (process.server) return
@@ -36,16 +37,23 @@ export default defineNuxtPlugin(async () => {
     const cookiesAccepted = localStorage.getItem('cookies-accepted')
     
     if (cookiesAccepted === 'true') {
-      // Fetch site settings to get GA ID
+      // Use useSiteSettings composable instead of making another API call
       try {
-        const settings = await $fetch('/api/sanity', { params: { type: 'siteSettings' } })
-        const gaId = settings?.googleAnalyticsId
+        const { googleAnalyticsId } = useSiteSettings()
+        const gaId = googleAnalyticsId.value
         
         if (gaId) {
           loadGoogleAnalytics(gaId)
+        } else {
+          // If not ready yet, wait a bit and try again
+          await nextTick()
+          const retryGaId = googleAnalyticsId.value
+          if (retryGaId) {
+            loadGoogleAnalytics(retryGaId)
+          }
         }
       } catch (error) {
-        console.warn('Failed to fetch site settings for GA:', error)
+        console.warn('Failed to get GA ID from site settings:', error)
       }
     }
   }

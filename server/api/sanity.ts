@@ -6,11 +6,21 @@ interface SanityError extends Error {
   statusCode?: number
 }
 
+// Core API client for write operations and siteSettings (needs fresh data)
 const client = createClient({
   projectId: '4dgj84d5',
   dataset: 'production',
   apiVersion: '2024-03-19',
   useCdn: false
+})
+
+// CDN client for read-only queries (news, gardens, events, services, etc.)
+// This dramatically reduces API usage and improves performance
+const cdnClient = createClient({
+  projectId: '4dgj84d5',
+  dataset: 'production',
+  apiVersion: '2024-03-19',
+  useCdn: true
 })
 
 interface Section {
@@ -228,7 +238,7 @@ export default defineEventHandler(async (event) => {
     }
     
     if (query.menuTitle) {
-      const result = await client.fetch(
+      const result = await cdnClient.fetch(
         '*[_type == "menu" && title == $menuTitle][0]{..., items[]{..., to{..., page-> { _id, slug, title }, section-> { _id, title }}}}',
         { menuTitle: query.menuTitle }
       )
@@ -873,7 +883,7 @@ export default defineEventHandler(async (event) => {
       if (query.title) {
         params.title = query.title
       }
-      const result = await client.fetch(`
+      const result = await cdnClient.fetch(`
         *[_type == "section" && sectionType == $sectionType${query.title ? ' && title == $title' : ''}][0] {
           ...,
           heroContent {
@@ -929,7 +939,7 @@ export default defineEventHandler(async (event) => {
     }
     
     if (query.type === 'sectionHomeScroll') {
-      const result = await client.fetch('*[_type == "sectionHomeScroll"][0]{..., items[]{..., link{..., page-> { _id, slug, title }}}}')
+      const result = await cdnClient.fetch('*[_type == "sectionHomeScroll"][0]{..., items[]{..., link{..., page-> { _id, slug, title }}}}')
       return result
     }
     
@@ -937,7 +947,7 @@ export default defineEventHandler(async (event) => {
       const limit = query.limit ? parseInt(query.limit as string) : undefined
       const limitClause = limit ? `[0...${limit}]` : ''
       
-      const result = await client.fetch(`*[_type == "news"] | order(publishedAt desc)${limitClause} {
+      const result = await cdnClient.fetch(`*[_type == "news"] | order(publishedAt desc)${limitClause} {
         _id,
         title,
         publishedAt,
@@ -959,7 +969,7 @@ export default defineEventHandler(async (event) => {
     }
 
     if (query.type === 'service') {
-      const result = await client.fetch(`*[_type == "service"] | order(orderRank){
+      const result = await cdnClient.fetch(`*[_type == "service"] | order(orderRank){
         _id,
         title,
         description,
@@ -974,7 +984,7 @@ export default defineEventHandler(async (event) => {
     }
 
     if (query.type === 'team') {
-      const result = await client.fetch(`*[_type == "team"] | order(orderRank asc) {
+      const result = await cdnClient.fetch(`*[_type == "team"] | order(orderRank asc) {
         _id,
         name,
         role,
@@ -987,7 +997,7 @@ export default defineEventHandler(async (event) => {
     }
     
     if (query.type === 'tips') {
-      const result = await client.fetch(`
+      const result = await cdnClient.fetch(`
         *[_type == "tips"] | order(orderRank asc) {
           title,
           content,
@@ -1006,7 +1016,7 @@ export default defineEventHandler(async (event) => {
 
     if (query.type === 'event') {
       if (query.all) {
-        return await client.fetch(`
+        return await cdnClient.fetch(`
           *[_type == "event"] | order(startDate asc) {
             _id,
             title,
@@ -1027,7 +1037,7 @@ export default defineEventHandler(async (event) => {
       
       // Single event by slug
       if (query.slug) {
-        return await client.fetch(`
+        return await cdnClient.fetch(`
           *[_type == "event" && slug.current == $slug][0] {
             _id,
             title,
@@ -1067,7 +1077,7 @@ export default defineEventHandler(async (event) => {
 
     if (query.type === 'garden') {
       if (query.all) {
-        return await client.fetch(`
+        return await cdnClient.fetch(`
           *[_type == "garden"] | order(orderRank asc) {
             _id,
             title,
@@ -1086,7 +1096,7 @@ export default defineEventHandler(async (event) => {
       
       // Single garden by slug
       if (query.slug) {
-        return await client.fetch(`
+        return await cdnClient.fetch(`
           *[_type == "garden" && slug.current == $slug][0] {
             _id,
             title,
@@ -1115,7 +1125,7 @@ export default defineEventHandler(async (event) => {
     }
 
     if (query.type === 'galleries') {
-      return await client.fetch(`
+      return await cdnClient.fetch(`
         *[_type == "gallery"] | order(orderRank asc) {
           _id,
           title,
@@ -1128,7 +1138,7 @@ export default defineEventHandler(async (event) => {
     }
 
     if (query.type === 'gallery' && query.id) {
-      return await client.fetch(`
+      return await cdnClient.fetch(`
         *[_type == "gallery" && _id == $id][0] {
           _id,
           title,

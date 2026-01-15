@@ -931,3 +931,8 @@ main > div, .page-container main {
 .event-link .image-wrapper:hover img {
   transform: scale(1.05);
 }
+
+
+.contact-form-input {
+  font-size: clamp(16px, 1.5vw, 18px);
+}
