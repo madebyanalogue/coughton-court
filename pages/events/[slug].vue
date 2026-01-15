@@ -404,8 +404,8 @@ onMounted(() => {
 
 .event-hero {
   position: relative;
-  height: calc(31vw + var(--header-bar-height, 80px));
-  min-height: 400px;
+  height: calc(50vw + var(--header-height, 80px));
+  min-height: 600px;
   overflow: hidden;
   padding-top: var(--header-height, 80px);
 }
@@ -447,13 +447,13 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding-top: var(--header-bar-height, 80px);
+  padding-top: var(--header-height, 80px);
   background: rgba(0, 0, 0, 0.4);
 }
 
 .event-hero__title {
   text-align: center;
-  padding-top: var(--header-bar-height, 80px);
+  padding-top: var(--header-height, 80px);
 }
 
 

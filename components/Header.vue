@@ -718,7 +718,7 @@ const closeMenu = () => {
   list-style: none;
   margin: 0;
   padding: 0px;
-  gap: 90px;
+  gap: clamp(40px, 6vw, 90px);
   flex-wrap: wrap;
   justify-content: center;
   height: 100%;
