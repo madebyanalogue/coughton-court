@@ -6,6 +6,37 @@ interface SanityError extends Error {
   statusCode?: number
 }
 
+// Simple in-memory cache for API responses
+// This prevents duplicate requests during the same request cycle
+const cache = new Map<string, { data: any; timestamp: number }>()
+const CACHE_TTL = 60000 // 60 seconds cache
+
+function getCacheKey(query: any): string {
+  return JSON.stringify(query)
+}
+
+function getCached(key: string): any | null {
+  const cached = cache.get(key)
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    return cached.data
+  }
+  if (cached) {
+    cache.delete(key) // Remove expired cache
+  }
+  return null
+}
+
+function setCache(key: string, data: any): void {
+  cache.set(key, { data, timestamp: Date.now() })
+  // Clean up old cache entries periodically (keep last 100)
+  if (cache.size > 100) {
+    const entries = Array.from(cache.entries())
+    entries.sort((a, b) => b[1].timestamp - a[1].timestamp)
+    cache.clear()
+    entries.slice(0, 100).forEach(([key, value]) => cache.set(key, value))
+  }
+}
+
 // Core API client for write operations and siteSettings (needs fresh data)
 const client = createClient({
   projectId: '4dgj84d5',
@@ -45,6 +76,13 @@ interface Page {
 
 export default defineEventHandler(async (event) => {
   const query = getQuery(event)
+  
+  // Check cache first
+  const cacheKey = getCacheKey(query)
+  const cached = getCached(cacheKey)
+  if (cached !== null) {
+    return cached
+  }
   
   try {
     if (query.type === 'siteSettings') {
@@ -223,8 +261,11 @@ export default defineEventHandler(async (event) => {
           }
         }
         if (!result) {
-          return { footerLogos: [], contactInfo: [] }
+          const emptyResult = { footerLogos: [], contactInfo: [] }
+          setCache(cacheKey, emptyResult)
+          return emptyResult
         }
+        setCache(cacheKey, result)
         return result
       } catch (fetchError: any) {
         console.error('Error fetching siteSettings:', {
@@ -242,6 +283,7 @@ export default defineEventHandler(async (event) => {
         '*[_type == "menu" && title == $menuTitle][0]{..., items[]{..., to{..., page-> { _id, slug, title }, section-> { _id, title }}}}',
         { menuTitle: query.menuTitle }
       )
+      setCache(cacheKey, result)
       return result
     }
     
@@ -875,7 +917,9 @@ export default defineEventHandler(async (event) => {
 
       // Return null instead of throwing 404 - allows usePageSettings to gracefully handle missing pages
       // (e.g., for event/garden pages that aren't regular page documents)
-      return result || null
+      const finalResult = result || null
+      setCache(cacheKey, finalResult)
+      return finalResult
     }
     
     if (query.type === 'section') {
@@ -935,11 +979,13 @@ export default defineEventHandler(async (event) => {
           }
         }
       `, params)
+      setCache(cacheKey, result)
       return result
     }
     
     if (query.type === 'sectionHomeScroll') {
       const result = await cdnClient.fetch('*[_type == "sectionHomeScroll"][0]{..., items[]{..., link{..., page-> { _id, slug, title }}}}')
+      setCache(cacheKey, result)
       return result
     }
     
@@ -965,6 +1011,7 @@ export default defineEventHandler(async (event) => {
         offsiteUrl,
         linkTitle
       }`)
+      setCache(cacheKey, result)
       return result
     }
 
@@ -980,6 +1027,7 @@ export default defineEventHandler(async (event) => {
           cost
         }
       }`)
+      setCache(cacheKey, result)
       return result
     }
 
@@ -993,6 +1041,7 @@ export default defineEventHandler(async (event) => {
         "imageAlt": image.alt,
         orderRank
       }`)
+      setCache(cacheKey, result)
       return result
     }
     
@@ -1011,12 +1060,13 @@ export default defineEventHandler(async (event) => {
           orderRank
         }
       `)
+      setCache(cacheKey, result)
       return result
     }
 
     if (query.type === 'event') {
       if (query.all) {
-        return await cdnClient.fetch(`
+        const result = await cdnClient.fetch(`
           *[_type == "event"] | order(startDate asc) {
             _id,
             title,
@@ -1033,11 +1083,13 @@ export default defineEventHandler(async (event) => {
             }
           }
         `)
+        setCache(cacheKey, result)
+        return result
       }
       
       // Single event by slug
       if (query.slug) {
-        return await cdnClient.fetch(`
+        const result = await cdnClient.fetch(`
           *[_type == "event" && slug.current == $slug][0] {
             _id,
             title,
@@ -1072,12 +1124,14 @@ export default defineEventHandler(async (event) => {
             bookingUrl
           }
         `, { slug: query.slug })
+        setCache(cacheKey, result)
+        return result
       }
     }
 
     if (query.type === 'garden') {
       if (query.all) {
-        return await cdnClient.fetch(`
+        const result = await cdnClient.fetch(`
           *[_type == "garden"] | order(orderRank asc) {
             _id,
             title,
@@ -1092,6 +1146,8 @@ export default defineEventHandler(async (event) => {
             }
           }
         `)
+        setCache(cacheKey, result)
+        return result
       }
       
       // Single garden by slug
@@ -1121,11 +1177,13 @@ export default defineEventHandler(async (event) => {
             }
           }
         `, { slug: query.slug })
+        setCache(cacheKey, result)
+        return result
       }
     }
 
     if (query.type === 'galleries') {
-      return await cdnClient.fetch(`
+      const result = await cdnClient.fetch(`
         *[_type == "gallery"] | order(orderRank asc) {
           _id,
           title,
@@ -1148,6 +1206,8 @@ export default defineEventHandler(async (event) => {
           }
         }
       `, { id: query.id })
+      setCache(cacheKey, result)
+      return result
     }
     
     throw new Error('Invalid query parameters')
