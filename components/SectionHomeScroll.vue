@@ -310,9 +310,11 @@ body.has-home-scroll .back-to-top {
   }
 }
 
+
 .home--container .media-link:hover img {
-  transform: scale(1.05);
+  transform: scale(var(--image-hover-scale));
 }
+
 
 .home--container .preload-medias img {
   width: 1px;

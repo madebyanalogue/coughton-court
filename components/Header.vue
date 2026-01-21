@@ -3,8 +3,9 @@
 
   <header 
     ref="headerRef" 
-    class="scheme overlay"
+    class="scheme"
     :class="{
+      'overlay': shouldUseOverlay,
       'light': !shouldUseOverlay,
       'over-hero': shouldUseOverlay && !hasScrolledPastHero
     }"

@@ -182,8 +182,9 @@ onUnmounted(() => {
 }
 
 .instagram-item:hover .instagram-image {
-  transform: scale(1.05);
+  transform: scale(var(--image-hover-scale));
 }
+
 
 .instagram-link-container {
   text-align: center;

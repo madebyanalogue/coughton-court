@@ -161,7 +161,7 @@ section {
 }
 
 .garden-link:hover .garden-image {
-  transform: scale(1.05);
+  transform: scale(var(--image-hover-scale));
 }
 
 .garden-image-fallback {

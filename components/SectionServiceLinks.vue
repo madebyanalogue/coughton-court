@@ -165,7 +165,7 @@ const getGridClass = (index) => {
 }
 
 .service-link.service-link-item--url:hover .cover-image {
-  transform: scale(1.05);
+  transform: scale(var(--image-hover-scale));
 }
 
 .service-link-content {

@@ -7,7 +7,7 @@
           <h2 class="h4">{{ section.basicContent.title }}</h2>
         </div>
 
-        <div class="grid py1 pbottom col-span-12 col-span-3-md">
+        <div class="grid grid-1 grid-md-12 py1 pbottom col-span-3-md">
           <div class="col-span-12 col-span-9-md">
             <div v-if="section?.basicContent?.content" class="content-wrapper">
               <SanityBlocks :blocks="section.basicContent.content" />

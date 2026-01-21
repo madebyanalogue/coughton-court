@@ -12,7 +12,7 @@
     <Header :page-data="page" />
     <div class="app-shell" :key="route.fullPath">
       <div class="page-container">
-        <main :style="{ paddingTop: mainPaddingVar }" class="main-content">
+        <main class="main-content">
           <div class="page-wrapper">
             <!-- Old page HTML - captured before navigation, stays visible until new page is ready -->
             <div v-if="oldPageHtml && oldPageHtml.trim().length > 0" 
@@ -191,26 +191,13 @@ router.afterEach(async (to) => {
         
         // Page is ready when it has content and no loading state
         if (hasContent && !fallback) {
-          // Check if this is a garden/event page transition (should be instant)
-          const isGardenOrEvent = to.path.startsWith('/gardens/') || to.path.startsWith('/events/')
-          const wasGardenOrEvent = previousRouteKey.value?.includes('/gardens/') || previousRouteKey.value?.includes('/events/')
-          const isGardenToGarden = isGardenOrEvent && wasGardenOrEvent
+          // Make new page visible first
+          pageReady.value = true
           
-          // Detect if page was ready immediately (cached/prefetched)
-          const wasReadyImmediately = attempts <= 2
-          const isInstant = disablePageTransition.value || isGardenToGarden || wasReadyImmediately
-          
-          // Add class to body for instant garden transitions
-          if (isGardenToGarden && typeof document !== 'undefined') {
-            document.body.classList.add('garden-transition')
-          }
-          
-          // For instant transitions (cached/disabled), skip all delays
-          if (isInstant) {
-            // Make new page visible immediately
-            pageReady.value = true
-            
-            // Remove old page immediately - new page is already covering it
+          // Wait for browser to paint the new page before removing old page
+          // This prevents flash of background color
+          requestAnimationFrame(() => {
+            // Now remove old page - new page is painted and covering it
             oldPageHtml.value = ''
             
             // Clean up immediately
@@ -240,48 +227,7 @@ router.afterEach(async (to) => {
             document.dispatchEvent(new CustomEvent('route-changed'))
             
             resolve()
-          } else {
-            // For non-cached pages, use small delay for visual smoothness
-            nextTick(() => {
-              // First, make new page visible (it will cover old page)
-              pageReady.value = true
-              
-              // Wait for next frame to ensure new page is painted and covering old page
-              requestAnimationFrame(() => {
-                // Now remove old page - new page is already visible and covering it
-                oldPageHtml.value = ''
-                
-                setTimeout(() => {
-                  previousRouteKey.value = null
-                  isPageTransitioning.value = false
-                  
-                  if (typeof document !== 'undefined') {
-                    document.body.classList.remove('page-transitioning', 'garden-transition')
-                    
-                    // Restore body scroll position (remove fixed positioning)
-                    document.body.style.position = ''
-                    document.body.style.top = ''
-                    document.body.style.width = ''
-                    document.body.style.overflow = ''
-                  }
-                  
-                  // Ensure scroll is at top (already reset in beforeEach, but double-check)
-                  if (typeof window !== 'undefined') {
-                    window.scrollTo({ top: 0, behavior: 'instant' })
-                  }
-                  
-                  if (window.gsap && window.gsap.ScrollTrigger) {
-                    window.gsap.ScrollTrigger.refresh()
-                  }
-                  
-                  document.dispatchEvent(new CustomEvent('page-transition-in-complete'))
-                  document.dispatchEvent(new CustomEvent('route-changed'))
-                  
-                  resolve()
-                }, 150)
-              })
-            })
-          }
+          })
         } else if (attempts >= maxAttempts) {
           // Timeout - show page anyway
           pageReady.value = true
@@ -309,10 +255,9 @@ router.afterEach(async (to) => {
   }
 })
 
-// Main content padding - removed on all pages
-const mainPaddingVar = computed(() => {
-  return '0'
-});
+// Main content padding is handled by CSS (main.css line 239)
+// Pages without hero sections will have padding-top: calc(var(--header-height))
+// Pages with hero sections can override this in their component styles
 
 // Update favicon based on dark mode
 useFavicon(isDark);
