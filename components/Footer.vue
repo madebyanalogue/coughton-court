@@ -13,7 +13,7 @@
             <div v-if="footerMenusLeft?.length > 0" class="footer-menus-left grid grid-3 gap-2">
               <div v-for="menu in footerMenusLeft" :key="menu._id" class="footer-menu">
                 <div class="grid grid-1 gap-1">
-                  <h5 v-if="menu.title" class="footer-menu-title h5">{{ menu.title }}</h5>
+                  <div v-if="menu.title" class="footer-menu-title h5">{{ menu.title }}</div>
                   <ul v-if="menu.items && menu.items.length > 0" class="footer-menu-list">
                     <li v-for="item in menu.items" :key="item._key || item.text" class="footer-menu-item">
                       <NuxtLink 
