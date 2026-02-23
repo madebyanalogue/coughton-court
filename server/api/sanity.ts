@@ -847,6 +847,25 @@ export default defineEventHandler(async (event) => {
               },
               textRight,
               useNarrowText
+            },
+            membershipsContent {
+              title,
+              text,
+              memberships[] {
+                category,
+                price
+              },
+              buttonText,
+              buttonLink,
+              buttonOpenInNewTab,
+              image {
+                asset-> {
+                  _id,
+                  url,
+                  metadata { dimensions }
+                }
+              },
+              useNarrowText
             }
           }
         }`

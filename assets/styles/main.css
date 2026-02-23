@@ -120,7 +120,7 @@ section {
   transition: background-color 0.2s, color 0.2s, border-color 0.2s;
   border-radius: 100px;
   cursor: pointer;
-  padding: calc(var(--h4) * .6) calc(var(--h4) * 1.5) calc(var(--h4) * .4);
+  padding: calc(var(--h4) * .85) calc(var(--h4) * 2) calc(var(--h4) * .7);
   border: 1px solid var(--button-border-color);
   line-height: 1;
   font-family: var(--heading);

@@ -136,6 +136,12 @@
         :section="section"
       />
 
+      <!-- Memberships Section -->
+      <SectionMemberships
+        v-else-if="section._type === 'section' && section.sectionType === 'memberships'"
+        :section="section"
+      />
+
       <!-- Quote Section -->
       <SectionQuote
         v-else-if="section._type === 'section' && section.sectionType === 'quote'"
@@ -292,6 +298,7 @@ import SectionContactForm from '~/components/SectionContactForm.vue'
 import SectionDirections from '~/components/SectionDirections.vue'
 import SectionOpeningTimesAndPrices from '~/components/SectionOpeningTimesAndPrices.vue'
 import SectionTextAndImages from '~/components/SectionTextAndImages.vue'
+import SectionMemberships from '~/components/SectionMemberships.vue'
 
 const props = defineProps({
   sections: {

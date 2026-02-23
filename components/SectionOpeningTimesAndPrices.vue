@@ -201,7 +201,7 @@ const closeLightbox = () => {
 }
 
 .price-item {
-  padding: calc(var(--pad-1) * .8) calc(var(--pad-1) * 1.5);
+  padding: calc(var(--pad-1) * 1)  calc(var(--pad-1) * 1.5) calc(var(--pad-1) * .8);
   border-radius: 100px;
   background-color: var(--secondary-background-color);
   display: flex;
