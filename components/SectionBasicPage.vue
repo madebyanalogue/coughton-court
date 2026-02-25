@@ -1,6 +1,6 @@
 <template>
   <section :class="['dark section-basic-page', { 'section-border-top': section.borderTop, 'section-border-bottom': section.borderBottom }]">
-    <div class="wrapper medium">
+    <div class="wrapper small">
       <div class="py2 px-3-sm px-md-0 grid grid-1 grid-md-4 gap-3">
 
         <div class="">
@@ -9,7 +9,7 @@
 
         <div class="grid grid-1 grid-md-12 py1 pbottom col-span-3-md">
           <div class="col-span-12 col-span-9-md">
-            <div v-if="section?.basicContent?.content" class="content-wrapper">
+            <div v-if="section?.basicContent?.content" class="content-wrapper show-ol">
               <SanityBlocks :blocks="section.basicContent.content" />
             </div>
             <a 

@@ -1,6 +1,6 @@
 <template>
   <section :class="['dark section-basic-page-html', { 'section-border-top': section.borderTop, 'section-border-bottom': section.borderBottom }]">
-    <div class="wrapper medium">
+    <div class="wrapper small">
       <div class="py2 px-3-sm px-md-0 grid grid-1 grid-md-4 gap-3">
 
         <div class="">
@@ -9,7 +9,7 @@
 
         <div class="grid grid-1 grid-md-12 py1 pbottom col-span-3-md">
           <div class="col-span-12 col-span-9-md">
-            <div v-if="htmlContent" class="content-wrapper html-content" v-html="htmlContent"></div>
+            <div v-if="htmlContent" class="content-wrapper html-content show-ol heading-font" v-html="htmlContent"></div>
             <a 
               v-if="section?.basicPageHtmlContent?.pdf?.asset?.url" 
               :href="section.basicPageHtmlContent.pdf.asset.url" 

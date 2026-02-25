@@ -208,3 +208,10 @@ h1, h2, h3, h4, h5, h6, h7 {
 .sanity-blocks strong, .sanity-blocks b {
   font-weight: 700;
 }
+
+.show-ol ol {
+  list-style: auto;
+}
+.heading-font {
+  font-family: var(--heading);
+}
