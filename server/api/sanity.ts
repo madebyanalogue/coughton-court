@@ -359,6 +359,17 @@ export default defineEventHandler(async (event) => {
                 }
               }
             },
+            basicPageHtmlContent {
+              title,
+              html,
+              pdf {
+                asset-> {
+                  _id,
+                  url,
+                  metadata { dimensions }
+                }
+              }
+            },
             imageContent {
               image {
                 asset-> {

@@ -14,6 +14,11 @@
         :section="section"
       />
 
+      <SectionBasicPageHtml
+        v-else-if="section._type === 'section' && section.sectionType === 'basicPageHtml'"
+        :section="section"
+      />
+
       <SectionImage
         v-else-if="section._type === 'section' && section.sectionType === 'image'"
         :section="section"
@@ -264,6 +269,7 @@ import { computed, watch, onMounted, onUnmounted } from 'vue'
 import { usePageSettings } from '~/composables/usePageSettings'
 import SectionHero from '~/components/SectionHero.vue'
 import SectionBasicPage from '~/components/SectionBasicPage.vue'
+import SectionBasicPageHtml from '~/components/SectionBasicPageHtml.vue'
 import SectionImage from '~/components/SectionImage.vue'
 import SectionHeadline from '~/components/SectionHeadline.vue'
 import SectionContact from '~/components/SectionContact.vue'
