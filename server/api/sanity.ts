@@ -834,7 +834,10 @@ export default defineEventHandler(async (event) => {
               },
               informationBlocks[] {
                 title,
-                description
+                description,
+                link,
+                linkTarget,
+                buttonText
               },
               image {
                 asset-> {
@@ -1067,8 +1070,18 @@ export default defineEventHandler(async (event) => {
         name,
         role,
         bio,
-        "imageUrl": image.asset->url,
-        "imageAlt": image.alt,
+        image {
+          ...,
+          alt,
+          asset-> {
+            _id,
+            _type,
+            url,
+            metadata {
+              dimensions
+            }
+          }
+        },
         orderRank
       }`)
       setCache(cacheKey, result)

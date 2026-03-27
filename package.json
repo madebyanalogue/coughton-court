@@ -22,8 +22,6 @@
     "@sanity/vision": "^3.89.0",
     "@unhead/vue": "^2.0.8",
     "better-sqlite3": "^12.2.0",
-    "canvas": "^3.2.0",
-    "colorthief": "^2.6.0",
     "gsap": "^3.13.0",
     "nuxt": "^3.17.2",
     "resend": "^6.6.0",

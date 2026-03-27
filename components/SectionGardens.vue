@@ -19,7 +19,7 @@
                 <div class="image-wrapper">
                   <NuxtImg 
                     v-if="garden.featuredImage"
-                    :src="getImageUrl(garden.featuredImage)" 
+                    :src="getImageUrl(garden.featuredImage, { width: 1056, quality: 85 })" 
                     :alt="garden.title"
                     class="garden-image"
                     data-image-overlay
@@ -46,7 +46,7 @@
                 <div class="image-wrapper">
                   <NuxtImg 
                     v-if="garden.featuredImage"
-                    :src="getImageUrl(garden.featuredImage)" 
+                    :src="getImageUrl(garden.featuredImage, { width: 1056, quality: 85 })" 
                     :alt="garden.title"
                     class="garden-image"
                     data-image-overlay

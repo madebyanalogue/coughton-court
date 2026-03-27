@@ -2,24 +2,14 @@
   <section :class="{ 'section-border-top': section.borderTop, 'section-border-bottom': section.borderBottom }">
     <div class="wrapper">
       <div class="relative py9">
-        <div v-if="section.bannerContent?.image" class="cover object-fit-child show-md">
+        <div v-if="section.bannerContent?.image" class="cover object-fit-child">
           <NuxtImg 
             :src="getImageUrl(section.bannerContent.image, { width: 1920, quality: 85 })" 
             :alt="section.title" 
             width="1920"
             quality="85"
             format="webp"
-            loading="lazy" 
-            data-image-overlay 
-          />
-        </div>
-        <div v-if="section.bannerContent?.image" class="hide-md">
-          <NuxtImg 
-            :src="getImageUrl(section.bannerContent.image, { width: 1200, quality: 85 })" 
-            :alt="section.title" 
-            width="1200"
-            quality="85"
-            format="webp"
+            sizes="100vw"
             loading="lazy" 
             data-image-overlay 
           />

@@ -137,7 +137,6 @@
 <script setup>
 import { computed, ref, onMounted, nextTick, watch } from 'vue'
 import { useSanityImage } from '~/composables/useSanityImage'
-import { useColorExtraction } from '~/composables/useColorExtraction'
 
 const props = defineProps({
   section: {
@@ -152,9 +151,11 @@ const props = defineProps({
 })
 
 const { getImageUrl } = useSanityImage()
-// Disable runtime color extraction for this section.
-// We still use the shared getters/setters so downstream logic stays unchanged.
-const { /* extractColorFromImage */ getColorForGallery, setColorForGallery } = useColorExtraction()
+
+/** Gallery id → lightbox background color (static palette only) */
+const galleryColorById = ref({})
+
+const getColorForGallery = (id) => galleryColorById.value[id]
 
 // Gallery data
 const galleries = ref([])
@@ -165,7 +166,6 @@ const gridRef = ref(null)
 const loadMoreBtnRef = ref(null)
 const selectedGallery = ref(null)
 const isModalOpen = ref(false)
-const hoveredColor = ref(null)
 const showScrollIndicator = ref(false)
 const indicatorEnabled = ref(false)
  
@@ -208,7 +208,7 @@ const loadMore = async () => {
   if (!sectionEl || !gridEl || !gsap) {
     displayedCount.value = galleries.value.length
     await nextTick()
-    await extractColorsForGalleries()
+    assignPaletteColors()
     return
   }
 
@@ -291,16 +291,16 @@ const galleryPalette = ['#e0d0c5', '#ac7cba', '#64be85', '#fee510', '#fe330a', '
 // Assign colors from the static palette instead of extracting from images.
 const assignPaletteColors = () => {
   if (!Array.isArray(galleries.value)) return
+  const next = {}
   galleries.value.forEach((gallery, idx) => {
-    const color = galleryPalette[idx % galleryPalette.length]
-    setColorForGallery(gallery._id, color)
+    next[gallery._id] = galleryPalette[idx % galleryPalette.length]
   })
+  galleryColorById.value = next
 }
 
 const handleGalleryHover = (galleryId) => {
   const color = getColorForGallery(galleryId)
   if (color) {
-    hoveredColor.value = color
     // Expose color as CSS var on all section elements for theming
     if (typeof document !== 'undefined') {
       document.querySelectorAll('section').forEach((el) => {
@@ -321,7 +321,6 @@ const handleGalleryHover = (galleryId) => {
 }
 
 const handleGalleryLeave = () => {
-  hoveredColor.value = null
   if (typeof document !== 'undefined') {
     document.querySelectorAll('section').forEach((el) => {
       el.style.removeProperty('background')

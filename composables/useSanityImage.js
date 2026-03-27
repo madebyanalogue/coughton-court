@@ -53,13 +53,18 @@ export const useSanityImage = () => {
       return imageBuilder.url()
     } catch (error) {
       console.error('Error building Sanity image URL:', error)
-      // Fallback to direct URL
-      if (source.asset.url) {
-        return source.asset.url
-      }
-      if (source.asset._ref) {
-        const [_file, id, extension] = source.asset._ref.split('-')
-        return `https://cdn.sanity.io/images/4dgj84d5/production/${id}.${extension}`
+      // Never return the raw asset URL — append transform params to the CDN URL
+      if (source?.asset?.url) {
+        try {
+          const u = new URL(source.asset.url)
+          u.searchParams.set('w', String(Math.min(width, 1920)))
+          u.searchParams.set('q', String(quality))
+          u.searchParams.set('fit', 'max')
+          u.searchParams.set('auto', 'format')
+          return u.toString()
+        } catch {
+          return null
+        }
       }
       return null
     }

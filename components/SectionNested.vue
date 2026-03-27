@@ -2,17 +2,12 @@
   <section :class="{ 'section-border-top': section.borderTop, 'section-border-bottom': section.borderBottom }">
     <div class="wrapper">
       <div class="relative py6">
-        <div class="cover object-fit-child show-md">
+        <div class="cover object-fit-child">
           <NuxtImg 
-            :src="getImageUrl(section.nestedContent.mainImage)" 
+            :src="getImageUrl(section.nestedContent.mainImage, { width: 1920, quality: 85 })" 
             :alt="section.title"
-            loading="lazy"
-          />
-        </div>
-        <div class="hide-md">
-          <NuxtImg 
-            :src="getImageUrl(section.nestedContent.mainImage)" 
-            :alt="section.title"
+            width="1920"
+            sizes="100vw"
             loading="lazy"
           />
         </div>
@@ -28,8 +23,9 @@
             <div v-if="section.nestedContent.iconImage" class="grid">
               <div class="col-span-2">
                 <NuxtImg 
-                  :src="getImageUrl(section.nestedContent.iconImage)"
+                  :src="getImageUrl(section.nestedContent.iconImage, { width: 400, quality: 85 })"
                   :alt="`${section.title} icon`"
+                  width="400"
                   loading="lazy"
                 />
               </div>
@@ -44,7 +40,6 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
 import { useSanityImage } from '~/composables/useSanityImage'
 
 const props = defineProps({

@@ -17,8 +17,9 @@
                 >
                 <div class="media-inner-container grid grid-1">
                   <img 
-                    :src="member.imageUrl" 
-                    :alt="member.imageAlt || member.name" 
+                    v-if="member.image?.asset"
+                    :src="getImageUrl(member.image, { width: 1200, quality: 80 })" 
+                    :alt="member.image?.alt || member.name" 
                     class="media" 
                   />
                   <div class="media-caption grid grid-1">
@@ -71,8 +72,9 @@
                   <div class="media-inner-container grid grid-1">
                     <div class="pw p2 pleftright">
                       <img 
-                        :src="member.imageUrl" 
-                        :alt="member.imageAlt || member.name" 
+                        v-if="member.image?.asset"
+                        :src="getImageUrl(member.image, { width: 1200, quality: 80 })" 
+                        :alt="member.image?.alt || member.name" 
                         class="media" 
                       />
                     </div>
@@ -102,6 +104,9 @@
 import { computed, onMounted, watch, ref, nextTick, onUnmounted } from 'vue'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { useSanityImage } from '~/composables/useSanityImage'
+
+const { getImageUrl } = useSanityImage()
 const generatedMediaUrls = Array.from({ length: 24 }, (_, idx) => `https://picsum.photos/seed/team-${idx + 1}/600/600`)
 
 const props = defineProps({

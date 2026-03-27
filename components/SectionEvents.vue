@@ -28,7 +28,7 @@
                 <div class="image-wrapper">
                   <NuxtImg 
                     v-if="event.featuredImage"
-                    :src="getImageUrl(event.featuredImage)" 
+                    :src="getImageUrl(event.featuredImage, { width: 1056, quality: 85 })" 
                     :alt="event.title"
                     class="event-image"
                     data-image-overlay
@@ -56,7 +56,7 @@
                 <div class="image-wrapper">
                   <NuxtImg 
                     v-if="event.featuredImage"
-                    :src="getImageUrl(event.featuredImage)" 
+                    :src="getImageUrl(event.featuredImage, { width: 1056, quality: 85 })" 
                     :alt="event.title"
                     class="event-image"
                     data-image-overlay

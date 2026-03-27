@@ -72,6 +72,19 @@
             <div v-if="block.description" class="information-block__description">
               <SanityBlocks :blocks="block.description" />
             </div>
+            <div
+              v-if="block.link && block.buttonText"
+              class="information-block__button"
+            >
+              <a
+                :href="block.link"
+                :target="informationBlockLinkTarget(block)"
+                :rel="informationBlockLinkRel(block)"
+                class="button"
+              >
+                {{ block.buttonText }}
+              </a>
+            </div>
           </div>
         </div>
 
@@ -137,6 +150,12 @@ const openLightbox = () => {
 const closeLightbox = () => {
   isLightboxOpen.value = false
 }
+
+const informationBlockLinkTarget = (block) =>
+  block?.linkTarget === '_self' ? '_self' : '_blank'
+
+const informationBlockLinkRel = (block) =>
+  informationBlockLinkTarget(block) === '_blank' ? 'noopener noreferrer' : undefined
 </script>
 
 <style scoped>
@@ -234,6 +253,10 @@ const closeLightbox = () => {
 .information-block__description {
   color: inherit;
   opacity: 0.9;
+}
+
+.information-block__button {
+  margin-top: 0.5rem;
 }
 
 .opening-times-prices__lightbox {
