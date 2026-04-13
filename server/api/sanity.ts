@@ -860,7 +860,8 @@ export default defineEventHandler(async (event) => {
                 caption
               },
               textRight,
-              useNarrowText
+              useNarrowText,
+              unrestrictImageRatio
             },
             membershipsContent {
               title,

@@ -18,7 +18,10 @@
         >
           <!-- Single Image (No Carousel) -->
           <div v-if="images.length === 1" class="single-image">
-            <div class="carousel__image-wrapper">
+            <div
+              class="carousel__image-wrapper"
+              :class="{ 'carousel__image-wrapper--natural': unrestrictImageRatio }"
+            >
               <NuxtImg 
                 :src="getGalleryImageUrl(images[0])" 
                 :alt="images[0].alt || 'Image'"
@@ -53,7 +56,10 @@
                 :key="index"
                 class="carousel__slide"
               >
-                <div class="carousel__image-wrapper">
+                <div
+                  class="carousel__image-wrapper"
+                  :class="{ 'carousel__image-wrapper--natural': unrestrictImageRatio }"
+                >
                   <NuxtImg 
                     :src="getGalleryImageUrl(image)" 
                     :alt="image.alt || 'Image'"
@@ -148,6 +154,9 @@ const images = computed(() => {
 })
 const textRight = computed(() => props.section?.textAndImagesContent?.textRight || false)
 const useNarrowText = computed(() => props.section?.textAndImagesContent?.useNarrowText || false)
+const unrestrictImageRatio = computed(
+  () => props.section?.textAndImagesContent?.unrestrictImageRatio === true
+)
 
 // Check if mobile (for conditional grid-reverse)
 const isMobile = ref(false)
@@ -304,11 +313,22 @@ onUnmounted(() => {
   overflow: hidden;
 }
 
+.carousel__image-wrapper--natural {
+  aspect-ratio: unset;
+}
+
 .carousel__image {
   width: 100%;
   height: 100%;
   object-fit: cover;
   object-position: center;
+}
+
+.carousel__image-wrapper--natural .carousel__image {
+  height: auto;
+  display: block;
+  object-fit: unset;
+  object-position: unset;
 }
 
 .carousel__caption {
