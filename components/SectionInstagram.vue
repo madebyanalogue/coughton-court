@@ -14,22 +14,24 @@
         </div>
 
         <!-- Fading Carousel (like SingleCarousel) -->
-        <div v-if="items?.length" class="instagram-carousel px1 px-sm-4 hide-md">
+        <div v-if="items?.length && isReady && isMobile" class="instagram-carousel px1 px-sm-4 hide-md">
           <div class="carousel-stage">
             <img
               v-for="(item, index) in items"
               :key="index"
-              :src="getImageUrl(item.image)"
+              :src="getCarouselImageUrl(item.image)"
               :alt="`Instagram carousel ${index + 1}`"
               class="carousel-image"
               :class="{ 'is-active': index === currentSlide }"
+              loading="lazy"
+              sizes="100vw"
               draggable="false"
             />
           </div>
         </div>
 
         <!-- Instagram Grid -->
-        <div class="grid grid-3 gap-2 px2 px-md-6 show-md">
+        <div v-else-if="isReady" class="grid grid-3 gap-2 px2 px-md-6 show-md">
           <div
             v-for="(item, index) in shuffledItems"
             :key="index"
@@ -43,16 +45,20 @@
               class="instagram-link"
             >
               <img
-                :src="getImageUrl(item.image)"
+                :src="getGridImageUrl(item.image)"
                 :alt="`Instagram post ${index + 1}`"
                 class="instagram-image"
+                loading="lazy"
+                sizes="(max-width: 1023px) 33vw, 20vw"
               />
             </a>
             <img
               v-else
-              :src="getImageUrl(item.image)"
+              :src="getGridImageUrl(item.image)"
               :alt="`Instagram post ${index + 1}`"
               class="instagram-image"
+              loading="lazy"
+              sizes="(max-width: 1023px) 33vw, 20vw"
             />
           </div>
         </div>
@@ -100,6 +106,9 @@ const items = computed(() => props.section?.instagramContent?.items || [])
 
 // Shuffled items for random placement
 const shuffledItems = ref([])
+const isMobile = ref(false)
+const isReady = ref(false)
+let resizeHandler = null
 
 // Fisher-Yates shuffle algorithm
 const shuffleArray = (array) => {
@@ -111,7 +120,31 @@ const shuffleArray = (array) => {
   return shuffled
 }
 
+const getGridImageUrl = (image) =>
+  getImageUrl(image, {
+    width: 500,
+    quality: 72,
+    fit: 'crop',
+    crop: 'focalpoint'
+  })
+
+const getCarouselImageUrl = (image) =>
+  getImageUrl(image, {
+    width: 900,
+    quality: 75,
+    fit: 'crop',
+    crop: 'focalpoint'
+  })
+
 onMounted(() => {
+  isMobile.value = typeof window !== 'undefined' ? window.innerWidth < 768 : false
+  isReady.value = true
+  const onResize = () => {
+    isMobile.value = window.innerWidth < 768
+  }
+  resizeHandler = onResize
+  window.addEventListener('resize', resizeHandler)
+
   // Shuffle items on component mount
   shuffledItems.value = shuffleArray(items.value)
 })
@@ -142,6 +175,9 @@ onMounted(() => {
 
 onUnmounted(() => {
   stopCarousel()
+  if (resizeHandler) {
+    window.removeEventListener('resize', resizeHandler)
+  }
 })
 </script>
 

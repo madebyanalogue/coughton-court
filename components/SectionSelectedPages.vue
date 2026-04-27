@@ -19,11 +19,12 @@
                 <div class="image-wrapper">
                   <NuxtImg 
                     v-if="page.featuredImage"
-                    :src="getImageUrl(page.featuredImage)" 
+                    :src="getImageUrl(page.featuredImage, { width: 700, quality: 78, fit: 'crop', crop: 'focalpoint' })" 
                     :alt="page.title"
                     class="page-image"
                     data-image-overlay
                     loading="lazy"
+                    sizes="(max-width: 799px) 100vw, (max-width: 1023px) 50vw, 25vw"
                   />
                   <div 
                     v-else
@@ -46,11 +47,12 @@
                 <div class="image-wrapper">
                   <NuxtImg 
                     v-if="page.featuredImage"
-                    :src="getImageUrl(page.featuredImage)" 
+                    :src="getImageUrl(page.featuredImage, { width: 700, quality: 78, fit: 'crop', crop: 'focalpoint' })" 
                     :alt="page.title"
                     class="page-image"
                     data-image-overlay
                     loading="lazy"
+                    sizes="(max-width: 799px) 100vw, (max-width: 1023px) 50vw, 25vw"
                   />
                   <div 
                     v-else

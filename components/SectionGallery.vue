@@ -17,7 +17,7 @@
               `ratio-${item.imageRatio}`,
             ]">
             <NuxtImg
-              :src="getImageUrl(item.image, { width: 1200, quality: 85 })"
+              :src="getImageUrl(item.image, { width: 1200, quality: 80, fit: 'crop', crop: 'focalpoint' })"
               :alt="`Gallery image ${index + 1}`"
               :class="[
                 'gallery-image',
@@ -27,6 +27,7 @@
               format="webp"
               data-image-overlay
               loading="lazy"
+              sizes="(max-width: 768px) 100vw, 50vw"
             />
           </div>
           <!-- Empty spacer div for items without images -->

@@ -16,9 +16,11 @@
             <div class="grid grid-1">
               <NuxtImg 
                 v-if="post.featuredImage"
-                :src="getImageUrl(post.featuredImage)" 
+                :src="getImageUrl(post.featuredImage, { width: 900, quality: 78, fit: 'crop', crop: 'focalpoint' })" 
                 :alt="post.title"
                 class="news-thumbnail"
+                sizes="(max-width: 799px) 100vw, 50vw"
+                loading="lazy"
                 data-image-overlay
               />
               <div class="grid grid-1 gap-1">

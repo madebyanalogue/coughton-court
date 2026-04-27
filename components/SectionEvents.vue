@@ -28,11 +28,12 @@
                 <div class="image-wrapper">
                   <NuxtImg 
                     v-if="event.featuredImage"
-                    :src="getImageUrl(event.featuredImage, { width: 1056, quality: 85 })" 
+                    :src="getImageUrl(event.featuredImage, { width: 1056, quality: 80, fit: 'crop', crop: 'focalpoint' })" 
                     :alt="event.title"
                     class="event-image"
                     data-image-overlay
                     loading="lazy"
+                    sizes="(max-width: 799px) 100vw, 33vw"
                   />
                   <div 
                     v-else
@@ -56,11 +57,12 @@
                 <div class="image-wrapper">
                   <NuxtImg 
                     v-if="event.featuredImage"
-                    :src="getImageUrl(event.featuredImage, { width: 1056, quality: 85 })" 
+                    :src="getImageUrl(event.featuredImage, { width: 1056, quality: 80, fit: 'crop', crop: 'focalpoint' })" 
                     :alt="event.title"
                     class="event-image"
                     data-image-overlay
                     loading="lazy"
+                    sizes="(max-width: 799px) 100vw, 33vw"
                   />
                   <div 
                     v-else

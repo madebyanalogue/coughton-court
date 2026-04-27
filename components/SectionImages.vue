@@ -22,13 +22,14 @@
                 width: `${item.width}%`
               }"> 
               <NuxtImg 
-                :src="getImageUrl(item.image, { width: 1200, quality: 85 })" 
+                :src="getImageUrl(item.image, { width: 1200, quality: 80, fit: 'crop', crop: 'focalpoint' })" 
                 :alt="item.title || 'Image'"
                 class="image"
                 width="1200"
                 loading="lazy"
-                quality="85"
+                quality="80"
                 format="webp"
+                sizes="(max-width: 801px) 100vw, 50vw"
                 data-image-overlay
               />
             </div>

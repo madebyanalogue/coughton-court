@@ -10,13 +10,17 @@ export const useSanityImage = () => {
   })
 
   /**
-   * Get optimized image URL from Sanity
+   * Get optimized image URL from Sanity.
+   * Defaults are conservative and bandwidth-friendly.
+   *
    * @param {Object} source - Sanity image source object
    * @param {Object} options - Optimization options
-   * @param {number} options.width - Maximum width (default: 1920)
-   * @param {number} options.height - Maximum height (optional)
-   * @param {number} options.quality - Image quality 1-100 (default: 85)
-   * @param {string} options.format - Image format (default: auto)
+   * @param {number} options.width - Target width (default: 1920)
+   * @param {number} options.height - Target height (optional)
+   * @param {number} options.quality - Image quality 1-100 (default: 80)
+   * @param {string} options.fit - Sanity fit mode (default: max)
+   * @param {string} options.crop - Sanity crop mode (optional, e.g. focalpoint)
+   * @param {boolean} options.autoFormat - Add auto=format (default: true)
    * @returns {string|null} Optimized image URL
    */
   const getImageUrl = (source, options = {}) => {
@@ -27,8 +31,10 @@ export const useSanityImage = () => {
     const {
       width = 1920,
       height,
-      quality = 85,
-      format = 'auto'
+      quality = 80,
+      fit = 'max',
+      crop,
+      autoFormat = true
     } = options
 
     try {
@@ -45,9 +51,17 @@ export const useSanityImage = () => {
       // Apply quality (reduces file size)
       imageBuilder = imageBuilder.quality(quality)
 
-      // Apply format if specified (auto allows Sanity to choose best format)
-      if (format && format !== 'auto') {
-        imageBuilder = imageBuilder.format(format)
+      // Fit/crop defaults keep images bounded unless a component opts in.
+      if (fit) {
+        imageBuilder = imageBuilder.fit(fit)
+      }
+
+      if (crop) {
+        imageBuilder = imageBuilder.crop(crop)
+      }
+
+      if (autoFormat) {
+        imageBuilder = imageBuilder.auto('format')
       }
 
       return imageBuilder.url()
@@ -59,8 +73,9 @@ export const useSanityImage = () => {
           const u = new URL(source.asset.url)
           u.searchParams.set('w', String(Math.min(width, 1920)))
           u.searchParams.set('q', String(quality))
-          u.searchParams.set('fit', 'max')
-          u.searchParams.set('auto', 'format')
+          if (fit) u.searchParams.set('fit', fit)
+          if (crop) u.searchParams.set('crop', crop)
+          if (autoFormat) u.searchParams.set('auto', 'format')
           return u.toString()
         } catch {
           return null

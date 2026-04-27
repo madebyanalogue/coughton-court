@@ -1,6 +1,6 @@
 <template>
   <section :class="['section-team', { 'section-border-top': section.borderTop, 'section-border-bottom': section.borderBottom }]">
-    <div class="show-md"> 
+    <div v-if="isReady && !isMobile" class="show-md"> 
       <div class="team--viewer" ref="effectSection">
         <p class="scroll">Scroll</p>
         <!-- Visualize caption visibility area -->
@@ -57,7 +57,7 @@
         </div>
       </div>
     </div>
-    <div class="hide-md py1 ptop">
+    <div v-else-if="isReady" class="hide-md py1 ptop">
       <div class="pw p3 p4-sm pbottom">
         <div v-if="teamMembers.length"
              data-gsap-slider-init
@@ -121,6 +121,9 @@ const { orderedTeamMembers, loading, fetchTeamMembers } = useTeam()
 
 // Get team members
 const teamMembers = computed(() => orderedTeamMembers.value)
+const isMobile = ref(false)
+const isReady = ref(false)
+let resizeHandler = null
 
 // Refs for effect section
 const effectSection = ref(null)
@@ -128,6 +131,14 @@ const effectContainer = ref(null)
 
 // Fetch team members on mount and init GSAP effect
 onMounted(async () => {
+  isMobile.value = typeof window !== 'undefined' ? window.innerWidth < 800 : false
+  isReady.value = true
+  const onResize = () => {
+    isMobile.value = window.innerWidth < 800
+  }
+  resizeHandler = onResize
+  window.addEventListener('resize', resizeHandler)
+
   await fetchTeamMembers()
 
   if (typeof window === 'undefined') return
@@ -284,6 +295,9 @@ onMounted(async () => {
 
 onUnmounted(() => {
   ScrollTrigger.getAll().forEach(st => st.kill())
+  if (typeof window !== 'undefined' && resizeHandler) {
+    window.removeEventListener('resize', resizeHandler)
+  }
 })
 </script>
 

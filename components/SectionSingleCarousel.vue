@@ -21,7 +21,7 @@
         v-if="enableFixedBackground && carouselImages.length > 0"
         class="fixed-background"
         :style="{
-          backgroundImage: `url(${getMediaUrl(carouselImages[0])})`,
+          backgroundImage: `url(${getMediaUrl(carouselImages[0], { width: 1920 })})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundAttachment: 'fixed'
@@ -43,10 +43,11 @@
           >
             <img 
               v-if="!isVideo(media)"
-              :src="getMediaUrl(media)" 
+              :src="getMediaUrl(media, { width: 1600 })" 
               :alt="media.alt || 'Carousel image'"
               class="carousel-image"
-              loading="eager"
+              loading="lazy"
+              sizes="100vw"
             />
             <video 
               v-else
@@ -63,10 +64,11 @@
         <div v-else-if="carouselImages.length === 1" class="single-image">
           <img 
             v-if="!isVideo(carouselImages[0])"
-            :src="getMediaUrl(carouselImages[0])" 
+            :src="getMediaUrl(carouselImages[0], { width: 1600 })" 
             :alt="carouselImages[0].alt || 'Carousel image'"
             class="carousel-image"
-            loading="eager"
+            loading="lazy"
+            sizes="100vw"
           />
           <video 
             v-else
@@ -84,10 +86,11 @@
       <!-- Overlay -->
       <div v-if="overlay" class="overlay-image">
         <img 
-          :src="getMediaUrl(overlay)" 
+          :src="getMediaUrl(overlay, { width: 1600, fit: 'max' })" 
           :alt="overlay.alt || 'Overlay image'"
           class="overlay-img"
-          loading="eager"
+          loading="lazy"
+          sizes="100vw"
         />
       </div>
       
@@ -125,6 +128,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import SectionMarquee from '~/components/SectionMarquee.vue'
+import { useSanityImage } from '~/composables/useSanityImage'
 
 const props = defineProps({
   section: {
@@ -132,6 +136,7 @@ const props = defineProps({
     required: true
   }
 })
+const { getImageUrl } = useSanityImage()
 
 // Extract data from section
 const carouselImages = computed(() => props.section?.singleCarouselContent?.carousel || [])
@@ -150,9 +155,15 @@ const currentSlide = ref(0)
 let carouselInterval = null
 
 // Media URL helper
-const getMediaUrl = (media) => {
+const getMediaUrl = (media, options = {}) => {
   if (!media?.asset?.url) return ''
-  return media.asset.url
+  if (isVideo(media)) return media.asset.url
+  return getImageUrl(media, {
+    width: options.width || 1600,
+    quality: 80,
+    fit: options.fit || 'crop',
+    crop: options.crop || 'focalpoint'
+  })
 }
 
 // Check if media is a video

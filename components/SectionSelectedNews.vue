@@ -15,6 +15,8 @@
                 :src="getImageUrl(newsItem.featuredImage)" 
                 :alt="newsItem.title"
                 class="square"
+                sizes="(max-width: 799px) 100vw, 50vw"
+                loading="lazy"
                 data-image-overlay
               />
               <div class="grid grid-1 gap-1">
@@ -60,6 +62,7 @@
 import { ref, computed, onMounted, nextTick, onUnmounted } from 'vue'
 import SanityBlocks from '~/components/SanityBlocks.vue'
 import { useScrollTrigger } from '~/composables/useScrollTrigger.js'
+import { useSanityImage } from '~/composables/useSanityImage'
 
 const props = defineProps({
   section: {
@@ -69,6 +72,7 @@ const props = defineProps({
 })
 
 const { registerSection, unregisterSection } = useScrollTrigger()
+const { getImageUrl: getSanityImageUrl } = useSanityImage()
 const sectionRef = ref(null)
 
 const title = computed(() => props.section?.selectedNewsContent?.title || 'News')
@@ -82,8 +86,12 @@ function getImageUrl(image) {
   if ((mimeType && mimeType === 'image/svg+xml') || (url && url.endsWith('.svg'))) {
     return url
   }
-  // fallback: just use the url if present
-  return url
+  return getSanityImageUrl(image, {
+    width: 900,
+    quality: 80,
+    fit: 'crop',
+    crop: 'focalpoint'
+  })
 }
 
 onMounted(async () => {

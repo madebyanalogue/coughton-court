@@ -8,11 +8,13 @@
               <div class="usp grid grid-1 gap-1 gap-sm-2">
                 <div class="usp grid grid-2">
                   <div class="usp-image-container">
-                    <img 
+                    <NuxtImg 
                       v-if="item.image?.asset?.url"
-                      :src="item.image.asset.url" 
+                      :src="getOptimizedImage(item.image)" 
                       :alt="item.title || 'USP'"
                       class="square usp-image"
+                      sizes="(max-width: 799px) 50vw, 25vw"
+                      loading="lazy"
                       :data-index="index"
                     />
                   </div>
@@ -36,6 +38,7 @@
 import { computed, ref, onMounted, onUnmounted, nextTick } from 'vue'
 import SanityBlocks from '~/components/SanityBlocks.vue'
 import gsap from 'gsap'
+import { useSanityImage } from '~/composables/useSanityImage'
 
 const props = defineProps({
   section: {
@@ -43,9 +46,18 @@ const props = defineProps({
     required: true
   }
 })
+const { getImageUrl } = useSanityImage()
 
 const sectionRef = ref(null)
 const items = computed(() => props.section?.uspsContent?.items || [])
+
+const getOptimizedImage = (image) =>
+  getImageUrl(image, {
+    width: 500,
+    quality: 75,
+    fit: 'crop',
+    crop: 'focalpoint'
+  })
 
 const setupAnimations = () => {
   if (!sectionRef.value) return

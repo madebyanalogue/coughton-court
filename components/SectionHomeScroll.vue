@@ -14,8 +14,10 @@
             class="media-link"
           >
             <NuxtImg
-              :src="getImageUrl(item.image)"
+              :src="getImageUrl(item.image, { width: 700, quality: 75, fit: 'crop', crop: 'focalpoint' })"
               :alt="item.title"
+              loading="lazy"
+              sizes="(max-width: 1023px) 40vw, 280px"
             />
             <h3 class="media-title">{{ item.title }}</h3>
           </NuxtLink>
@@ -27,8 +29,10 @@
             rel="noopener noreferrer"
           >
             <NuxtImg
-              :src="getImageUrl(item.image)"
+              :src="getImageUrl(item.image, { width: 700, quality: 75, fit: 'crop', crop: 'focalpoint' })"
               :alt="item.title"
+              loading="lazy"
+              sizes="(max-width: 1023px) 40vw, 280px"
             />
             <h3 class="media-title">{{ item.title }}</h3>
           </a>
@@ -107,7 +111,7 @@ onMounted(() => {
 
     // Build media array from Sanity images
     mediaArray.value = props.section.homeScrollContent.items.map(item => 
-      getImageUrl(item.image)
+      getImageUrl(item.image, { width: 700, quality: 75, fit: 'crop', crop: 'focalpoint' })
     )
 
     const medias = root ? root.querySelectorAll('.media') : [];

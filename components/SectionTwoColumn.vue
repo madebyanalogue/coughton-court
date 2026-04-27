@@ -15,14 +15,18 @@
           <div class="image-container">
             <NuxtImg 
               v-if="mainImage" 
-              :src="mainImage.asset.url" 
+              :src="getOptimizedImage(mainImage, { width: 1400 })" 
               :alt="mainImage.alt || 'Main image'" 
+              sizes="(max-width: 799px) 100vw, 50vw"
+              loading="lazy"
             />
             <div v-if="overlayImage" class="overlay-image">
               <NuxtImg 
-                :src="overlayImage.asset.url" 
+                :src="getOptimizedImage(overlayImage, { width: 1200, fit: 'max' })" 
                 :alt="overlayImage.alt || 'Overlay image'"
                 class="overlay-img"
+                sizes="(max-width: 799px) 100vw, 50vw"
+                loading="lazy"
               />
             </div>
           </div>
@@ -36,9 +40,11 @@
           </div>
           <div class="text-image-container" v-if="textImage && !enableBookingButton">
             <NuxtImg 
-              :src="textImage.asset.url" 
+              :src="getOptimizedImage(textImage, { width: 900, fit: 'max' })" 
               :alt="textImage.alt || 'Text image'" 
               class="text-image"
+              sizes="(max-width: 799px) 100vw, 50vw"
+              loading="lazy"
             />
           </div>
           <div class="text-content" v-if="text && !enableBookingButton">
@@ -57,6 +63,7 @@
 import { computed, ref } from 'vue'
 import SanityBlocks from '~/components/SanityBlocks.vue'
 import SectionMarquee from '~/components/SectionMarquee.vue'
+import { useSanityImage } from '~/composables/useSanityImage'
 
 // Define props based on the Sanity schema
 const props = defineProps({
@@ -105,6 +112,18 @@ const props = defineProps({
     default: null
   }
 })
+
+const { getImageUrl } = useSanityImage()
+
+const getOptimizedImage = (image, options = {}) => {
+  if (!image) return ''
+  return getImageUrl(image, {
+    width: options.width || 1400,
+    quality: 80,
+    fit: options.fit || 'crop',
+    crop: options.crop || 'focalpoint'
+  })
+}
 </script>
 
 <style scoped>

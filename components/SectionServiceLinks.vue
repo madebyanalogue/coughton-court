@@ -18,9 +18,10 @@
           >
             <div class="service-link-image">
               <img 
-                :src="getImageUrl(item.image)" 
+                :src="getImageUrl(item.image, { width: 900, quality: 78, fit: 'crop', crop: 'focalpoint' })" 
                 :alt="item.title"
                 class="cover-image"
+                loading="lazy"
               />
             </div>
             <div class="service-link-content flex flex-center gap-1 h4 p2">
@@ -31,9 +32,10 @@
           <div v-else class="service-link service-link--no-url">
             <div class="service-link-image">
               <img 
-                :src="getImageUrl(item.image)" 
+                :src="getImageUrl(item.image, { width: 900, quality: 78, fit: 'crop', crop: 'focalpoint' })" 
                 :alt="item.title"
                 class="cover-image"
+                loading="lazy"
               />
             </div>
             <div class="service-link-content flex flex-center gap-1 h4 p2">

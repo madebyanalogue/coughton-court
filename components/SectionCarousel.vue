@@ -39,9 +39,10 @@
                   :alt="image.alt || title || 'Carousel image'"
                   class="carousel__image"
                   width="1200"
-                  quality="85"
+                  quality="80"
                   format="webp"
-                  loading="eager"
+                  sizes="(max-width: 799px) 100vw, 50vw"
+                  loading="lazy"
                 />
               </div>
               <p v-if="image.caption" class="carousel__caption">{{ image.caption }}</p>
@@ -98,8 +99,12 @@ const description = computed(() => props.section?.carouselContent?.description |
 const images = computed(() => props.section?.carouselContent?.images || [])
 
 const getGalleryImageUrl = (image) => {
-  if (image?.asset?.url) return image.asset.url
-  return getImageUrl(image, { width: 1200, quality: 85 })
+  return getImageUrl(image, {
+    width: 1200,
+    quality: 80,
+    fit: 'crop',
+    crop: 'focalpoint'
+  })
 }
 
 const nextSlide = () => {

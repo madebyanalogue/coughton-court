@@ -27,9 +27,10 @@
                 <div class="gallery-item__media-container">
                   <img 
                     v-if="gallery.thumbnail?.asset"
-                      :src="getImageUrl(gallery.thumbnail)"
+                      :src="getThumbnailUrl(gallery.thumbnail)"
                       :alt="gallery.title"
                       loading="lazy" 
+                      sizes="(max-width: 799px) 50vw, (max-width: 1023px) 33vw, 25vw"
                       class="gallery-item__img"
                     />
                   <div v-else class="thumbnail-placeholder">
@@ -103,9 +104,10 @@
           >
               <img 
                 v-if="item._type === 'image' && item.asset"
-                :src="getImageUrl(item)"
+                :src="getLightboxImageUrl(item)"
                 :alt="`${selectedGallery?.title} - Image ${index + 1}`"
                 loading="lazy" 
+                sizes="90vw"
                 class="lightbox-img"
               />
               <video
@@ -151,6 +153,20 @@ const props = defineProps({
 })
 
 const { getImageUrl } = useSanityImage()
+const getThumbnailUrl = (image) =>
+  getImageUrl(image, {
+    width: 480,
+    quality: 70,
+    fit: 'crop',
+    crop: 'focalpoint'
+  })
+
+const getLightboxImageUrl = (image) =>
+  getImageUrl(image, {
+    width: 1800,
+    quality: 82,
+    fit: 'max'
+  })
 
 /** Gallery id → lightbox background color (static palette only) */
 const galleryColorById = ref({})

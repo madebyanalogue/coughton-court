@@ -14,7 +14,7 @@
         width="1920"
         height="1080"
         quality="85"
-        sizes="1920px"
+        sizes="100vw"
       />
     </div>
     <div v-else class="page-hero-placeholder">

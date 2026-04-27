@@ -1,7 +1,7 @@
 <template>
   <section :class="['section-dual-carousel', { 'section-border-top': section.borderTop, 'section-border-bottom': section.borderBottom }]">
     <!-- Desktop Dual Carousel -->
-    <div class="dual-carousel-container desktop-carousel">
+    <div v-if="isReady && !isMobile" class="dual-carousel-container desktop-carousel">
       <!-- Left Carousel -->
       <div class="carousel-wrapper left-carousel">
         <div 
@@ -17,10 +17,11 @@
           >
             <img 
               v-if="!isVideo(media)"
-              :src="getMediaUrl(media)" 
+              :src="getMediaUrl(media, { width: 1400 })" 
               :alt="media.alt || 'Carousel image'"
               class="carousel-image"
-              loading="eager"
+              loading="lazy"
+              sizes="50vw"
             />
             <video 
               v-else
@@ -37,10 +38,11 @@
         <div v-else-if="leftImages.length === 1" class="single-image">
           <img 
             v-if="!isVideo(leftImages[0])"
-            :src="getMediaUrl(leftImages[0])" 
+            :src="getMediaUrl(leftImages[0], { width: 1400 })" 
             :alt="leftImages[0].alt || 'Carousel image'"
             class="carousel-image"
-            loading="eager"
+            loading="lazy"
+            sizes="50vw"
           />
           <video 
             v-else
@@ -57,10 +59,11 @@
         <!-- Left Overlay -->
         <div v-if="leftOverlay" class="overlay-image left-overlay">
           <img 
-            :src="getMediaUrl(leftOverlay)" 
+            :src="getMediaUrl(leftOverlay, { width: 1400, fit: 'max' })" 
             :alt="leftOverlay.alt || 'Overlay image'"
             class="overlay-img"
-            loading="eager"
+            loading="lazy"
+            sizes="50vw"
           />
         </div>
       </div>
@@ -80,10 +83,11 @@
           >
             <img 
               v-if="!isVideo(media)"
-              :src="getMediaUrl(media)" 
+              :src="getMediaUrl(media, { width: 1400 })" 
               :alt="media.alt || 'Carousel image'"
               class="carousel-image"
-              loading="eager"
+              loading="lazy"
+              sizes="50vw"
             />
             <video 
               v-else
@@ -100,10 +104,11 @@
         <div v-else-if="rightImages.length === 1" class="single-image">
           <img 
             v-if="!isVideo(rightImages[0])"
-            :src="getMediaUrl(rightImages[0])" 
+            :src="getMediaUrl(rightImages[0], { width: 1400 })" 
             :alt="rightImages[0].alt || 'Carousel image'"
             class="carousel-image"
-            loading="eager"
+            loading="lazy"
+            sizes="50vw"
           />
           <video 
             v-else
@@ -120,17 +125,18 @@
         <!-- Right Overlay -->
         <div v-if="rightOverlay" class="overlay-image right-overlay">
           <img 
-            :src="getMediaUrl(rightOverlay)" 
+            :src="getMediaUrl(rightOverlay, { width: 1400, fit: 'max' })" 
             :alt="rightOverlay.alt || 'Overlay image'"
             class="overlay-img"
-            loading="eager"
+            loading="lazy"
+            sizes="50vw"
           />
         </div>
       </div>
     </div>
 
     <!-- Mobile Single Carousel -->
-    <div class="mobile-carousel-container">
+    <div v-else-if="isReady" class="mobile-carousel-container">
       <div 
         v-if="allImages.length > 1" 
         class="carousel-container"
@@ -144,9 +150,11 @@
         >
           <img 
             v-if="!isVideo(media)"
-            :src="getMediaUrl(media)" 
+            :src="getMediaUrl(media, { width: 900 })" 
             :alt="media.alt || 'Carousel image'"
             class="carousel-image"
+            loading="lazy"
+            sizes="100vw"
           />
           <video 
             v-else
@@ -163,9 +171,11 @@
       <div v-else-if="allImages.length === 1" class="single-image">
         <img 
           v-if="!isVideo(allImages[0])"
-          :src="getMediaUrl(allImages[0])" 
+          :src="getMediaUrl(allImages[0], { width: 900 })" 
           :alt="allImages[0].alt || 'Carousel image'"
           class="carousel-image"
+          loading="lazy"
+          sizes="100vw"
         />
         <video 
           v-else
@@ -182,10 +192,11 @@
       <!-- Mobile Overlay (show left overlay if available, otherwise right overlay) -->
       <div v-if="mobileOverlay" class="overlay-image mobile-overlay">
           <img 
-            :src="getMediaUrl(mobileOverlay)" 
+            :src="getMediaUrl(mobileOverlay, { width: 900, fit: 'max' })" 
             :alt="mobileOverlay.alt || 'Overlay image'"
             class="overlay-img"
-            loading="eager"
+            loading="lazy"
+            sizes="100vw"
           />
       </div>
     </div>
@@ -194,6 +205,7 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { useSanityImage } from '~/composables/useSanityImage'
 
 const props = defineProps({
   section: {
@@ -201,6 +213,7 @@ const props = defineProps({
     required: true
   }
 })
+const { getImageUrl } = useSanityImage()
 
 // Extract data from section
 const leftImages = computed(() => props.section?.dualCarouselContent?.leftCarousel || [])
@@ -225,11 +238,19 @@ const mobileOverlay = computed(() => leftOverlay.value || rightOverlay.value)
 
 // Get the maximum number of slides for mobile (all images combined)
 const maxMobileSlides = computed(() => allImages.value.length)
+const isMobile = ref(false)
+const isReady = ref(false)
 
 // Media URL helper
-const getMediaUrl = (media) => {
+const getMediaUrl = (media, options = {}) => {
   if (!media?.asset?.url) return ''
-  return media.asset.url
+  if (isVideo(media)) return media.asset.url
+  return getImageUrl(media, {
+    width: options.width || 1400,
+    quality: 80,
+    fit: options.fit || 'crop',
+    crop: options.crop || 'focalpoint'
+  })
 }
 
 // Check if media is a video
@@ -261,6 +282,8 @@ const stopCarousel = () => {
 }
 
 onMounted(() => {
+  isMobile.value = typeof window !== 'undefined' ? window.innerWidth <= 800 : false
+  isReady.value = true
   startCarousel()
   
   // Listen for window resize to restart carousel with correct slide count
@@ -274,6 +297,7 @@ onUnmounted(() => {
 
 // Handle resize to restart carousel with correct slide count
 const handleResize = () => {
+  isMobile.value = window.innerWidth <= 800
   stopCarousel()
   currentSlide.value = 0 // Reset to first slide
   startCarousel()

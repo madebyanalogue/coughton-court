@@ -22,16 +22,17 @@
                     :alt="item.alt || 'Carousel image'"
                     class="carousel-image"
                     width="1200"
-                    quality="85"
+                    quality="80"
                     format="webp"
-                    loading="eager"
+                    sizes="(max-width: 767px) 95vw, (max-width: 991px) 45vw, 33vw"
+                    loading="lazy"
                   />
                 </div>
                 
                 <!-- Video Item -->
                 <div v-else-if="isVideoItem(item) && item.asset?.asset" class="carousel-media">
                   <video
-                    :poster="item.poster ? getImageUrl(item.poster) : undefined"
+                    :poster="item.poster ? getImageUrl(item.poster, { width: 1200, quality: 75, fit: 'crop', crop: 'focalpoint' }) : undefined"
                     class="carousel-video"
                     muted
                     loop

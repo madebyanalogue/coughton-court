@@ -11,8 +11,9 @@
 
     <NuxtImg
       v-if="section.contactContent?.decorativeImage?.asset?.url"
-      :src="section.contactContent.decorativeImage.asset.url"
+      :src="getImageUrl(section.contactContent.decorativeImage, { width: 900, quality: 80, fit: 'max' })"
       :alt="section.contactContent.decorativeImage.alt || 'Contact'"
+      sizes="(max-width: 799px) 100vw, 50vw"
       loading="lazy"
     />
   </section>

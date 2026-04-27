@@ -13,6 +13,8 @@
               :src="imageUrl" 
               :alt="imageAlt || 'Decorative image'" 
               class="py05 pbottom"
+              loading="lazy"
+              sizes="(max-width: 799px) 60vw, 420px"
             />
           </div>
 
@@ -73,7 +75,9 @@ const imageSource = computed(() => {
   return props.section?.textContent?.image || null
 })
 const imageUrl = computed(() => {
-  return imageSource.value ? getImageUrl(imageSource.value) : null
+  return imageSource.value
+    ? getImageUrl(imageSource.value, { width: 420, quality: 75, fit: 'max' })
+    : null
 })
 const imageAlt = computed(() => {
   return imageSource.value?.alt || ''
