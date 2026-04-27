@@ -27,7 +27,6 @@
               format="webp"
               data-image-overlay
               loading="lazy"
-              sizes="(max-width: 768px) 100vw, 50vw"
             />
           </div>
           <!-- Empty spacer div for items without images -->

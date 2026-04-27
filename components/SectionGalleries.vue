@@ -30,7 +30,6 @@
                       :src="getThumbnailUrl(gallery.thumbnail)"
                       :alt="gallery.title"
                       loading="lazy" 
-                      sizes="(max-width: 799px) 50vw, (max-width: 1023px) 33vw, 25vw"
                       class="gallery-item__img"
                     />
                   <div v-else class="thumbnail-placeholder">
@@ -107,7 +106,6 @@
                 :src="getLightboxImageUrl(item)"
                 :alt="`${selectedGallery?.title} - Image ${index + 1}`"
                 loading="lazy" 
-                sizes="90vw"
                 class="lightbox-img"
               />
               <video

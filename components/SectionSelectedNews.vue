@@ -15,7 +15,6 @@
                 :src="getImageUrl(newsItem.featuredImage)" 
                 :alt="newsItem.title"
                 class="square"
-                sizes="(max-width: 799px) 100vw, 50vw"
                 loading="lazy"
                 data-image-overlay
               />

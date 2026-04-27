@@ -9,7 +9,6 @@
             width="1920"
             quality="85"
             format="webp"
-            sizes="100vw"
             loading="lazy" 
             data-image-overlay 
           />

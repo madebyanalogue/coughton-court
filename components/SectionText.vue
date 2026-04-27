@@ -14,7 +14,6 @@
               :alt="imageAlt || 'Decorative image'" 
               class="py05 pbottom"
               loading="lazy"
-              sizes="(max-width: 799px) 60vw, 420px"
             />
           </div>
 

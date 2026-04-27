@@ -13,7 +13,6 @@
                       :src="getOptimizedImage(item.image)" 
                       :alt="item.title || 'USP'"
                       class="square usp-image"
-                      sizes="(max-width: 799px) 50vw, 25vw"
                       loading="lazy"
                       :data-index="index"
                     />

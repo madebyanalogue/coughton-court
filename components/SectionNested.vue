@@ -7,7 +7,6 @@
             :src="getImageUrl(section.nestedContent.mainImage, { width: 1920, quality: 85 })" 
             :alt="section.title"
             width="1920"
-            sizes="100vw"
             loading="lazy"
           />
         </div>

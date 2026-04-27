@@ -27,7 +27,6 @@
               height="1080"
               quality="85"
               format="webp"
-              sizes="100vw"
               loading="eager"
               preload
             />
@@ -146,7 +145,6 @@
                         width="1200"
                         quality="80"
                         format="webp"
-                        sizes="(max-width: 799px) 100vw, 50vw"
                         loading="lazy"
                       />
                     </div>

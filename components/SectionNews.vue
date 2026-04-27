@@ -19,7 +19,6 @@
                 :src="getImageUrl(post.featuredImage, { width: 900, quality: 78, fit: 'crop', crop: 'focalpoint' })" 
                 :alt="post.title"
                 class="news-thumbnail"
-                sizes="(max-width: 799px) 100vw, 50vw"
                 loading="lazy"
                 data-image-overlay
               />

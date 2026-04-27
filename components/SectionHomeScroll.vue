@@ -17,7 +17,6 @@
               :src="getImageUrl(item.image, { width: 700, quality: 75, fit: 'crop', crop: 'focalpoint' })"
               :alt="item.title"
               loading="lazy"
-              sizes="(max-width: 1023px) 40vw, 280px"
             />
             <h3 class="media-title">{{ item.title }}</h3>
           </NuxtLink>
@@ -32,7 +31,6 @@
               :src="getImageUrl(item.image, { width: 700, quality: 75, fit: 'crop', crop: 'focalpoint' })"
               :alt="item.title"
               loading="lazy"
-              sizes="(max-width: 1023px) 40vw, 280px"
             />
             <h3 class="media-title">{{ item.title }}</h3>
           </a>

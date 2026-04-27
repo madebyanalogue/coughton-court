@@ -24,7 +24,6 @@
                     class="page-image"
                     data-image-overlay
                     loading="lazy"
-                    sizes="(max-width: 799px) 100vw, (max-width: 1023px) 50vw, 25vw"
                   />
                   <div 
                     v-else
@@ -52,7 +51,6 @@
                     class="page-image"
                     data-image-overlay
                     loading="lazy"
-                    sizes="(max-width: 799px) 100vw, (max-width: 1023px) 50vw, 25vw"
                   />
                   <div 
                     v-else

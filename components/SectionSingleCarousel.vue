@@ -47,7 +47,6 @@
               :alt="media.alt || 'Carousel image'"
               class="carousel-image"
               loading="lazy"
-              sizes="100vw"
             />
             <video 
               v-else
@@ -68,7 +67,6 @@
             :alt="carouselImages[0].alt || 'Carousel image'"
             class="carousel-image"
             loading="lazy"
-            sizes="100vw"
           />
           <video 
             v-else
@@ -90,7 +88,6 @@
           :alt="overlay.alt || 'Overlay image'"
           class="overlay-img"
           loading="lazy"
-          sizes="100vw"
         />
       </div>
       

@@ -24,7 +24,6 @@
                     class="garden-image"
                     data-image-overlay
                     loading="lazy"
-                    sizes="(max-width: 799px) 100vw, (max-width: 1023px) 50vw, 33vw"
                   />
                   <div 
                     v-else
@@ -52,7 +51,6 @@
                     class="garden-image"
                     data-image-overlay
                     loading="lazy"
-                    sizes="(max-width: 799px) 100vw, (max-width: 1023px) 50vw, 33vw"
                   />
                   <div 
                     v-else

@@ -29,7 +29,6 @@
                 loading="lazy"
                 quality="80"
                 format="webp"
-                sizes="(max-width: 801px) 100vw, 50vw"
                 data-image-overlay
               />
             </div>

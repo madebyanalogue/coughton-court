@@ -24,7 +24,6 @@
                     width="1200"
                     quality="80"
                     format="webp"
-                    sizes="(max-width: 767px) 95vw, (max-width: 991px) 45vw, 33vw"
                     loading="lazy"
                   />
                 </div>

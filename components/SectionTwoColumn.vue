@@ -17,7 +17,6 @@
               v-if="mainImage" 
               :src="getOptimizedImage(mainImage, { width: 1400 })" 
               :alt="mainImage.alt || 'Main image'" 
-              sizes="(max-width: 799px) 100vw, 50vw"
               loading="lazy"
             />
             <div v-if="overlayImage" class="overlay-image">
@@ -25,7 +24,6 @@
                 :src="getOptimizedImage(overlayImage, { width: 1200, fit: 'max' })" 
                 :alt="overlayImage.alt || 'Overlay image'"
                 class="overlay-img"
-                sizes="(max-width: 799px) 100vw, 50vw"
                 loading="lazy"
               />
             </div>
@@ -43,7 +41,6 @@
               :src="getOptimizedImage(textImage, { width: 900, fit: 'max' })" 
               :alt="textImage.alt || 'Text image'" 
               class="text-image"
-              sizes="(max-width: 799px) 100vw, 50vw"
               loading="lazy"
             />
           </div>

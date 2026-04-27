@@ -29,7 +29,6 @@
                 width="1200"
                 quality="80"
                 format="webp"
-                sizes="(max-width: 799px) 100vw, 50vw"
                 loading="lazy"
               />
             </div>
@@ -68,7 +67,6 @@
                     width="1200"
                     quality="80"
                     format="webp"
-                    sizes="(max-width: 799px) 100vw, 50vw"
                     loading="lazy"
                   />
                 </div>

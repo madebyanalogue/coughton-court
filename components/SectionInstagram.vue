@@ -24,7 +24,6 @@
               class="carousel-image"
               :class="{ 'is-active': index === currentSlide }"
               loading="lazy"
-              sizes="100vw"
               draggable="false"
             />
           </div>
@@ -49,7 +48,6 @@
                 :alt="`Instagram post ${index + 1}`"
                 class="instagram-image"
                 loading="lazy"
-                sizes="(max-width: 1023px) 33vw, 20vw"
               />
             </a>
             <img
@@ -58,7 +56,6 @@
               :alt="`Instagram post ${index + 1}`"
               class="instagram-image"
               loading="lazy"
-              sizes="(max-width: 1023px) 33vw, 20vw"
             />
           </div>
         </div>

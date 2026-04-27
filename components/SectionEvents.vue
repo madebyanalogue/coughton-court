@@ -33,7 +33,6 @@
                     class="event-image"
                     data-image-overlay
                     loading="lazy"
-                    sizes="(max-width: 799px) 100vw, 33vw"
                   />
                   <div 
                     v-else
@@ -62,7 +61,6 @@
                     class="event-image"
                     data-image-overlay
                     loading="lazy"
-                    sizes="(max-width: 799px) 100vw, 33vw"
                   />
                   <div 
                     v-else

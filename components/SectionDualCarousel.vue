@@ -21,7 +21,6 @@
               :alt="media.alt || 'Carousel image'"
               class="carousel-image"
               loading="lazy"
-              sizes="50vw"
             />
             <video 
               v-else
@@ -42,7 +41,6 @@
             :alt="leftImages[0].alt || 'Carousel image'"
             class="carousel-image"
             loading="lazy"
-            sizes="50vw"
           />
           <video 
             v-else
@@ -63,7 +61,6 @@
             :alt="leftOverlay.alt || 'Overlay image'"
             class="overlay-img"
             loading="lazy"
-            sizes="50vw"
           />
         </div>
       </div>
@@ -87,7 +84,6 @@
               :alt="media.alt || 'Carousel image'"
               class="carousel-image"
               loading="lazy"
-              sizes="50vw"
             />
             <video 
               v-else
@@ -108,7 +104,6 @@
             :alt="rightImages[0].alt || 'Carousel image'"
             class="carousel-image"
             loading="lazy"
-            sizes="50vw"
           />
           <video 
             v-else
@@ -129,7 +124,6 @@
             :alt="rightOverlay.alt || 'Overlay image'"
             class="overlay-img"
             loading="lazy"
-            sizes="50vw"
           />
         </div>
       </div>
@@ -154,7 +148,6 @@
             :alt="media.alt || 'Carousel image'"
             class="carousel-image"
             loading="lazy"
-            sizes="100vw"
           />
           <video 
             v-else
@@ -175,7 +168,6 @@
           :alt="allImages[0].alt || 'Carousel image'"
           class="carousel-image"
           loading="lazy"
-          sizes="100vw"
         />
         <video 
           v-else
@@ -196,7 +188,6 @@
             :alt="mobileOverlay.alt || 'Overlay image'"
             class="overlay-img"
             loading="lazy"
-            sizes="100vw"
           />
       </div>
     </div>
