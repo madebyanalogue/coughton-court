@@ -25,7 +25,7 @@ const processMenuItems = (items) => {
 }
 
 export const useSiteSettings = () => {
-  const { data: settings, error, pending } = useAsyncData('siteSettings-v2', async () => {
+  const { data: settings, error, pending } = useAsyncData('siteSettings-v3', async () => {
     try {
       const result = await $fetch('/api/sanity', { params: { type: 'siteSettings' } })
       
@@ -105,6 +105,7 @@ export const useSiteSettings = () => {
     defaultMetaDescription: computed(() => settings.value?.seo?.defaultMetaDescription || ''),
     defaultOgImage: computed(() => settings.value?.seo?.defaultOgImage || null),
     facebookAppId: computed(() => settings.value?.seo?.facebookAppId || ''),
-    twitterHandle: computed(() => settings.value?.seo?.twitterHandle || '')
+    twitterHandle: computed(() => settings.value?.seo?.twitterHandle || ''),
+    sitePopup: computed(() => settings.value?.sitePopup || null)
   }
 } 

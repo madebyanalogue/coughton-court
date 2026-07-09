@@ -77,9 +77,10 @@ interface Page {
 export default defineEventHandler(async (event) => {
   const query = getQuery(event)
   
-  // Check cache first
+  // Check cache first (siteSettings is always fetched fresh for CMS edits)
   const cacheKey = getCacheKey(query)
-  const cached = getCached(cacheKey)
+  const skipCache = query.type === 'siteSettings'
+  const cached = skipCache ? null : getCached(cacheKey)
   if (cached !== null) {
     return cached
   }
@@ -239,7 +240,15 @@ export default defineEventHandler(async (event) => {
             newsletterActionUrl,
             // Cookies & Analytics
             cookiesMessage,
-            googleAnalyticsId
+            googleAnalyticsId,
+            // Site popup
+            sitePopup {
+              enabled,
+              disableAt,
+              title,
+              description,
+              buttonText
+            }
           }
         `)
         // Normalize menu items to always be arrays
@@ -262,10 +271,10 @@ export default defineEventHandler(async (event) => {
         }
         if (!result) {
           const emptyResult = { footerLogos: [], contactInfo: [] }
-          setCache(cacheKey, emptyResult)
+          if (!skipCache) setCache(cacheKey, emptyResult)
           return emptyResult
         }
-        setCache(cacheKey, result)
+        if (!skipCache) setCache(cacheKey, result)
         return result
       } catch (fetchError: any) {
         console.error('Error fetching siteSettings:', {

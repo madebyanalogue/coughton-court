@@ -42,6 +42,7 @@
               :page-data="page"
               :key="route.path"
             />
+            <SitePopup />
           </template>
           <template #fallback>
             <!-- No footer during SSR -->
@@ -56,6 +57,7 @@
 import Header from '~/components/Header.vue';
 import Footer from '~/components/Footer.vue';
 import Preloader from '~/components/Preloader.vue';
+import SitePopup from '~/components/SitePopup.vue';
 import { useDarkMode } from '~/composables/usePageUi.js';
 import { useFavicon } from '~/composables/useFavicon.js';
 import { usePageSettings } from '~/composables/usePageSettings';
