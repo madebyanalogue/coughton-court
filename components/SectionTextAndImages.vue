@@ -112,6 +112,18 @@
           <div v-if="text && text.length > 0" class="text-content">
             <SanityBlocks :blocks="text" />
           </div>
+          <div v-if="buttons.length" class="text-and-images-buttons">
+            <NuxtLink
+              v-for="(button, index) in buttons"
+              :key="button._key || index"
+              :to="button.href"
+              :target="button.external ? '_blank' : undefined"
+              :rel="button.external ? 'noopener noreferrer' : undefined"
+              class="button"
+            >
+              {{ button.text }}
+            </NuxtLink>
+          </div>
         </div>
       </div>
 
@@ -151,6 +163,39 @@ const text = computed(() => {
 const images = computed(() => {
   const imgs = props.section?.textAndImagesContent?.images
   return imgs && Array.isArray(imgs) ? imgs : []
+})
+const buttons = computed(() => {
+  const items = props.section?.textAndImagesContent?.buttons
+  if (!items || !Array.isArray(items)) return []
+
+  return items
+    .map((button) => {
+      const text = button?.text?.trim()
+      if (!text) return null
+
+      const pageSlug = button?.page?.slug?.current
+      if (pageSlug) {
+        return {
+          _key: button._key,
+          text,
+          href: pageSlug === 'index' ? '/' : `/${pageSlug}`,
+          external: false
+        }
+      }
+
+      const url = button?.url?.trim()
+      if (url) {
+        return {
+          _key: button._key,
+          text,
+          href: url,
+          external: true
+        }
+      }
+
+      return null
+    })
+    .filter(Boolean)
 })
 const textRight = computed(() => props.section?.textAndImagesContent?.textRight || false)
 const useNarrowText = computed(() => props.section?.textAndImagesContent?.useNarrowText || false)
@@ -285,6 +330,13 @@ onUnmounted(() => {
 
 .text-content {
   width: 100%;
+}
+
+.text-and-images-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 25px;
+  margin-top: var(--pad-1);
 }
 
 .text-and-images-images {

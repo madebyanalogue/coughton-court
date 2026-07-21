@@ -859,6 +859,17 @@ export default defineEventHandler(async (event) => {
             textAndImagesContent {
               title,
               text,
+              buttons[] {
+                text,
+                page-> {
+                  _id,
+                  title,
+                  slug {
+                    current
+                  }
+                },
+                url
+              },
               images[] {
                 asset-> {
                   _id,
