@@ -564,25 +564,23 @@ export default defineEventHandler(async (event) => {
               content
             },
             newsContent {
-              topText
+              title
             },
             selectedNewsContent {
               title,
               news[]-> {
                 _id,
                 title,
+                slug,
                 publishedAt,
-                summary,
-                content,
+                shortDescription,
                 featuredImage {
                   asset-> {
                     _id,
                     url,
                     metadata { dimensions }
                   }
-                },
-                offsiteUrl,
-                linkTitle
+                }
               },
               button {
                 text,
@@ -1044,16 +1042,88 @@ export default defineEventHandler(async (event) => {
     }
     
     if (query.type === 'news') {
+      if (query.all) {
+        const result = await cdnClient.fetch(`
+          *[_type == "news"] | order(publishedAt desc) {
+            _id,
+            title,
+            slug,
+            shortDescription,
+            publishedAt,
+            featuredImage {
+              asset-> {
+                _id,
+                url,
+                metadata { dimensions }
+              }
+            }
+          }
+        `)
+        setCache(cacheKey, result)
+        return result
+      }
+
+      // Single news item by slug
+      if (query.slug) {
+        const result = await cdnClient.fetch(`
+          *[_type == "news" && slug.current == $slug][0] {
+            _id,
+            title,
+            slug,
+            shortDescription,
+            publishedAt,
+            cost,
+            category,
+            featuredImage {
+              asset-> {
+                _id,
+                url,
+                metadata { dimensions }
+              }
+            },
+            introductionTitle,
+            introduction,
+            gallery[] {
+              asset-> {
+                _id,
+                url,
+                metadata { dimensions }
+              },
+              alt,
+              caption
+            },
+            tab1Title,
+            tab1Content,
+            tab2Title,
+            tab2Content,
+            bookingUrl,
+            seo {
+              metaTitle,
+              metaDescription,
+              ogImage {
+                asset-> {
+                  _id,
+                  url,
+                  metadata { dimensions }
+                }
+              }
+            }
+          }
+        `, { slug: query.slug })
+        setCache(cacheKey, result)
+        return result
+      }
+
+      // Legacy list fetch (Selected News / useNews)
       const limit = query.limit ? parseInt(query.limit as string) : undefined
       const limitClause = limit ? `[0...${limit}]` : ''
-      
+
       const result = await cdnClient.fetch(`*[_type == "news"] | order(publishedAt desc)${limitClause} {
         _id,
         title,
+        slug,
         publishedAt,
-        summary,
-        content,
-        excerpt,
+        shortDescription,
         category,
         featuredImage {
           asset-> {
@@ -1061,9 +1131,7 @@ export default defineEventHandler(async (event) => {
             url,
             metadata { dimensions }
           }
-        },
-        offsiteUrl,
-        linkTitle
+        }
       }`)
       setCache(cacheKey, result)
       return result

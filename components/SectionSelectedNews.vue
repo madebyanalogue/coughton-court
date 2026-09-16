@@ -1,43 +1,46 @@
 <template>
   <section ref="sectionRef" :class="{ 'section-border-top': section.borderTop, 'section-border-bottom': section.borderBottom }">
     <div class="wrapper">
-      <div class="grid grid-1">
+      <div class="grid grid-1 py-md-1">
 
         <div v-if="title" class="text-center py1">
           <div class="h4 mono">{{ title }}</div>
         </div>
 
-        <div class="grid grid-1 grid-md-2">
-          <div v-for="newsItem in newsToShow" :key="newsItem._id" class="">
-            <div class="grid grid-1">
-              <NuxtImg 
-                v-if="newsItem.featuredImage"
-                :src="getImageUrl(newsItem.featuredImage)" 
-                :alt="newsItem.title"
-                class="square"
-                loading="lazy"
-                data-image-overlay
-              />
+        <div class="grid grid-1 grid-md-3 gap-3">
+          <div v-for="newsItem in newsToShow" :key="newsItem._id" class="news-card">
+            <NuxtLink 
+              v-if="newsItem.slug?.current" 
+              :to="`/news/${newsItem.slug.current}`" 
+              class="news-link"
+            >
               <div class="grid grid-1 gap-1">
-                <div class="h2">{{ newsItem.title }}</div>
-                <SanityBlocks v-if="newsItem.content" :blocks="newsItem.content" />
-                <div v-if="newsItem.offsiteUrl">
-                  <a 
-                      :href="newsItem.offsiteUrl" 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      class="btn" 
-                      data-btn-hover
-                    >
-                      <span class="btn__text">{{ newsItem.linkTitle || 'Discover more' }}</span>
-                      <div class="btn__circle"></div>
-                  </a>
+                <div class="h6 medium">{{ newsItem.title }}</div>
+                <div class="image-wrapper">
+                  <NuxtImg 
+                    v-if="newsItem.featuredImage"
+                    :src="getImageUrl(newsItem.featuredImage, { width: 1056, quality: 80, fit: 'crop', crop: 'focalpoint' })" 
+                    :alt="newsItem.title"
+                    class="news-image"
+                    loading="lazy"
+                    data-image-overlay
+                  />
+                  <div 
+                    v-else
+                    class="news-image-fallback secondary"
+                  ></div>
                 </div>
-                <!-- <div class="">
-                  <div class="h5">{{ formatDate(post.publishedAt) }}</div>
-                </div> -->
+                <div class="news-date">{{ formatDate(newsItem.publishedAt) }}</div>
+                <div class="flex gap-1">
+                  <div class="col-xs">
+                    <p v-if="newsItem.shortDescription" class="h7">{{ newsItem.shortDescription }}</p>
+                  </div>
+                  <div class="">
+                    <div class="arrow">→</div>
+                  </div>
+                </div>
               </div>
-            </div>
+            </NuxtLink>
           </div>
         </div>
 
@@ -59,7 +62,6 @@
 
 <script setup>
 import { ref, computed, onMounted, nextTick, onUnmounted } from 'vue'
-import SanityBlocks from '~/components/SanityBlocks.vue'
 import { useScrollTrigger } from '~/composables/useScrollTrigger.js'
 import { useSanityImage } from '~/composables/useSanityImage'
 
@@ -71,7 +73,7 @@ const props = defineProps({
 })
 
 const { registerSection, unregisterSection } = useScrollTrigger()
-const { getImageUrl: getSanityImageUrl } = useSanityImage()
+const { getImageUrl } = useSanityImage()
 const sectionRef = ref(null)
 
 const title = computed(() => props.section?.selectedNewsContent?.title || 'News')
@@ -79,42 +81,29 @@ const button = computed(() => props.section?.selectedNewsContent?.button || null
 const selectedNews = computed(() => props.section?.selectedNewsContent?.news || [])
 const newsToShow = ref([])
 
-function getImageUrl(image) {
-  const url = image?.asset?.url
-  const mimeType = image?.asset?.mimeType
-  if ((mimeType && mimeType === 'image/svg+xml') || (url && url.endsWith('.svg'))) {
-    return url
-  }
-  return getSanityImageUrl(image, {
-    width: 900,
-    quality: 80,
-    fit: 'crop',
-    crop: 'focalpoint'
-  })
+const formatDate = (dateString) => {
+  if (!dateString) return ''
+  const date = new Date(dateString)
+  return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long' })
 }
 
 onMounted(async () => {
   if (selectedNews.value.length > 0) {
-    // Use selected news items from Sanity (limit to 2)
-    newsToShow.value = selectedNews.value.slice(0, 2)
+    newsToShow.value = selectedNews.value
   } else {
-    // Fetch latest 2 news posts if none selected
-    const res = await $fetch('/api/sanity', { params: { type: 'news', limit: 2 } })
-    newsToShow.value = res
+    const res = await $fetch('/api/sanity', { params: { type: 'news', limit: 3 } })
+    newsToShow.value = res || []
   }
-  
-  // Dispatch event for image overlay plugin to re-initialize
+
   nextTick(() => {
     window.dispatchEvent(new CustomEvent('news-loaded'))
   })
-  
-  // Register section for scroll animations
+
   if (sectionRef.value) {
     registerSection(`selected-news-${props.section._id}`, {
       trigger: sectionRef.value,
       start: 'top 80%',
       onEnter: () => {
-        // Simple fade-in animation
         const gsap = window.gsap
         if (gsap) {
           gsap.to(sectionRef.value, {
@@ -128,15 +117,39 @@ onMounted(async () => {
   }
 })
 
-// Clean up scroll trigger when component unmounts
 onUnmounted(() => {
   unregisterSection(`selected-news-${props.section._id}`)
 })
 </script>
 
 <style scoped>
-/* Initial state for scroll animations */
 section {
   opacity: 0;
 }
-</style> 
+
+.news-link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.image-wrapper {
+  aspect-ratio: 3/2;
+}
+
+.news-date {
+  font-style: italic;
+}
+
+.news-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.news-image-fallback {
+  width: 100%;
+  height: 100%;
+}
+</style>

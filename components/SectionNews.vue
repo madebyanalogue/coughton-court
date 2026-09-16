@@ -1,152 +1,277 @@
 <template>
-  <section :class="['news-section', { 'section-border-top': section.borderTop, 'section-border-bottom': section.borderBottom }]">
+  <section ref="sectionRef" :class="{ 'section-border-top': section.borderTop, 'section-border-bottom': section.borderBottom }">
     <div class="wrapper">
-      <div class="grid grid-1 gap-2 py2 py-sm-3 px-md-5">
+      <div class="grid grid-1 py-md-1">
 
-        <!-- Top Text Section -->
-        <div v-if="topText" class="grid grid-1 grid-md-2">
-          <h2 class="h1">
-            <div v-html="topText"></div>
-          </h2>
+        <div v-if="title" class="text-center py1">
+          <div class="h4 mono">{{ title }}</div>
         </div>
 
-        
-        <div class="grid grid-1 grid-md-2 gap-2 gap-2-md py2 pbottom underline-links reverse">
-          <div v-for="(post, index) in posts" :key="post._id" class="news-item" :data-summary="post.summary">
-            <div class="grid grid-1">
-              <NuxtImg 
-                v-if="post.featuredImage"
-                :src="getImageUrl(post.featuredImage, { width: 900, quality: 78, fit: 'crop', crop: 'focalpoint' })" 
-                :alt="post.title"
-                class="news-thumbnail"
-                loading="lazy"
-                data-image-overlay
-              />
+        <div v-if="newsItems.length === 0" class="text-center py4">
+          <p class="h7">No news at the moment.</p>
+        </div>
+
+        <div v-else class="grid grid-1 grid-md-3 gap-3">
+          <div 
+            v-for="(item, index) in newsItems" 
+            :key="item._id" 
+            :ref="el => setNewsCardRef(el, index)"
+            class="news-card"
+          >
+            <NuxtLink 
+              v-if="item.slug?.current" 
+              :to="`/news/${item.slug.current}`" 
+              class="news-link"
+            >
               <div class="grid grid-1 gap-1">
-                <div class="grid grid-1 gap-05">
-                  <div class="news-category h6 uppercase">
-                    {{ post.category }}
-                  </div>
-                  <div class="grid">
-                    <div class="col-span-7 h3 heading">{{ post.title }}</div>
-                  </div>
+                <div class="h6 medium">{{ item.title }}</div>
+                <div class="image-wrapper">
+                  <NuxtImg 
+                    v-if="item.featuredImage"
+                    :src="getImageUrl(item.featuredImage, { width: 1056, quality: 80, fit: 'crop', crop: 'focalpoint' })" 
+                    :alt="item.title"
+                    class="news-image"
+                    data-image-overlay
+                    loading="lazy"
+                  />
+                  <div 
+                    v-else
+                    class="news-image-fallback secondary"
+                  ></div>
                 </div>
-                <div v-if="post.excerpt" :blocks="post.excerpt" class="h5" v-html="post.excerpt"></div>
-                <div v-if="post.offsiteUrl">
-                  <a 
-                      :href="post.offsiteUrl" 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                    >
-                      {{ post.linkTitle || 'Discover more' }}
-                  </a>
+                <div class="news-date">{{ formatDate(item.publishedAt) }}</div>
+                <div class="flex gap-1">
+                    <div class="col-xs">
+                    <p v-if="item.shortDescription" class="h7">{{ item.shortDescription }}</p>
+                    </div>
+                    <div class="">
+                      <div class="arrow">→</div>
+                    </div>
                 </div>
-                <!-- <div class="">
-                  <div class="h5">{{ formatDate(post.publishedAt) }}</div>
-                </div> -->
+              </div>
+            </NuxtLink>
+            <div v-else class="news-link">
+              <div class="grid grid-1 gap-1">
+                <div class="h2">{{ item.title }}</div>
+                <div class="image-wrapper">
+                  <NuxtImg 
+                    v-if="item.featuredImage"
+                    :src="getImageUrl(item.featuredImage, { width: 1056, quality: 80, fit: 'crop', crop: 'focalpoint' })" 
+                    :alt="item.title"
+                    class="news-image"
+                    data-image-overlay
+                    loading="lazy"
+                  />
+                  <div 
+                    v-else
+                    class="news-image-fallback secondary"
+                  ></div>
+                </div>
+                <div class="news-date">{{ formatDate(item.publishedAt) }}</div>
+                <div class="flex gap-1">
+                    <div class="col-xs">
+                    <p v-if="item.shortDescription" class="h7">{{ item.shortDescription }}</p>
+                    </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
+
       </div>
     </div>
   </section>
-
-</template> 
+</template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
-import { useSanityImage } from '~/composables/useSanityImage'
-import { isDark, useRemoveTopPadding } from '~/composables/usePageUi.js'
+import { ref, computed, onMounted, nextTick, onUnmounted, watch } from 'vue'
+import { useScrollTrigger } from '~/composables/useScrollTrigger.js'
+import { useSanityImage } from '~/composables/useSanityImage.js'
 
-// Props
 const props = defineProps({
   section: {
     type: Object,
-    required: true,
-    validator: (value) => {
-      return value && 
-             value._type === 'section' && 
-             value.sectionType === 'news'
-    }
+    required: true
   }
 })
 
-const posts = ref([])
+const { registerSection, unregisterSection } = useScrollTrigger()
 const { getImageUrl } = useSanityImage()
+const sectionRef = ref(null)
+const newsCardRefs = ref([])
+const hasAnimated = ref(false)
 
-// Computed property for top text with line break formatting
-const topText = computed(() => {
-  const text = props.section?.newsContent?.topText || ''
-  return text.replace(/\n/g, '<br>')
-})
+const title = computed(() => props.section?.newsContent?.title || '')
 
-onMounted(async () => {
-  const res = await $fetch('/api/sanity', { params: { type: 'news' } })
-  posts.value = res
+const { data: newsData } = await useAsyncData(
+  `news-${props.section._key}`,
+  () => $fetch('/api/sanity', { 
+    params: { 
+      type: 'news',
+      all: true
+    } 
+  })
+)
+
+const newsItems = computed(() => newsData.value || [])
+
+const formatDate = (dateString) => {
+  if (!dateString) return ''
+  const date = new Date(dateString)
+  return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long' })
+}
+
+const setNewsCardRef = (el, index) => {
+  if (el) {
+    if (!newsCardRefs.value[index]) {
+      newsCardRefs.value[index] = el
+    } else if (newsCardRefs.value[index] !== el) {
+      newsCardRefs.value[index] = el
+    }
+  }
+}
+
+const animateNewsIn = () => {
+  if (hasAnimated.value) return
   
-  // Debug: Check if images are rendered with correct attributes
+  const gsap = window.gsap
+  if (!gsap) return
+  
   nextTick(() => {
-    const newsImages = document.querySelectorAll('[data-image-overlay]')
-    //console.log('[SectionNews] Found images with data-image-overlay:', newsImages.length)
-    newsImages.forEach((img, i) => {
-        // console.log(`[SectionNews] Image ${i}:`, {
-        //   tagName: img.tagName,
-        //   src: img.src,
-        //   alt: img.alt,
-        //   hasOverlay: img.hasAttribute('data-image-overlay')
-        // })
+    const validRefs = newsCardRefs.value.filter(ref => ref !== null && ref !== undefined)
+    
+    if (validRefs.length === 0) {
+      setTimeout(() => {
+        if (!hasAnimated.value) {
+          animateNewsIn()
+        }
+      }, 50)
+      return
+    }
+    
+    const alreadyAnimated = validRefs.some(ref => {
+      const computedStyle = window.getComputedStyle(ref)
+      return parseFloat(computedStyle.opacity) > 0
     })
     
-    // Dispatch event for image overlay plugin to re-initialize
+    if (alreadyAnimated) {
+      hasAnimated.value = true
+      return
+    }
+    
+    hasAnimated.value = true
+    
+    gsap.set(validRefs, {
+      opacity: 0,
+      y: 20
+    })
+    
+    gsap.to(validRefs, {
+      opacity: 1,
+      y: 0,
+      duration: 0.6,
+      stagger: 0.15,
+      ease: 'power2.out',
+      delay: 0.2
+    })
+  })
+}
+
+onMounted(async () => {
+  nextTick(() => {
     window.dispatchEvent(new CustomEvent('news-loaded'))
   })
+  
+  if (sectionRef.value) {
+    registerSection(`news-${props.section._id}`, {
+      trigger: sectionRef.value,
+      start: 'top 80%',
+      onEnter: () => {
+        const gsap = window.gsap
+        if (gsap) {
+          gsap.to(sectionRef.value, {
+            opacity: 1,
+            duration: 0.8,
+            ease: 'power2.out',
+            onComplete: () => {
+              nextTick(() => {
+                animateNewsIn()
+              })
+            }
+          })
+        }
+      }
+    })
+  }
+  
+  await nextTick()
+  setTimeout(() => {
+    if (sectionRef.value && !hasAnimated.value) {
+      const rect = sectionRef.value.getBoundingClientRect()
+      const isVisible = rect.top < window.innerHeight * 0.8
+      if (isVisible) {
+        const gsap = window.gsap
+        if (gsap) {
+          gsap.to(sectionRef.value, {
+            opacity: 1,
+            duration: 0.8,
+            ease: 'power2.out',
+            onComplete: () => {
+              nextTick(() => {
+                animateNewsIn()
+              })
+            }
+          })
+        }
+      }
+    }
+  }, 200)
 })
 
-isDark.value = false
-useRemoveTopPadding.value = false
+watch(newsItems, (newItems, oldItems) => {
+  if (oldItems && newItems.length !== oldItems.length) {
+    hasAnimated.value = false
+    newsCardRefs.value = []
+  }
+}, { immediate: false })
 
-function formatDate(dateStr) {
-  if (!dateStr) return ''
-  const date = new Date(dateStr)
-  // Get month name in uppercase
-  const month = date.toLocaleString('en-US', { month: 'long' }).toUpperCase()
-  const year = date.getFullYear()
-  return `${month} ${year}`
-}
+onUnmounted(() => {
+  unregisterSection(`news-${props.section._id}`)
+})
 </script>
 
 <style scoped>
-.news-section {
-  background-color: var(--light-grey);
-}
-
-.news-item {
+section {
   opacity: 0;
-  animation: fadeInNews 1.5s ease-in-out forwards;
 }
 
-.news-item:nth-child(1) { animation-delay: 0.2s; }
-.news-item:nth-child(2) { animation-delay: 0.4s; }
-.news-item:nth-child(3) { animation-delay: 0.6s; }
-.news-item:nth-child(4) { animation-delay: 0.8s; }
-.news-item:nth-child(5) { animation-delay: 1.0s; }
-.news-item:nth-child(6) { animation-delay: 1.2s; }
-
-@keyframes fadeInNews {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.news-link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
 }
 
-.news-thumbnail {
-  aspect-ratio: 1/1.2;
+.image-wrapper {
+  aspect-ratio: 3/2;
+}
+
+.news-date {
+  font-style: italic;
+}
+
+.news-image {
   width: 100%;
+  height: 100%;
   object-fit: cover;
 }
-</style> 
+
+.news-image-fallback {
+  width: 100%;
+  height: 100%;
+}
+
+.news-card {
+  will-change: opacity, transform;
+}
+</style>
