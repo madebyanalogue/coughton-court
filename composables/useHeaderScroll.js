@@ -1,9 +1,17 @@
 import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { useRoute } from '#app'
 
 export function useHeaderScroll() {
+  const route = useRoute()
   const isHeaderVisible = ref(true)
   const lastScrollY = ref(0)
   const scrollThreshold = 50 // minimum scroll amount before hiding header
+
+  // A scrolled events listing can leave the header hidden. Start each page visible.
+  watch(() => route.fullPath, () => {
+    isHeaderVisible.value = true
+    lastScrollY.value = 0
+  })
 
   const handleScroll = () => {
     const currentScrollY = window.scrollY

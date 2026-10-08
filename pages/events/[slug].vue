@@ -222,11 +222,13 @@ import { useSanityImage } from '~/composables/useSanityImage.js'
 import { useSiteSettings } from '~/composables/useSiteSettings'
 import { useUrlProcessing } from '~/composables/useUrlProcessing'
 import { useHead } from '#app'
+import { useEventHeroHeader } from '~/composables/useEventHeroHeader.js'
 
 const route = useRoute()
 const { getImageUrl } = useSanityImage()
 const { title: websiteTitle, defaultMetaDescription, defaultOgImage } = useSiteSettings()
 const { getProcessedUrl, shouldOpenInNewTab } = useUrlProcessing()
+const { setEventHeroHasBackground } = useEventHeroHeader()
 
 const slug = computed(() => route.params.slug)
 
@@ -245,6 +247,16 @@ const heroBackgroundUrl = computed(() => {
   const image = event.value?.heroBackground
   if (!image?.asset) return null
   return getImageUrl(image, { width: 1920, quality: 80 })
+})
+
+watch(heroBackgroundUrl, (url) => {
+  setEventHeroHasBackground(!!url)
+}, { immediate: true })
+
+onUnmounted(() => {
+  if (!route.path.startsWith('/events/')) {
+    setEventHeroHasBackground(false)
+  }
 })
 
 // Page meta - use page-specific SEO data if available, otherwise use defaults

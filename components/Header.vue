@@ -100,6 +100,7 @@ import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue';
 import { gsap } from 'gsap';
 import { useRoute, useRouter } from '#app';
 import { useHeaderScroll } from '~/composables/useHeaderScroll';
+import { useEventHeroHeader } from '~/composables/useEventHeroHeader.js';
 import { useSiteSettings } from '~/composables/useSiteSettings';
 import { useMenu } from '~/composables/useMenu';
 import Logo from '~/components/Logo.vue';
@@ -121,6 +122,7 @@ const route = useRoute();
 const router = useRouter();
 const headerRef = ref(null);
 const { isHeaderVisible } = useHeaderScroll()
+const { eventHeroHasBackground } = useEventHeroHeader()
 const { settings: siteSettings, bookingLink, bookingTitle } = useSiteSettings()
 const { mainMenu } = useMenu()
 
@@ -142,8 +144,8 @@ const hasPageHero = computed(() => {
   if (isGardenPage.value) {
     return true
   }
-  if (isEventPage.value) {
-    return true
+  if (isEventDetail.value) {
+    return eventHeroHasBackground.value
   }
   return !!props.pageData?.enableHeroImage
 })
@@ -152,27 +154,33 @@ const hasPageHero = computed(() => {
 const previousOverlayState = ref(true)
 const previousRoutePath = ref('')
 
+const isEventDetail = computed(() => /^\/events\/[^/]+/.test(route.path))
+
+const usesOverlayHero = computed(() => {
+  return isGardenPage.value || (isEventDetail.value && eventHeroHasBackground.value)
+})
+
 // Determine if we should use overlay scheme
 const shouldUseOverlay = computed(() => {
-  // Garden pages use an overlay header over a full-bleed hero.
-  const isGardenOrEvent = isGardenPage.value
-  
-  // During page transitions, keep previous state to prevent flashing
+  const heroRoute = usesOverlayHero.value
+
+  // During page transitions, keep the previous header unless this event
+  // has a photo that should show through the bar.
   if (typeof document !== 'undefined' && document.body.classList.contains('page-transitioning')) {
-    const wasGardenOrEvent = previousRoutePath.value.startsWith('/gardens/')
-    const isGardenOrEventNow = isGardenOrEvent
-    
-    if (wasGardenOrEvent && isGardenOrEventNow) {
+    if (isEventDetail.value && eventHeroHasBackground.value && !hasScrolledPastHero.value) {
       return true
     }
-    
-    // Otherwise keep previous state
+
+    const wasGarden = previousRoutePath.value.startsWith('/gardens/')
+    if (wasGarden && isGardenPage.value) {
+      return true
+    }
+
     return previousOverlayState.value
   }
-  
-  // Garden pages use an overlay header unless scrolled past the hero
-  if (isGardenOrEvent) {
-    // Only switch to light scheme if explicitly scrolled past hero
+
+  // Hero pages use an overlay header unless scrolled past the hero
+  if (heroRoute) {
     if (hasScrolledPastHero.value) {
       previousOverlayState.value = false
       return false
@@ -244,62 +252,76 @@ const checkHeroScroll = () => {
 
 // Watch for route changes to capture previous route before transition
 router.beforeEach((to, from) => {
-  // Capture the "from" route path before navigation
   previousRoutePath.value = from.path
-  // Capture current overlay state before it changes
-  if (from.path.startsWith('/gardens/')) {
-    previousOverlayState.value = true
-  } else {
-    // Try to determine from current computed value
-    const currentOverlay = shouldUseOverlay.value
-    previousOverlayState.value = currentOverlay
-  }
+  previousOverlayState.value = shouldUseOverlay.value
 })
 
 // Initialize previous overlay state based on current route
 onMounted(() => {
   previousRoutePath.value = route.path
-  if (isGardenPage.value || isEventPage.value) {
-    previousOverlayState.value = true
-  } else if (props.pageData?.enableHeroImage) {
+  if (usesOverlayHero.value || props.pageData?.enableHeroImage) {
     previousOverlayState.value = true
   } else {
     previousOverlayState.value = false
   }
 })
 
-// Watch for route changes and pageData to detect hero
-watch([() => route.path, () => props.pageData?.enableHeroImage], () => {
-  // Update previous state when route/pageData changes (but not during transition)
-  if (!document.body.classList.contains('page-transitioning')) {
-    // Update previous route path after transition completes
-    previousRoutePath.value = route.path
-    
-    if (isGardenPage.value || isEventPage.value) {
-      previousOverlayState.value = true
-    } else if (props.pageData?.enableHeroImage) {
-      previousOverlayState.value = true
-    } else {
-      previousOverlayState.value = false
-    }
+let headerStateTimer = null
+
+// Page transitions freeze the header scheme. Apply the destination page once that ends,
+// so a hard load and an in-site visit land on the same header.
+const syncHeaderForRoute = () => {
+  if (headerStateTimer) {
+    clearTimeout(headerStateTimer)
+    headerStateTimer = null
   }
-  
-  if (isEventPage.value || isGardenPage.value || props.pageData?.enableHeroImage) {
-    nextTick(() => {
-      checkHeroScroll()
-      if (typeof window !== 'undefined') {
-        window.addEventListener('scroll', checkHeroScroll, { passive: true })
-      }
-    })
-  } else {
+
+  if (typeof document !== 'undefined' && document.body.classList.contains('page-transitioning')) {
+    headerStateTimer = setTimeout(syncHeaderForRoute, 50)
+    return
+  }
+
+  previousRoutePath.value = route.path
+
+  const heroPage = usesOverlayHero.value || !!props.pageData?.enableHeroImage
+
+  if (typeof window !== 'undefined') {
+    window.removeEventListener('scroll', checkHeroScroll)
+  }
+
+  if (!heroPage) {
     hasScrolledPastHero.value = false
-    if (typeof window !== 'undefined') {
-      window.removeEventListener('scroll', checkHeroScroll)
-    }
+    previousOverlayState.value = false
+    return
   }
+
+  nextTick(() => {
+    checkHeroScroll()
+    if (!hasScrolledPastHero.value) {
+      previousOverlayState.value = true
+    }
+    if (headerRef.value && typeof window !== 'undefined' && window.gsap) {
+      window.gsap.set(headerRef.value, { y: '0%' })
+    }
+    if (typeof window !== 'undefined') {
+      window.addEventListener('scroll', checkHeroScroll, { passive: true })
+    }
+  })
+}
+
+// Watch for route changes and pageData to detect hero
+watch([() => route.path, () => props.pageData?.enableHeroImage, eventHeroHasBackground], () => {
+  syncHeaderForRoute()
 }, { immediate: true })
 
-// Get menu items from the menu
+onUnmounted(() => {
+  if (headerStateTimer) {
+    clearTimeout(headerStateTimer)
+  }
+  if (typeof window !== 'undefined') {
+    window.removeEventListener('scroll', checkHeroScroll)
+  }
+})
 const mainMenuItems = computed(() => {
   if (!mainMenu.value) return []
   const items = mainMenu.value.items

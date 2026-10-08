@@ -11,38 +11,36 @@
           <h1 class="events-toolbar__title">What's On</h1>
 
           <div class="events-filters-stack">
-          <div class="events-filters" role="tablist" aria-label="Filter by Events or Workshops">
-            <button
-              v-for="filter in kindFilters"
-              :key="`kind-${filter.value}`"
-              type="button"
-              class="events-filters__btn h7"
-              :class="{ 'events-filters__btn--active': activeKind === filter.value }"
-              role="tab"
-              :aria-selected="activeKind === filter.value"
-              :disabled="countForKind(filter.value) === 0"
-              @click="setKind(filter.value)"
+            <select
+              v-model="activeKind"
+              class="events-filters__select h7"
+              aria-label="Filter by Events or Workshops"
             >
-              {{ filter.label }} ({{ countForKind(filter.value) }})
-            </button>
-          </div>
+              <option
+                v-for="filter in kindFilters"
+                :key="`kind-${filter.value}`"
+                :value="filter.value"
+                :disabled="filter.value !== 'all' && countForKind(filter.value) === 0"
+              >
+                {{ filter.label }} ({{ countForKind(filter.value) }})
+              </option>
+            </select>
 
-          <div class="events-filters" role="tablist" aria-label="Filter events by venue">
-            <button
-              v-for="filter in venueFilters"
-              :key="`venue-${filter.value}`"
-              type="button"
-              class="events-filters__btn h7"
-              :class="{ 'events-filters__btn--active': activeVenue === filter.value }"
-              role="tab"
-              :aria-selected="activeVenue === filter.value"
-              :disabled="countForVenue(filter.value) === 0"
-              @click="setVenue(filter.value)"
+            <select
+              v-model="activeVenue"
+              class="events-filters__select h7"
+              aria-label="Filter events by venue"
             >
-              {{ filter.label }} ({{ countForVenue(filter.value) }})
-            </button>
+              <option
+                v-for="filter in venueFilters"
+                :key="`venue-${filter.value}`"
+                :value="filter.value"
+                :disabled="filter.value !== 'all' && countForVenue(filter.value) === 0"
+              >
+                {{ filter.label }} ({{ countForVenue(filter.value) }})
+              </option>
+            </select>
           </div>
-        </div>
         </div>
 
         <div v-if="monthGroups.length === 0" class="text-center py4">
@@ -289,14 +287,6 @@ const formatDateRange = (startDate, endDate) => {
   return `${startFormatted} - ${endFormatted}`
 }
 
-const setVenue = (value) => {
-  activeVenue.value = value
-}
-
-const setKind = (value) => {
-  activeKind.value = value
-}
-
 const setEventCardRef = (el, key) => {
   if (el) {
     eventCardRefs.value[key] = el
@@ -452,36 +442,27 @@ section {
 }
 
 .events-filters-stack {
-  display: grid;
-  gap: 0.75rem;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 15px;
   margin-left: auto;
 }
 
-.events-filters {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: end;
-  gap: 15px;
-}
-
-.events-filters__btn {
-  background: transparent;
+.events-filters__select {
+  appearance: none;
+  background-color: transparent;
+  background-image: linear-gradient(45deg, transparent 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position: calc(100% - 18px) calc(50% - 2px), calc(100% - 13px) calc(50% - 2px);
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
   border: 1px solid;
   color: inherit;
   cursor: pointer;
-  padding: 10px 20px;
-  opacity: 1;
-  transition: opacity 0.2s ease, background-color 0.2s ease, color 0.2s ease;
-}
-
-.events-filters__btn--active {
-  background: currentColor;
-  color: var(--background-color);
-}
-
-.events-filters__btn:disabled {
-  opacity: 0.35;
-  cursor: not-allowed;
+  font-family: var(--heading);
+  padding: 13px 36px 11px 20px;
+  border-radius: 0;
 }
 
 .events-month__title {
