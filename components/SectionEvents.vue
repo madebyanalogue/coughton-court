@@ -514,7 +514,8 @@ section {
 }
 
 .image-wrapper {
-  aspect-ratio: 1;
+  aspect-ratio: 1.5;
+  border-radius: 10px;
 }
 
 .event-date {

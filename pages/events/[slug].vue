@@ -929,7 +929,8 @@ const endDrag = () => {
 
 .more-events__image,
 .more-events__fallback {
-  aspect-ratio: 1;
+  aspect-ratio: 1.5;
+  border-radius: 10px;
   overflow: hidden;
   display: block;
 }
