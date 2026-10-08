@@ -111,6 +111,12 @@
         :section="section"
       />
 
+      <!-- Featured Carousel Section -->
+      <SectionFeaturedCarousel
+        v-else-if="section._type === 'section' && section.sectionType === 'featuredCarousel'"
+        :section="section"
+      />
+
       <!-- FAQs Section -->
       <SectionFAQs
         v-else-if="section._type === 'section' && section.sectionType === 'faqs'"
@@ -305,6 +311,7 @@ import SectionDirections from '~/components/SectionDirections.vue'
 import SectionOpeningTimesAndPrices from '~/components/SectionOpeningTimesAndPrices.vue'
 import SectionTextAndImages from '~/components/SectionTextAndImages.vue'
 import SectionMemberships from '~/components/SectionMemberships.vue'
+import SectionFeaturedCarousel from '~/components/SectionFeaturedCarousel.vue'
 
 const props = defineProps({
   sections: {

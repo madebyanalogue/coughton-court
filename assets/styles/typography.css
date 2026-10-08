@@ -129,7 +129,13 @@ LARGE TITLES
 .h6     { line-height: 1.2; }
 .h7     { line-height: 1.2; }
 body    { line-height: 1.2; }
-.rte    { line-height: 1.2; }
+.rte    { line-height: 1.4; }
+
+@media (min-width: 1024px) {
+  .rte {
+    font-size: 22px;
+  }
+}
 
 .h0, .rte .h0 { font-size: var(--h0); }
 .h1, .rte h1 { font-size: var(--h1); font-family: var(--body); }

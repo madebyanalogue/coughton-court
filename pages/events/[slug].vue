@@ -14,109 +14,96 @@
       </div>
     </template>
     <template v-else-if="event">
-      <!-- Hero with featured image and title (with parallax similar to PageHero) -->
-      <section class="event-hero scheme overlay" ref="eventHeroRef">
-        <div class="event-hero__image-wrapper">
-          <div class="event-hero__image" :class="{ 'event-hero__image--no-image': !event.featuredImage }">
-            <NuxtImg 
-              v-if="event.featuredImage"
-              :src="getImageUrl(event.featuredImage, { width: 1920, quality: 85 })" 
-              :alt="event.title"
-              class="event-hero__img"
-              width="1920"
-              height="1080"
-              quality="85"
-              format="webp"
-              loading="eager"
-              preload
-            />
-          </div>
+      <section
+        class="event-hero"
+        :class="{ 'event-hero--has-background': heroBackgroundUrl }"
+      >
+        <div v-if="heroBackgroundUrl" class="event-hero__background" aria-hidden="true">
+          <NuxtImg
+            :src="heroBackgroundUrl"
+            alt=""
+            class="event-hero__background-img"
+            width="1920"
+            quality="80"
+            format="webp"
+            loading="eager"
+            preload
+          />
         </div>
-        <div class="event-hero__overlay">
-          <h1 class="event-hero__title h1 px4">{{ event.title }}</h1>
+        <div v-if="heroBackgroundUrl" class="event-hero__overlay" aria-hidden="true"></div>
+        <div class="wrapper event-hero__inner">
+          <div class="event-hero__content">
+            <div class="event-hero__heading">
+              <h1 class="event-hero__title h1">{{ event.title }}</h1>
+              <p v-if="heroDate" class="event-hero__date">{{ heroDate }}</p>
+            </div>
+            <a
+              v-if="event.bookingUrl"
+              :href="getProcessedUrl(event.bookingUrl)"
+              :target="shouldOpenInNewTab(event.bookingUrl) ? '_blank' : undefined"
+              :rel="shouldOpenInNewTab(event.bookingUrl) ? 'noopener' : undefined"
+              class="button event-hero__button"
+            >
+              Buy tickets
+            </a>
+          </div>
+          <div v-if="event.featuredImage" class="event-hero__media">
+            <div class="event-hero__image-inset">
+              <NuxtImg 
+                :src="getImageUrl(event.featuredImage, { width: 1600, quality: 85 })" 
+                :alt="event.title"
+                class="event-hero__img"
+                width="1600"
+                quality="85"
+                format="webp"
+                loading="eager"
+                preload
+              />
+            </div>
+          </div>
         </div>
       </section>
       
-      <!-- Introduction -->
-      <PageIntroduction 
-        v-if="event.introduction"
-        :enabled="true"
-        :title="event.introductionTitle || 'Introduction'"
-        :content="event.introduction"
-      />
-
-      <!-- Two Column Layout: Event Details + Gallery Carousel -->
-      <section class="event-details-section section-border-top section-padding">
+      <section class="event-details-section section-padding">
         <div class="wrapper">
-          <div class="grid grid-1 grid-md-2 gap-3">
-            <!-- Left: Event Details -->
-            <div class="event-details flex column gap-3 px-md-3">
-              
-              <dl class="event-meta grid grid-2">
-                <div v-if="event.startDate" class="event-meta-item">
-                  <dt class="h5">{{ isSameDate ? 'Date' : 'Start Date' }}</dt>
-                  <dd>{{ formatDate(event.startDate) }}</dd>
-                </div>
-                <div v-if="event.startDate && !isSameDate" class="event-meta-item">
-                  <dt class="h5">End Date</dt>
-                  <dd>{{ formatDate(event.endDate) }}</dd>
-                </div>
-                <div v-if="event.cost" class="event-meta-item">
-                  <dt class="h5">Cost</dt>
-                  <dd>{{ event.cost }}</dd>
-                </div>
-                <div v-if="event.category" class="event-meta-item">
-                  <dt class="h5">Category</dt>
-                  <dd>{{ event.category }}</dd>
-                </div>
-              </dl>
-
-              <!-- Tabs Section -->
-              <div v-if="hasTabContent" class="event-tabs-section">
-                <div class="event-tabs grid grid-1 gap-2">
-                  <!-- Tab Headers (only show if both tabs have content) -->
-                  <div v-if="showTabHeaders" class="event-tabs__headers">
-                    <button 
-                      v-for="tab in tabs" 
-                      :key="tab.id"
-                      @click="activeTab = tab.id"
-                      class="event-tabs__header h5 "
-                      :class="{ 'event-tabs__header--active': activeTab === tab.id }"
-                    >
-                      {{ tab.title }}
-                    </button>
-                  </div>
-
-                  <!-- Tab Content -->
-                  <div class="event-tabs__content">
-                    <div v-if="activeTab === 'tab1' && event.tab1Content" class="event-tab-panel">
-                      <SanityBlocks :blocks="event.tab1Content" />
-                    </div>
-                    <div v-if="activeTab === 'tab2' && event.tab2Content" class="event-tab-panel">
-                      <SanityBlocks :blocks="event.tab2Content" />
-                    </div>
-                  </div>
-
-                  <!-- Booking Button -->
-                  <div v-if="event.bookingUrl" class="event-booking">
-                    <a 
-                      :href="getProcessedUrl(event.bookingUrl)" 
-                      :target="shouldOpenInNewTab(event.bookingUrl) ? '_blank' : undefined"
-                      :rel="shouldOpenInNewTab(event.bookingUrl) ? 'noopener' : undefined"
-                      class="button min-180"
-                    >
-                      <span class="btn__text">{{ bookingTitle || 'Book Now' }}</span>
-                      <div class="btn__circle"></div>
-                    </a>
-                  </div>
-                  
-                </div>
+          <div class="event-details">
+            <aside class="event-info">
+              <div v-if="whenText" class="event-info__item">
+                <h2 class="event-info__label">When</h2>
+                <p class="event-info__value">{{ whenText }}</p>
               </div>
+              <div v-if="whereText" class="event-info__item">
+                <h2 class="event-info__label">Where</h2>
+                <p class="event-info__value">{{ whereText }}</p>
+              </div>
+              <div v-if="pricingText" class="event-info__item">
+                <h2 class="event-info__label">Pricing</h2>
+                <p class="event-info__value">{{ pricingText }}</p>
+              </div>
+              <a
+                v-if="event.bookingUrl"
+                :href="getProcessedUrl(event.bookingUrl)"
+                :target="shouldOpenInNewTab(event.bookingUrl) ? '_blank' : undefined"
+                :rel="shouldOpenInNewTab(event.bookingUrl) ? 'noopener' : undefined"
+                class="button event-info__button"
+              >
+                Buy tickets
+              </a>
+            </aside>
 
+            <div class="event-copy">
+              <div
+                v-for="(section, index) in copySections"
+                :key="index"
+                class="event-copy__section rte"
+              >
+                <h2 v-if="section.title" class="event-copy__title">{{ section.title }}</h2>
+                <SanityBlocks :blocks="section.blocks" />
+              </div>
             </div>
+          </div>
 
-            <!-- Right: Gallery Carousel -->
-            <div v-if="event.gallery?.length" class="event-gallery">
+          <div v-if="event.gallery?.length" class="event-gallery">
               <div class="event-carousel" ref="carouselRef">
                 <div 
                   class="event-carousel__track"
@@ -169,6 +156,56 @@
                 </div>
               </div>
             </div>
+        </div>
+      </section>
+
+      <section v-if="moreEvents.length" class="more-events section-padding">
+        <div class="wrapper">
+          <div class="more-events__header">
+            <h2 class="more-events__title">More events</h2>
+            <div v-if="moreEvents.length > perView" class="more-events__nav">
+              <button type="button" class="more-events__arrow" aria-label="Previous events" @click="prevMore">
+                ←
+              </button>
+              <button type="button" class="more-events__arrow" aria-label="Next events" @click="nextMore">
+                →
+              </button>
+            </div>
+          </div>
+          <div class="more-events__viewport">
+            <div
+              class="more-events__track"
+              :style="{ transform: `translateX(-${moreIndex * (100 / perView)}%)` }"
+            >
+              <article
+                v-for="item in moreEvents"
+                :key="item._id"
+                class="more-events__card"
+              >
+                <NuxtLink
+                  v-if="item.slug?.current"
+                  :to="`/events/${item.slug.current}`"
+                  class="more-events__link"
+                  :aria-label="item.title"
+                >
+                  <div class="more-events__image">
+                    <NuxtImg
+                      v-if="item.featuredImage"
+                      :src="getImageUrl(item.featuredImage, { width: 1056, quality: 80, fit: 'crop', crop: 'focalpoint' })"
+                      :alt="item.title"
+                      width="1056"
+                      quality="80"
+                      format="webp"
+                      loading="lazy"
+                    />
+                    <div v-else class="more-events__fallback secondary"></div>
+                  </div>
+                </NuxtLink>
+                <p class="more-events__date">{{ formatDateRange(item.startDate, item.endDate) }}</p>
+                <h3 class="more-events__name">{{ item.title }}</h3>
+                <p v-if="item.shortDescription" class="more-events__description">{{ limitDescription(item.shortDescription) }}</p>
+              </article>
+            </div>
           </div>
         </div>
       </section>
@@ -179,17 +216,16 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useSanityImage } from '~/composables/useSanityImage.js'
 import { useSiteSettings } from '~/composables/useSiteSettings'
 import { useUrlProcessing } from '~/composables/useUrlProcessing'
 import { useHead } from '#app'
-import PageIntroduction from '~/components/PageIntroduction.vue'
 
 const route = useRoute()
 const { getImageUrl } = useSanityImage()
-const { title: websiteTitle, bookingTitle, defaultMetaDescription, defaultOgImage } = useSiteSettings()
+const { title: websiteTitle, defaultMetaDescription, defaultOgImage } = useSiteSettings()
 const { getProcessedUrl, shouldOpenInNewTab } = useUrlProcessing()
 
 const slug = computed(() => route.params.slug)
@@ -204,6 +240,12 @@ const { data: event, error, pending } = await useAsyncData(
     } 
   })
 )
+
+const heroBackgroundUrl = computed(() => {
+  const image = event.value?.heroBackground
+  if (!image?.asset) return null
+  return getImageUrl(image, { width: 1920, quality: 80 })
+})
 
 // Page meta - use page-specific SEO data if available, otherwise use defaults
 useHead(() => {
@@ -274,40 +316,131 @@ const formatDate = (dateString) => {
   return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
 }
 
-// Check if start and end dates are the same
-const isSameDate = computed(() => {
-  if (!event.value?.startDate || !event.value?.endDate) return false
-  const start = new Date(event.value.startDate)
-  const end = new Date(event.value.endDate)
-  return start.toDateString() === end.toDateString()
+const whenText = computed(() => {
+  if (event.value?.when?.trim()) return event.value.when.trim()
+  if (!event.value?.startDate) return ''
+  const start = formatDate(event.value.startDate)
+  if (!event.value.endDate) return start
+  const end = formatDate(event.value.endDate)
+  return start === end ? start : `${start} – ${end}`
 })
 
-// Event hero parallax (match PageHero behavior)
-const eventHeroRef = ref(null)
-let eventHeroScrollHandler = null
+const pricingText = computed(() => {
+  return event.value?.pricing?.trim() || event.value?.cost?.trim() || ''
+})
 
-const handleEventHeroScroll = () => {
-  if (!eventHeroRef.value) return
-  const wrapper = eventHeroRef.value.querySelector('.event-hero__image-wrapper')
-  if (!wrapper) return
+const { data: allEvents } = await useAsyncData(
+  'more-events',
+  () => $fetch('/api/sanity', { params: { type: 'event', all: true } })
+)
 
-  const scrollY = window.scrollY || window.pageYOffset
-  const parallaxOffset = scrollY * 0.3
-  wrapper.style.transform = `translateY(${parallaxOffset}px)`
+const moreEvents = computed(() => {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+
+  return (allEvents.value || []).filter((item) => {
+    if (!item?.startDate) return false
+    if (item._id && item._id === event.value?._id) return false
+    if (item.slug?.current && item.slug.current === slug.value) return false
+
+    const endDate = item.endDate ? new Date(item.endDate) : new Date(item.startDate)
+    endDate.setHours(23, 59, 59, 999)
+    return endDate >= today
+  })
+})
+
+const perView = ref(1)
+const moreIndex = ref(0)
+
+const updatePerView = () => {
+  perView.value = window.innerWidth >= 800 ? 3 : 1
+  const maxIndex = Math.max(moreEvents.value.length - perView.value, 0)
+  if (moreIndex.value > maxIndex) moreIndex.value = maxIndex
 }
 
+const prevMore = () => {
+  moreIndex.value = Math.max(moreIndex.value - 1, 0)
+}
+
+const nextMore = () => {
+  const maxIndex = Math.max(moreEvents.value.length - perView.value, 0)
+  moreIndex.value = Math.min(moreIndex.value + 1, maxIndex)
+}
+
+const DESCRIPTION_LIMIT = 160
+
+const limitDescription = (text) => {
+  const value = (text || '').replace(/\s+/g, ' ').trim()
+  if (value.length <= DESCRIPTION_LIMIT) return value
+  const sliced = value.slice(0, DESCRIPTION_LIMIT)
+  const breakpoint = sliced.lastIndexOf(' ')
+  const trimmed = (breakpoint > 0 ? sliced.slice(0, breakpoint) : sliced).trim()
+  return `${trimmed}…`
+}
+
+const formatDateRange = (startDate, endDate) => {
+  if (!startDate) return ''
+  const start = formatDate(startDate)
+  if (!endDate) return start
+  const end = formatDate(endDate)
+  return start === end ? start : `${start} – ${end}`
+}
+
+const heroDate = computed(() => formatDateRange(event.value?.startDate, event.value?.endDate))
+
 onMounted(() => {
-  if (typeof window !== 'undefined' && event.value?.featuredImage) {
-    eventHeroScrollHandler = handleEventHeroScroll
-    window.addEventListener('scroll', eventHeroScrollHandler, { passive: true })
-    handleEventHeroScroll()
-  }
+  updatePerView()
+  window.addEventListener('resize', updatePerView)
 })
 
 onUnmounted(() => {
-  if (eventHeroScrollHandler && typeof window !== 'undefined') {
-    window.removeEventListener('scroll', eventHeroScrollHandler)
-  }
+  window.removeEventListener('resize', updatePerView)
+})
+
+watch(moreEvents, () => {
+  moreIndex.value = 0
+})
+
+const whereLabels = {
+  house: 'House',
+  cafe: 'Cafe',
+  garden: 'Garden'
+}
+
+const whereText = computed(() => {
+  const option = event.value?.whereOption
+  if (option && whereLabels[option]) return whereLabels[option]
+  return event.value?.where?.trim() || ''
+})
+
+const portableTextParagraphs = (blocks) => {
+  if (!Array.isArray(blocks)) return []
+  return blocks
+    .map((block) => {
+      if (!Array.isArray(block?.children)) return ''
+      return block.children.map((child) => child.text || '').join('')
+    })
+    .map((text) => text.replace(/\s+/g, ' ').trim().toLowerCase())
+    .filter(Boolean)
+}
+
+const copySections = computed(() => {
+  const candidates = [
+    { title: event.value?.tab1Title, blocks: event.value?.tab1Content },
+    { title: event.value?.tab2Title, blocks: event.value?.tab2Content }
+  ]
+  const shown = []
+
+  return candidates.filter((section) => {
+    if (!section.blocks?.length) return false
+    const paragraphs = portableTextParagraphs(section.blocks)
+    const repeated = paragraphs.length > 0 && paragraphs.every((paragraph) =>
+      shown.some((previous) => previous.includes(paragraph))
+    )
+    if (repeated) return false
+    shown.push(paragraphs.join('\n'))
+    return true
+  })
 })
 
 // Gallery carousel
@@ -376,107 +509,255 @@ const endDrag = () => {
   dragOffset.value = 0
 }
 
-// Tabs
-const activeTab = ref('tab1')
-
-const tabs = computed(() => [
-  { id: 'tab1', title: event.value?.tab1Title || 'What to Expect' },
-  { id: 'tab2', title: event.value?.tab2Title || 'What\'s Included' }
-])
-
-const hasTabContent = computed(() => {
-  return !!(event.value?.tab1Content || event.value?.tab2Content)
-})
-
-const showTabHeaders = computed(() => {
-  return !!(event.value?.tab1Content && event.value?.tab2Content)
-})
-
-// Set initial active tab based on available content
-onMounted(() => {
-  if (!event.value?.tab1Content && event.value?.tab2Content) {
-    activeTab.value = 'tab2'
-  }
-})
 </script>
 
 <style scoped>
-.event-page {
-  margin-top: calc(var(--header-height, 80px) * -1);
-}
-
 .event-hero {
   position: relative;
-  height: calc(50vw + var(--header-height, 80px));
-  min-height: 600px;
   overflow: hidden;
   padding-top: var(--header-height, 80px);
+  background: #617954;
+  color: rgba(var(--light-green), 1);
 }
 
-.event-hero__image-wrapper {
-  position: absolute;
-  top: -20%;
-  left: 0;
-  width: 100%;
-  height: 140%;
-  will-change: transform;
-  /* Safari fix: ensure container has explicit dimensions */
-  min-height: 100vh;
-}
-
-.event-hero__image {
+.event-hero__background,
+.event-hero__overlay {
   position: absolute;
   inset: 0;
+  pointer-events: none;
 }
 
-.event-hero__image--no-image {
-  background-color: var(--dark-green);
+.event-hero__background {
+  z-index: 0;
+}
+
+.event-hero__background-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.event-hero__overlay {
+  z-index: 1;
+  background: rgba(43, 46, 41, 0.45);
+}
+
+.event-hero__inner {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: 1fr;
+  max-height: 800px;
+}
+
+.event-hero__content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: start;
+  gap: var(--pad-2, 1.5rem);
+  padding: var(--section-padding, 3rem) 0;
+}
+
+.h1 {
+  line-height: 1.2;
+}
+
+.event-hero__heading {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 45px;
+}
+
+.event-hero__date {
+  margin: 0;
+  font-family: var(--heading);
+  font-weight: 400;
+  font-size: 18px;
+  line-height: 1.35;
+  color: white;
+}
+
+.event-hero__title {
+  margin: 0;
+  text-align: left;
+  color: white;
+}
+
+.event-hero__button {
+  align-self: flex-start;
+  width: auto;
+  border-radius: 100px;
+  color: white;
+  background: rgb(var(--dark-green));
+  border-color: rgb(var(--dark-green));
+}
+
+.event-hero__button:hover {
+  background: transparent;
+  color: white;
+  border-color: rgb(var(--dark-green));
+}
+
+.event-hero--has-background .event-hero__button {
+  background: white;
+  color: rgb(var(--dark-green));
+  border-color: white;
+}
+
+.event-hero--has-background .event-hero__button:hover {
+  background: transparent;
+  color: white;
+  border-color: white;
+}
+
+.event-hero__media {
+  display: flex;
+  min-height: 60vw;
+  padding: var(--wrapper-padding, 1.5rem);
+  border-left: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+.event-hero__image-inset {
+  width: 100%;
+  overflow: hidden;
+  flex: 1;
 }
 
 .event-hero__img {
   width: 100%;
   height: 100%;
-  /* Safari fix: use -webkit prefix and ensure dimensions */
-  -webkit-object-fit: cover;
-  object-fit: cover;
-  /* Force Safari to respect dimensions */
-  min-width: 100%;
-  min-height: 100%;
+  object-fit: contain;
+  object-position: center;
 }
 
-.event-hero__overlay {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding-top: var(--header-height, 80px);
-  background: rgba(0, 0, 0, 0.4);
+@media (min-width: 800px) {
+  .event-hero__inner {
+    grid-template-columns: 1fr 1fr;
+    align-items: stretch;
+    height: 800px;
+  }
+
+  .event-hero__content {
+    padding: 120px;
+    gap: 60px;
+  }
+
+  .event-hero__media {
+    min-height: 0;
+  }
 }
 
-.event-hero__title {
-  text-align: center;
-  padding-top: var(--header-height, 80px);
+
+.event-details-section {
+  background: #f7f7f7;
+  padding: calc(var(--section-padding) * 2) 0;
 }
 
-
-.event-meta {
-  gap: calc(var(--pad-1) * 1.5);
-}
-
-.event-meta-item {
+.event-details {
   display: flex;
   flex-direction: column;
-  gap: 0.1rem;
+  gap: 90px;
+  align-items: flex-start;
 }
 
+.event-info {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  width: 100%;
+  max-width: 680px;
+  padding: 1.75rem 1.5rem;
+  background: rgba(var(--dark-green), 0.08);
+  box-sizing: border-box;
+}
 
-.event-meta-item dd {
+.event-info,
+.event-copy {
+  font-family: var(--heading);
+}
+
+.event-info__item {
+  border-bottom: 1px solid;
+  padding-bottom: 35px;
+}
+
+.event-info__label {
+  margin: 0 0 12px;
+  font-family: var(--heading);
+  font-style: normal;
+  font-weight: 400;
+  font-size: 28px;
+  letter-spacing: 0;
+  text-transform: none;
+  line-height: 1.2;
+}
+
+.event-info__value {
   margin: 0;
+  white-space: pre-line;
+  line-height: 1.45;
+  font-size: 20px;
+}
+
+.event-info__button {
+  display: block;
+  width: 100%;
+  text-align: center;
+  box-sizing: border-box;
+  border-radius: 100px;
+  color: white;
+  background: rgb(var(--dark-green));
+  border-color: rgb(var(--dark-green));
+}
+
+.event-info__button:hover {
+  background: transparent;
+  color: rgb(var(--dark-green));
+  border-color: rgb(var(--dark-green));
+}
+
+.event-copy {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pad-2, 1.5rem);
+  max-width: 980px;
+}
+
+.event-copy__title {
+  margin: 0 0 22px;
+  font-family: var(--heading);
+  font-weight: 400;
+  font-size: 32px;
+  letter-spacing: -0.01em;
+  text-transform: none;
 }
 
 .event-gallery {
   position: relative;
+  margin-top: var(--pad-3, 2rem);
+}
+
+@media (min-width: 1200px) {
+  .event-details {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .event-info {
+    width: 680px;
+    max-width: 680px;
+    flex: 0 0 680px;
+    padding: 50px;
+    margin: 0 auto;
+  }
+
+  .event-copy {
+    flex: 1;
+    min-width: 0;
+  }
 }
 
 .event-carousel {
@@ -585,6 +866,114 @@ onMounted(() => {
 
 @keyframes spin {
   to { transform: rotate(360deg); }
+}
+
+.more-events__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: var(--pad-2);
+}
+
+.more-events__title {
+  margin: 0;
+  font-family: var(--heading);
+  font-size: 40px;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.more-events__nav {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.more-events__arrow {
+  background: transparent;
+  border: 1px solid currentColor;
+  color: inherit;
+  cursor: pointer;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+}
+
+.more-events__viewport {
+  overflow: hidden;
+}
+
+.more-events__track {
+  display: flex;
+  width: 100%;
+  transition: transform 0.45s ease;
+}
+
+.more-events__card {
+  flex: 0 0 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--pad-1);
+  align-content: start;
+  padding-right: var(--pad-3);
+}
+
+.more-events__link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
+.more-events__image,
+.more-events__fallback {
+  aspect-ratio: 1;
+  overflow: hidden;
+  display: block;
+}
+
+.more-events__image img,
+.more-events__image :deep(img) {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.more-events__date {
+  margin: 10px 0 0;
+  font-size: 18px;
+  font-weight: 400;
+  font-family: var(--heading);
+  line-height: 1.35;
+}
+
+.more-events__description {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 400;
+  font-family: var(--heading);
+  line-height: 1.4;
+  margin-top: 10px;
+}
+
+.more-events__name {
+  margin: 0;
+  font-family: var(--body-font);
+  font-weight: 400;
+  font-size: clamp(22px, 2vw, 28px);
+  letter-spacing: 0;
+  text-transform: none;
+  line-height: 1.2;
+}
+
+@media (min-width: 800px) {
+  .more-events__card {
+    flex: 0 0 33.333%;
+    max-width: 33.333%;
+  }
 }
 </style>
 

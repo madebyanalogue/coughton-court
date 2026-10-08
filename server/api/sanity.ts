@@ -796,6 +796,37 @@ export default defineEventHandler(async (event) => {
                 caption
               }
             },
+            featuredCarouselContent {
+              slides[] {
+                keyColour,
+                title,
+                description,
+                image {
+                  asset-> {
+                    _id,
+                    url,
+                    metadata { dimensions }
+                  },
+                  alt
+                },
+                buttonText,
+                event-> {
+                  _id,
+                  title,
+                  slug {
+                    current
+                  }
+                },
+                page-> {
+                  _id,
+                  title,
+                  slug {
+                    current
+                  }
+                },
+                url
+              }
+            },
             faqsContent {
               subtitle,
               image {
@@ -1206,6 +1237,8 @@ export default defineEventHandler(async (event) => {
             shortDescription,
             startDate,
             endDate,
+            venue,
+            eventKind,
             featuredImage {
               asset-> {
                 _id,
@@ -1230,8 +1263,24 @@ export default defineEventHandler(async (event) => {
             startDate,
             endDate,
             cost,
+            when,
+            whereOption,
+            where,
+            pricing,
             category,
+            venue,
+            eventKind,
             featuredImage {
+              asset-> {
+                _id,
+                url,
+                metadata { dimensions }
+              }
+            },
+            heroBackground {
+              alt,
+              hotspot,
+              crop,
               asset-> {
                 _id,
                 url,

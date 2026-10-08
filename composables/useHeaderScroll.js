@@ -13,9 +13,12 @@ export function useHeaderScroll() {
       return
     }
 
-    // Hide header when scrolling down (translate -100%), show when scrolling up (translate back)
-    // Always show if near top of page
-    isHeaderVisible.value = currentScrollY < lastScrollY.value || currentScrollY < 100
+    // Hide header when scrolling down. Show again on scroll up, except on the
+    // events listing, where it stays hidden until you're back near the top.
+    const eventsListing = document.body.classList.contains('events-listing')
+    isHeaderVisible.value = eventsListing
+      ? currentScrollY < 100
+      : currentScrollY < lastScrollY.value || currentScrollY < 100
     
     lastScrollY.value = currentScrollY
   }

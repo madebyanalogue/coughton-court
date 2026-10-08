@@ -139,11 +139,12 @@ const isGardenPage = computed(() => {
 
 // Check if the current page has a hero enabled
 const hasPageHero = computed(() => {
-  // Event and garden pages always have heroes
-  if (isEventPage.value || isGardenPage.value) {
+  if (isGardenPage.value) {
     return true
   }
-  // Regular pages need enableHeroImage to be true
+  if (isEventPage.value) {
+    return true
+  }
   return !!props.pageData?.enableHeroImage
 })
 
@@ -153,16 +154,14 @@ const previousRoutePath = ref('')
 
 // Determine if we should use overlay scheme
 const shouldUseOverlay = computed(() => {
-  // Check route first for gardens/events pages (they always have heroes)
-  const isGardenOrEvent = isGardenPage.value || isEventPage.value
+  // Garden pages use an overlay header over a full-bleed hero.
+  const isGardenOrEvent = isGardenPage.value
   
   // During page transitions, keep previous state to prevent flashing
   if (typeof document !== 'undefined' && document.body.classList.contains('page-transitioning')) {
-    // Check if we're transitioning between garden/event pages (both from and to)
-    const wasGardenOrEvent = previousRoutePath.value.startsWith('/gardens/') || previousRoutePath.value.startsWith('/events/')
+    const wasGardenOrEvent = previousRoutePath.value.startsWith('/gardens/')
     const isGardenOrEventNow = isGardenOrEvent
     
-    // If both old and new routes are garden/event pages, keep overlay
     if (wasGardenOrEvent && isGardenOrEventNow) {
       return true
     }
@@ -171,7 +170,7 @@ const shouldUseOverlay = computed(() => {
     return previousOverlayState.value
   }
   
-  // Gardens/events pages always use overlay unless scrolled past hero
+  // Garden pages use an overlay header unless scrolled past the hero
   if (isGardenOrEvent) {
     // Only switch to light scheme if explicitly scrolled past hero
     if (hasScrolledPastHero.value) {
@@ -248,7 +247,7 @@ router.beforeEach((to, from) => {
   // Capture the "from" route path before navigation
   previousRoutePath.value = from.path
   // Capture current overlay state before it changes
-  if (from.path.startsWith('/gardens/') || from.path.startsWith('/events/')) {
+  if (from.path.startsWith('/gardens/')) {
     previousOverlayState.value = true
   } else {
     // Try to determine from current computed value
