@@ -21,11 +21,11 @@ export function useHeaderScroll() {
       return
     }
 
-    // Hide header when scrolling down. Show again on scroll up, except on the
-    // events listing, where it stays hidden until you're back near the top.
-    const eventsListing = document.body.classList.contains('events-listing')
+    // Hide header when scrolling down. Show again on scroll up.
+    // What’s On is not sticky, so leave the bar visible and let the page scroll it away.
+    const eventsListing = route.path === '/events' || route.path === '/events/'
     isHeaderVisible.value = eventsListing
-      ? currentScrollY < 100
+      ? true
       : currentScrollY < lastScrollY.value || currentScrollY < 100
     
     lastScrollY.value = currentScrollY

@@ -242,7 +242,8 @@ main {
 /* Remove padding from main when page has a hero section (hero handles its own padding) */
 main:has(.page-hero),
 main:has(.garden-hero),
-main:has(.event-hero) {
+main:has(.event-hero),
+main:has(.events-hero) {
   padding-top: 0;
 }
 

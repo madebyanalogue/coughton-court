@@ -127,6 +127,7 @@ onUnmounted(() => {
 /* Initial state for scroll animations */
 section {
   opacity: 0;
+  background: white;
 }
 
 .page-link {

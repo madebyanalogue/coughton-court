@@ -53,11 +53,14 @@
             </NuxtLink>
           </div>
 
-          <div class="featured-carousel__media">
+          <div
+            class="featured-carousel__media"
+            :class="{ 'featured-carousel__media--cover': activeSlide.coverImage }"
+          >
             <div class="featured-carousel__image-inset">
               <NuxtImg
                 v-if="activeSlide.image"
-                :src="getSlideImageUrl(activeSlide.image)"
+                :src="getSlideImageUrl(activeSlide.image, activeSlide.coverImage)"
                 :alt="activeSlide.image.alt || activeSlide.title || 'Slide image'"
                 class="featured-carousel__image"
                 width="1400"
@@ -177,11 +180,11 @@ const slides = computed(() => {
 
 const activeSlide = computed(() => slides.value[currentSlide.value] || null)
 
-const getSlideImageUrl = (image) => {
-  return getImageUrl(image, {
-    width: 1600,
-    quality: 85
-  })
+const getSlideImageUrl = (image, cover) => {
+  return getImageUrl(image, cover
+    ? { width: 1600, quality: 85, fit: 'crop', crop: 'focalpoint' }
+    : { width: 1600, quality: 85 }
+  )
 }
 
 const showSlide = (index) => {
@@ -352,7 +355,7 @@ onUnmounted(() => {
 
 .featured-carousel__description {
   margin: 0;
-  max-width: 36ch;
+  max-width: 46ch;
   font-size: 18px;
   font-weight: 400;
   font-family: var(--heading);
@@ -393,6 +396,14 @@ onUnmounted(() => {
   pointer-events: none;
   user-select: none;
   -webkit-user-drag: none;
+}
+
+.featured-carousel__media--cover {
+  padding: 0;
+}
+
+.featured-carousel__media--cover .featured-carousel__image {
+  object-fit: cover;
 }
 
 .featured-carousel__controls {

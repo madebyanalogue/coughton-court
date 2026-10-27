@@ -781,7 +781,17 @@ export default defineEventHandler(async (event) => {
               title
             },
             eventsContent {
-              title
+              title,
+              heroImage {
+                alt,
+                hotspot,
+                crop,
+                asset-> {
+                  _id,
+                  url,
+                  metadata { dimensions }
+                }
+              }
             },
             carouselContent {
               title,
@@ -801,7 +811,10 @@ export default defineEventHandler(async (event) => {
                 keyColour,
                 title,
                 description,
+                coverImage,
                 image {
+                  hotspot,
+                  crop,
                   asset-> {
                     _id,
                     url,
@@ -1237,6 +1250,7 @@ export default defineEventHandler(async (event) => {
             shortDescription,
             startDate,
             endDate,
+            cost,
             venue,
             eventKind,
             featuredImage {

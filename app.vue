@@ -434,7 +434,8 @@ main.main-content {
 
 /* Adjust garden hero in old content to remove extra padding since main already accounts for header */
 .page-old .garden-hero,
-.page-old .event-hero {
+.page-old .event-hero,
+.page-old .events-hero {
   padding-top: 0 !important;
 }
 

@@ -103,6 +103,7 @@
       <SectionEvents
         v-else-if="section._type === 'section' && section.sectionType === 'events'"
         :section="section"
+        :page-data="pageData"
       />
 
       <!-- Carousel Section -->

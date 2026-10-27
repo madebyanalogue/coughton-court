@@ -7,7 +7,8 @@
     :class="{
       'overlay': shouldUseOverlay,
       'light': !shouldUseOverlay,
-      'over-hero': shouldUseOverlay && !hasScrolledPastHero
+      'over-hero': shouldUseOverlay && !hasScrolledPastHero,
+      'header--static': isEventsListing
     }"
   >
   
@@ -122,7 +123,7 @@ const route = useRoute();
 const router = useRouter();
 const headerRef = ref(null);
 const { isHeaderVisible } = useHeaderScroll()
-const { eventHeroHasBackground } = useEventHeroHeader()
+const { eventHeroHasBackground, eventsListingHasHero } = useEventHeroHeader()
 const { settings: siteSettings, bookingLink, bookingTitle } = useSiteSettings()
 const { mainMenu } = useMenu()
 
@@ -147,6 +148,9 @@ const hasPageHero = computed(() => {
   if (isEventDetail.value) {
     return eventHeroHasBackground.value
   }
+  if (isEventsListing.value) {
+    return eventsListingHasHero.value
+  }
   return !!props.pageData?.enableHeroImage
 })
 
@@ -156,8 +160,14 @@ const previousRoutePath = ref('')
 
 const isEventDetail = computed(() => /^\/events\/[^/]+/.test(route.path))
 
+const isEventsListing = computed(() => {
+  return route.path === '/events' || route.path === '/events/'
+})
+
 const usesOverlayHero = computed(() => {
-  return isGardenPage.value || (isEventDetail.value && eventHeroHasBackground.value)
+  return isGardenPage.value
+    || (isEventDetail.value && eventHeroHasBackground.value)
+    || (isEventsListing.value && eventsListingHasHero.value)
 })
 
 // Determine if we should use overlay scheme
@@ -171,6 +181,10 @@ const shouldUseOverlay = computed(() => {
       return true
     }
 
+    if (isEventsListing.value && eventsListingHasHero.value && !hasScrolledPastHero.value) {
+      return true
+    }
+
     const wasGarden = previousRoutePath.value.startsWith('/gardens/')
     if (wasGarden && isGardenPage.value) {
       return true
@@ -179,9 +193,10 @@ const shouldUseOverlay = computed(() => {
     return previousOverlayState.value
   }
 
-  // Hero pages use an overlay header unless scrolled past the hero
+  // Hero pages use an overlay header unless scrolled past the hero.
+  // What’s On is not sticky, so keep overlay the whole time — the bar scrolls away.
   if (heroRoute) {
-    if (hasScrolledPastHero.value) {
+    if (hasScrolledPastHero.value && !isEventsListing.value) {
       previousOverlayState.value = false
       return false
     }
@@ -208,6 +223,11 @@ const shouldUseOverlay = computed(() => {
 
 // Check if we've scrolled past the hero section
 const checkHeroScroll = () => {
+  if (isEventsListing.value) {
+    hasScrolledPastHero.value = false
+    return
+  }
+
   // For event pages, always check for hero
   if (isEventPage.value) {
     const heroElement = document.querySelector('.event-hero')
@@ -283,6 +303,10 @@ const syncHeaderForRoute = () => {
 
   previousRoutePath.value = route.path
 
+  if (isEventsListing.value && headerRef.value && typeof window !== 'undefined' && window.gsap) {
+    window.gsap.set(headerRef.value, { y: '0%' })
+  }
+
   const heroPage = usesOverlayHero.value || !!props.pageData?.enableHeroImage
 
   if (typeof window !== 'undefined') {
@@ -310,7 +334,7 @@ const syncHeaderForRoute = () => {
 }
 
 // Watch for route changes and pageData to detect hero
-watch([() => route.path, () => props.pageData?.enableHeroImage, eventHeroHasBackground], () => {
+watch([() => route.path, () => props.pageData?.enableHeroImage, eventHeroHasBackground, eventsListingHasHero], () => {
   syncHeaderForRoute()
 }, { immediate: true })
 
@@ -512,22 +536,20 @@ watch(() => route.path, () => {
 
 // Watch for header visibility changes and animate smoothly
 watch(isHeaderVisible, (newValue) => {
-  if (headerRef.value && headerAnimated.value) {
-    if (newValue) {
-      // Animate header in (transform back to 0)
-      gsap.to(headerRef.value, {
-        y: '0%',
-        duration: 0.4,
-        ease: 'power2.out'
-      })
-    } else {
-      // Animate header out (translate -100% on scroll down)
-      gsap.to(headerRef.value, {
-        y: '-100%',
-        duration: 0.4,
-        ease: 'power2.in'
-      })
-    }
+  if (!headerRef.value || !headerAnimated.value || isEventsListing.value) return
+
+  if (newValue) {
+    gsap.to(headerRef.value, {
+      y: '0%',
+      duration: 0.4,
+      ease: 'power2.out'
+    })
+  } else {
+    gsap.to(headerRef.value, {
+      y: '-100%',
+      duration: 0.4,
+      ease: 'power2.in'
+    })
   }
 })
 
@@ -566,8 +588,9 @@ const closeMenu = () => {
 </script>
 
 <style scoped>
-
-
+header.header--static {
+  position: absolute;
+}
 
 .header-bar {
   top: 0;
