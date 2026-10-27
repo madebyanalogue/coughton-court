@@ -279,6 +279,7 @@ onUnmounted(() => {
 <style scoped>
 .section-featured-carousel {
   opacity: 0;
+  padding-bottom: 0;
 }
 
 .section-featured-carousel:first-child {
